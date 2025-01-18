@@ -3,7 +3,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Poppins', sans-serif; /* Changed to Poppins */
+    font-family: 'Poppins', sans-serif; 
     background: linear-gradient(to bottom, #232221 50%, #9b0000);
     display: flex;
     justify-content: center;

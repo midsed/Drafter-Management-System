@@ -25,7 +25,7 @@
             </form>
         </div>
         <div class="right-section">
-            Drafter AutoTech
+            <img src="images/Drafter Logo Cropped.png" alt="Drafter AutoTech Logo">
         </div>
     </div>
 </body>

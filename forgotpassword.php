@@ -15,7 +15,6 @@
                 <label for="email">Email</label>
                 <div class="input-wrapper">
                     <input type="email" id="email" name="email" placeholder="Enter your email" required>
-                    <!-- Send OTP link inside the email input box -->
                     <a href="javascript:void(0)" class="send-otp-link" onclick="sendOTP()">Send OTP</a>
                 </div>
 
@@ -33,7 +32,7 @@
             </form>
         </div>
         <div class="right-section">
-            Drafter AutoTech
+            <img src="images/Drafter Logo Cropped.png" alt="Drafter AutoTech Logo">
         </div>
     </div>
 
