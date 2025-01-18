@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Poppins', sans-serif; /* Changed to Poppins */
     background: linear-gradient(to bottom, #232221 50%, #9b0000);
     display: flex;
     justify-content: center;
@@ -14,13 +16,13 @@ body {
     flex-direction: column;
     max-width: 100%;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1300px;
     background: #ffffff;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 100px 0;
-    min-height: 600px;
+    min-height: 500px;
 }
 
 .form-container {
@@ -94,6 +96,11 @@ a:hover {
     font-weight: bold;
     border-radius: 15px;
     background: linear-gradient(to bottom, #232221 50%, #9b0000);
+}
+.right-section img {
+    max-width: 50%;
+    max-height: 80%;
+    object-fit: contain;
 }
 
 p span, p a {
