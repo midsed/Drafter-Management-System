@@ -1,0 +1,87 @@
+<?php include('navigation/sidebar.php'); ?>
+<?php include('navigation/topbar.php'); ?>
+<link rel="stylesheet" href="css/style.css">
+
+<div class="main-content">
+    <div class="header">
+        <h1>Dashboard</h1>
+    </div>
+
+    <div class="content">
+        <div class="chart-container">
+            <h2>Stock Levels</h2>
+        </div>
+
+        <div class="low-stock-alerts">
+            <h2>Low Stock Alerts</h2>
+            <table>
+                <tr>
+                    <th>Part ID</th>
+                    <th>Part Name</th>
+                    <th>Category</th>
+                    <th>Condition</th>
+                    <th>Quantity</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td>#1</td>
+                    <td>Inverter</td>
+                    <td>cat1</td>
+                    <td>Brand New</td>
+                    <td>21</td>
+                    <td><a href="#">More Details</a></td>
+                </tr>
+                <tr>
+                    <td>#2</td>
+                    <td>Battery</td>
+                    <td>cat2</td>
+                    <td>Brand New</td>
+                    <td>32</td>
+                    <td><a href="#">More Details</a></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="new-updated-parts">
+            <h2>New and Recently Updated Parts</h2>
+            <table>
+                <tr>
+                    <th>Part ID</th>
+                    <th>Part Name</th>
+                    <th>Category</th>
+                    <th>Condition</th>
+                    <th>Quantity</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td>#1</td>
+                    <td>Inverter</td>
+                    <td>cat1</td>
+                    <td>Brand New</td>
+                    <td>21</td>
+                    <td><a href="#">More Details</a></td>
+                </tr>
+                <tr>
+                    <td>#2</td>
+                    <td>Battery</td>
+                    <td>cat2</td>
+                    <td>Brand New</td>
+                    <td>32</td>
+                    <td><a href="#">More Details</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
+</script>
+
+
