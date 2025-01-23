@@ -4,6 +4,7 @@
 
 <div class="main-content">
     <div class="header">
+        <a href="dashboard.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
         <h1>Page Name Here</h1>
 </div>
 
