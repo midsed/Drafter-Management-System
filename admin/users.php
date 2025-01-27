@@ -4,8 +4,8 @@
 
 <div class="main-content">
   <div class="header">
-    <a href="dashboard.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-    <h1>Users</h1>
+  <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+  <h1 style="margin: 0;">Users</h1>
     <a href="usersadd.php" class="add-user-btn">+ Add User</a> </div>
 
   <div class="search-container">

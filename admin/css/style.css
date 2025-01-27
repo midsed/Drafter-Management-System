@@ -105,9 +105,8 @@ body {
 .topbar .logout-icon {
     width: 20px;
     height: 20px;
-    background-image: url('logout-icon.png');
-    background-size: cover;
-    display: inline-block;
+    margin-left: 10px;
+    cursor: pointer;
 }
 
 .main-content {

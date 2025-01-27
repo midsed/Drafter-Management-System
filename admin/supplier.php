@@ -4,8 +4,9 @@
 
 <div class="main-content">
     <div class="header">
-        <a href="dashboard.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-        <h1>Supplier</h1>
+    <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
+      <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+      <h1 style="margin: 0;">Supplier</h1>
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
             <a href="addsupplier.php" class="btn btn-add">+ Add Supplier</a>

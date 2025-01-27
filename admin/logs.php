@@ -4,8 +4,10 @@
 
 <div class="main-content">
   <div class="header">
-    <a href="dashboard.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-    <h1>Logs</h1>
+    <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
+      <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+      <h1 style="margin: 0;">Logs</h1>
+    </a>
   </div>
   <div class="search-container">
     <input type="text" placeholder="Quick search" id="searchInput">
@@ -54,7 +56,6 @@
     </table>
   </div>
 
-
   <script>
     function toggleSidebar() {
       const sidebar = document.querySelector('.sidebar');
@@ -67,44 +68,50 @@
 </div>
 
 <style>
-    .header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
 
-.header a {
-  color: #000;
-  text-decoration: none;
-  margin-right: 15px;
-}
+  .header a {
+    color: #000;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
 
-.header a i {
-  margin-right: 5px; 
-}
+  .header img {
+    margin-right: 10px;
+  }
 
-.search-container {
-  text-align: center;
-}
+  .header h1 {
+    margin: 0;
+    font-size: 32px;
+  }
 
-.search-container input[type="text"] {
-  width: 300px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-  font-size: 14px;
-}
+  .search-container {
+    text-align: center;
+  }
 
-.search-container input[type="text"]:focus {
-  outline: none;
-  border-color: #007bff;
-}
+  .search-container input[type="text"] {
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
 
-.search-container .fa-search {
-  position: absolute;
-  right: 10px;
-  top: 12px;
-  color: #999;
-}
+  .search-container input[type="text"]:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .search-container .fa-search {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    color: #999;
+  }
 </style>

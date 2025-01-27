@@ -5,6 +5,8 @@
     </div>
     <div class="username">
         <span>Username</span>
-        <a href="logout.php"><i class="logout-icon">🔓</i></a>
+        <a href="logout.php">
+            <img src="https://i.ibb.co/gwbp9KZ/logout.png" alt="Logout" class="logout-icon">
+        </a>
     </div>
 </div>
