@@ -1,7 +1,7 @@
 <div class="sidebar">
     <ul class="nav-list">
         <li>
-            <a href="#">
+            <a href="dashboard.php">
                 <img src="/images/sideicon.png" alt="Dashboard Icon" class="nav-icon"> Home
             </a>
         </li>
@@ -11,12 +11,12 @@
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="service.php">
                 <img src="/images/sideicon.png" alt="Dashboard Icon" class="nav-icon"> Services
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="supplier.php">
                 <img src="/images/sideicon.png" alt="Dashboard Icon" class="nav-icon"> Suppliers
             </a>
         </li>

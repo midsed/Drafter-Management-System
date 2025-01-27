@@ -1,0 +1,51 @@
+<?php include('navigation/sidebar.php'); ?>
+<?php include('navigation/topbar.php'); ?>
+<link rel="stylesheet" href="css/style.css">
+
+<div class="main-content">
+    <div class="header">
+        <a href="supplier.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
+        <h1>Archived Service</h1>
+    </div>
+    <div class="search-container">
+    <input type="text" placeholder="Quick search" id="searchInput">
+    </div>
+    <div class="table-container">
+        <table class="supplier-table">
+            <thead>
+            <tr>
+                    <th>Service Type</th>
+                    <th>Service Price</th>
+                    <th>Service ID</th>
+                    <th>Customer</th>
+                    <th>Staff</th>
+                    <th>Part ID</th>
+                    <th>Edit Supplier</th>
+                    <th>Archive</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>sample</td>
+                    <td>sample</td>
+                    <td>sample</td>
+                    <td>sample</td>
+                    <td>sample</td>
+                    <td>sample</td>
+                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
+                    <td><button class="btn btn-archive">Archive</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
+</script>

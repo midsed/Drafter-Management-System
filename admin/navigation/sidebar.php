@@ -32,13 +32,13 @@
             </a>
         </li>
         <li>
-            <a href="suppliers.php">
+            <a href="supplier.php">
                 <img src="/images/sideicon.png" alt="Suppliers Icon" class="nav-icon">
                 <span>Suppliers</span>
             </a>
         </li>
         <li>
-            <a href="services.php">
+            <a href="service.php">
                 <img src="/images/sideicon.png" alt="Services Icon" class="nav-icon">
                 <span>Services</span>
             </a>
