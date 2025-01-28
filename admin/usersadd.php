@@ -38,8 +38,8 @@
         <div class="form-group">
             <label for="user_role">User Role:</label>
             <select id="user_role" name="user_role" required>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="user">Admin</option>
+                <option value="admin">Staff</option>
             </select>
         </div>
 
