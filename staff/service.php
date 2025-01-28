@@ -5,7 +5,7 @@
 <div class="main-content">
     <div class="header">
     <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
-      <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
       <h1 style="margin: 0;">Service</h1>
         <div class="actions">
             <a href="servicearchive.php" class="btn btn-archive">Archives</a>
