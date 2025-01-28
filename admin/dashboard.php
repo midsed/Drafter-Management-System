@@ -1,3 +1,18 @@
+<?php
+session_start();
+
+// Redirect to login if not logged in
+if (!isset($_SESSION['UserID'])) {
+    header("Location: /DrafterAutotech/Drafter-Management-System/login.php");
+    exit();
+}
+
+// Ensure the 'Username' key exists in session
+if (!isset($_SESSION['Username'])) {
+    $_SESSION['Username']; // Default value if not set
+}
+?>
+
 <?php include('navigation/sidebar.php'); ?>
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
@@ -23,7 +38,7 @@
                 </tr>
                 <tr>
                     <td>#7676</td>
-                    <td>Admin - Name N.</td>
+                    <td>Admin - Jade</td>
                     <td>2024-11-15 10:00:00</td>
                     <td><button>Print</button></td>
                 </tr>
@@ -107,4 +122,3 @@
         mainContent.classList.toggle('collapsed');
     }
 </script>
-
