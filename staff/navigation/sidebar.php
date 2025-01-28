@@ -6,7 +6,7 @@
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="parts.php">
                 <img src="images/sideicon.png" alt="Dashboard Icon" class="nav-icon"> Parts
             </a>
         </li>
