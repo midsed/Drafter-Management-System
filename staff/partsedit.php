@@ -4,7 +4,7 @@
 
 <div class="main-content">
     <div class="header">
-        <a href="parts.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         <h1>Edit Parts</h1>
     </div>
 
@@ -122,6 +122,7 @@
 
     .btn {
         background-color: #272727;
+        font-family: 'Poppins', sans-serif;
         color: white;
         padding: 10px 20px;
         border: none;

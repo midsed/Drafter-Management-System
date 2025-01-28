@@ -4,7 +4,7 @@
 
 <div class="main-content">
   <div class="header">
-  <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+  <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
   <h1 style="margin: 0;">Users</h1>
     <a href="usersadd.php" class="add-user-btn">+ Add User</a> </div>
 
@@ -87,9 +87,12 @@
 </div>
 
 <style>
+  button, .add-user-btn {
+  font-family: 'Poppins', sans-serif;
+}
     .header .add-user-btn {
-    background-color: #F00;
-    color: #fff;
+      background-color: #E10F0F; 
+      color: #fff;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;

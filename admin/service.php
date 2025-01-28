@@ -2,9 +2,11 @@
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
 <div class="main-content">
     <div class="header">
-    <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
     <h1 style="margin: 0;">Service</h1>
         <div class="actions">
             <a href="servicearchive.php" class="btn btn-archive">Archives</a>
@@ -55,11 +57,15 @@
 </script>
 
 <style>
+.btn {
+    font-family: 'Poppins', sans-serif;
+}
 
 .actions a.btn,
 .actions button.btn {
     color: white !important;
 }
+
 .btn {
     padding: 8px 12px;
     border: none;
@@ -116,6 +122,4 @@
     margin-bottom: 10px;
     font-size: 14px;
 }
-
-
 </style>

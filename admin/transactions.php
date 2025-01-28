@@ -4,11 +4,12 @@ include('navigation/topbar.php');
 ?>
 
 <link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <div class="main-content">
     <div class="header">
-    <img src="https://i.ibb.co/J3LX32C/back.png" alt="Back" style="width: 20px; height: 20px; margin-right: 25px;">
-        <h1>Transaction History</h1>
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    <h1>Transaction History</h1>
     </div>
 
     <div class="container">
@@ -67,6 +68,10 @@ include('navigation/topbar.php');
 </script>
 
 <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
     .container {
         margin: 20px;
     }
@@ -77,26 +82,27 @@ include('navigation/topbar.php');
         margin-bottom: 10px;
     }
 
-    .print-button {
+    .print-button, .filter-button, .print-receipt-button {
         padding: 10px 20px;
         border: none;
         border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .print-button {
         background-color: #E10F0F;
         color: white;
-        cursor: pointer;
         margin-left: 10px;
     }
 
     .filter-button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        background-color:rgb(218, 218, 218);
+        background-color: rgb(218, 218, 218);
         color: black;
-        cursor: pointer;
         margin-left: 10px;
     }
-
 
     table {
         border-collapse: collapse;
@@ -115,11 +121,8 @@ include('navigation/topbar.php');
 
     .print-receipt-button {
         padding: 5px 10px;
-        border: none;
         border-radius: 3px;
         background-color: #E10F0F;
         color: white;
-        cursor: pointer;
-        
     }
 </style>
