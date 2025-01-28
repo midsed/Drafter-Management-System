@@ -4,8 +4,9 @@
 
 <div class="main-content">
     <div class="header">
-        <a href="parts.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-        <h1>Edit Parts</h1>
+    <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    <h1 style="margin: 0;">Edit Parts</h1>
     </div>
 
     <form action="partsadd_process.php" method="POST" enctype="multipart/form-data">
@@ -105,6 +106,7 @@
         display: block;
         margin-bottom: 5px;
         font-weight: bold;
+        color: #272727;
     }
 
     input, select, textarea {

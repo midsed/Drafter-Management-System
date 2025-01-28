@@ -4,8 +4,9 @@
 
 <div class="main-content">
     <div class="header">
-        <a href="parts.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-        <h1>Archived Parts List</h1>
+    <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    <h1 style="margin: 0;">Archived Parts List</h1>
     </div>
 
     <div class="search-actions">
@@ -99,13 +100,14 @@
 }
 
 .red-button {
-    background: red;
+    background: #E10F0F;
     color: white;
     border: none;
     padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    font-family: 'Poppins', sans-serif;
     text-decoration: none;
     transition: background 0.3s ease;
 }
@@ -122,6 +124,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    font-family: 'Poppins', sans-serif;
     transition: background 0.3s ease;
 }
 
@@ -137,6 +140,7 @@
     padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
     text-decoration: none;
 }
 
