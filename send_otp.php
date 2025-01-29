@@ -1,57 +1,62 @@
 <?php
 session_start();
 require_once "dbconnect.php";
-require_once "mail_function.php"; // Assuming sendMail function is here
+require_once "mail_function.php"; 
 
-header("Access-Control-Allow-Origin: *"); // Allow cross-origin requests
-header("Access-Control-Allow-Headers: Content-Type");
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
-    $email = $_POST['email'];
+    $email = trim($_POST['email']);
 
-    // Check if email exists in the database
+    // Check if the email exists in the database
     $stmt = $conn->prepare("SELECT Email FROM user WHERE Email = ?");
+    if (!$stmt) {
+        error_log("Prepare failed: " . $conn->error);
+        die("Database error. Please try again later.");
+    }
+
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    // Check if the email exists in the database
+
     if ($result->num_rows === 0) {
-        echo "Email not found in our system.";
+        echo "Email not found.";
         exit;
     }
 
     // Generate a 6-digit OTP
-    $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    $otp = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+    $expiry = time() + 120; // OTP expires in 2 minutes
 
-    // Store OTP in session and update database
-    $_SESSION['otp'] = $otp;
-    $_SESSION['email'] = $email;
-
-    $stmt = $conn->prepare("UPDATE user SET OTP = ? WHERE Email = ?");
-    $stmt->bind_param("ss", $otp, $email);
-    if ($stmt->execute() && $stmt->affected_rows > 0) {
-        // Send OTP via email
-        $subject = "Your OTP Code";
-        
-        // Try sending the OTP via email
-        if (sendMail($email, $subject, $otp)) {
-            echo "OTP sent successfully to your email.";
-        } else {
-            error_log("Failed to send OTP to: $email");  // Log the failure for debugging
-            echo "Failed to send OTP. Please check error logs.";
-        }
-    } else {
-        // If OTP failed to store in DB
-        error_log("Failed to update OTP in database for: $email");  // Log the failure for debugging
-        echo "Failed to store OTP. Ensure email exists in the system.";
+    // Store OTP in database
+    $stmt = $conn->prepare("UPDATE user SET OTP = ?, otp_timestamp = ? WHERE Email = ?");
+    if (!$stmt) {
+        error_log("Prepare failed (Update): " . $conn->error);
+        die("Database error. Please try again later.");
     }
 
-    // Close database connection
+    $stmt->bind_param("sis", $otp, $expiry, $email);
+    if ($stmt->execute()) {
+        $_SESSION['email'] = $email;
+        echo "OTP stored successfully in DB.";
+    } else {
+        error_log("Failed to store OTP: " . $stmt->error);
+        die("Database error. Please try again later.");
+    }
+
+    // Send OTP via email
+    $subject = "Your OTP Code";
+    $message = "<p>Your OTP for password reset is: <strong>$otp</strong>. It is valid for 2 minutes.</p>";
+
+    if (sendMail($email, $subject, $message)) {
+        echo "OTP sent successfully.";
+    } else {
+        error_log("Failed to send OTP email.");
+        die("Error sending email. Please check mail logs.");
+    }
+
     $stmt->close();
     $conn->close();
-} else {
-    // Invalid request
-    echo "Invalid request.";
 }
 ?>
