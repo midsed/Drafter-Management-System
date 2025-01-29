@@ -59,7 +59,7 @@
         <div class="form-group">
             <label for="user_role">User Role:</label>
             <select id="user_role" name="user_role" required>
-                <option value="user" <?php echo $user['RoleType'] == 'user' ? 'selected' : ''; ?>>User</option>
+                <option value="staff" <?php echo $user['RoleType'] == 'staff' ? 'selected' : ''; ?>>Staff</option>
                 <option value="admin" <?php echo $user['RoleType'] == 'admin' ? 'selected' : ''; ?>>Admin</option>
             </select>
         </div>
