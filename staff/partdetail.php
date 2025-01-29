@@ -24,7 +24,9 @@ $part = [
 
 <div class="main-content">
     <div class="header">
-        <a href="parts.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
+    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    </a>
         <h1><?php echo $part["name"]; ?></h1>
     </div>
 

@@ -5,7 +5,9 @@
 
 <div class="main-content">
     <div class="header">
-        <a href="users.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
+    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    </a>
         <h1>Add User</h1>
     </div>
 
@@ -38,8 +40,8 @@
         <div class="form-group">
             <label for="user_role">User Role:</label>
             <select id="user_role" name="user_role" required>
-                <option value="user">Admin</option>
-                <option value="admin">Staff</option>
+                <option value="admin">Admin</option>
+                <option value="staff">Staff</option>
             </select>
         </div>
 
@@ -97,51 +99,70 @@ try {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $firstname = $_POST['firstname'] ?? '';
-    $lastname = $_POST['lastname'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $username = $_POST['username'] ?? '';
-    $user_role = $_POST['user_role'] ?? '';
-    $password = $_POST['password'] ?? '';
+    $firstname = trim($_POST['firstname'] ?? ''); 
+    $lastname = trim($_POST['lastname'] ?? ''); 
+    $email = trim($_POST['email'] ?? '');    
+    $username = trim($_POST['username'] ?? ''); 
+    $user_role = trim($_POST['user_role'] ?? '');
+    $password = trim($_POST['password'] ?? ''); 
 
     if (!empty($firstname) && !empty($lastname) && !empty($email) && !empty($username) && !empty($user_role) && !empty($password)) {
         try {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            // Check if email or username already exists
+            $checkStmt = $conn->prepare("SELECT COUNT(*) FROM user WHERE Email = :Email OR Username = :Username");
+            $checkStmt->bindParam(':Email', $email);
+            $checkStmt->bindParam(':Username', $username);
+            $checkStmt->execute();
+            $exists = $checkStmt->fetchColumn();
 
-            $stmt = $conn->prepare(
-                "INSERT INTO user (DateCreated, Email, FName, LName, Username, RoleType, Password) 
-                VALUES (NOW(), :email, :firstname, :lastname, :username, :user_role, :password)"
-            );
+            if ($exists > 0) {
+                echo "
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplicate Entry',
+                        text: 'The email or username is already taken. Please use a different one.'
+                    });
+                </script>
+                ";
+            } else {
+                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':firstname', $firstname);
-            $stmt->bindParam(':lastname', $lastname);
-            $stmt->bindParam(':username', $username);
-            $stmt->bindParam(':user_role', $user_role);
-            $stmt->bindParam(':password', $hashedPassword);
+                $stmt = $conn->prepare(
+                    "INSERT INTO user (DateCreated, Email, FName, LName, Username, RoleType, Password) 
+                    VALUES (NOW(), :Email, :FName, :LName, :Username, :RoleType, :Password)"
+                );
 
-            $stmt->execute();
+                $stmt->bindParam(':Email', $email);
+                $stmt->bindParam(':FName', $firstname);
+                $stmt->bindParam(':LName', $lastname);
+                $stmt->bindParam(':Username', $username);
+                $stmt->bindParam(':RoleType', $user_role);
+                $stmt->bindParam(':Password', $hashedPassword);
 
-            echo "
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'User Added Successfully',
-                    text: 'The user has been registered successfully.',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'users.php'; // Redirect to users page
-                    }
-                });
-            </script>
-            ";
+                $stmt->execute();
+
+                echo "
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'User Added Successfully',
+                        text: 'The user has been registered successfully.',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'users.php'; // Redirect to users page
+                        }
+                    });
+                </script>
+                ";
+            }
         } catch (PDOException $e) {
             echo "
             <script>
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
+                    title: 'Database Error',
                     text: 'An error occurred: " . $e->getMessage() . "'
                 });
             </script>
@@ -159,4 +180,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ";
     }
 }
+
 ?>

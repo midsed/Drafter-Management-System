@@ -8,7 +8,9 @@ include('navigation/topbar.php');
 
 <div class="main-content">
     <div class="header">
-    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    </a>
     <h1>Transaction History</h1>
     </div>
 

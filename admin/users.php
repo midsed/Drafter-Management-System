@@ -1,19 +1,23 @@
 <?php include('navigation/sidebar.php'); ?>
 <?php include('navigation/topbar.php'); ?>
+<?php include('dbconnect.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
 <div class="main-content">
   <div class="header">
-  <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-  <h1 style="margin: 0;">Users</h1>
-    <a href="usersadd.php" class="add-user-btn">+ Add User</a> </div>
+    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    </a>
+    <h1 style="margin: 0;">Users</h1>
+    <a href="usersadd.php" class="add-user-btn">+ Add User</a>
+  </div>
 
   <div class="search-container">
-    <input type="text" placeholder="Quick search" id="searchInput">
+    <input type="text" placeholder="Quick search" id="searchInput" onkeyup="searchTable()">
   </div>
 
   <div class="table-container">
-    <table>
+    <table id="userTable">
       <thead>
         <tr>
           <th>User ID</th>
@@ -26,78 +30,84 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>#7676</td>
-          <td>Johnny Wins</td>
-          <td>Admin</td>
-          <td>johnny43@email.com</td>
-          <td>Active</td>
-          <td>11/14/2024 10:22 AM</td>
-          <td><button>Edit</button></td>
-        </tr>
-        <tr>
-          <td>#7676</td>
-          <td>Brim Stone</td>
-          <td>Admin</td>
-          <td>brimmy@email.com</td>
-          <td>Inactive</td>
-          <td>11/15/2024 09:45 AM</td>
-          <td><button>Edit</button></td>
-        </tr>
-        <tr>
-          <td>#7676</td>
-          <td>Dante Gulapa</td>
-          <td>Staff</td>
-          <td>dantepogil23@gmail.com</td>
-          <td>Active</td>
-          <td>11/15/2024 09:45 AM</td>
-          <td><button>Edit</button></td>
-        </tr>
-        <tr>
-          <td>#7676</td>
-          <td>Lerone James</td>
-          <td>Staff</td>
-          <td>lerone23@gmail.com</td>
-          <td>Active</td>
-          <td>11/15/2024 09:45 AM</td>
-          <td><button>Edit</button></td>
-        </tr>
-        <tr>
-          <td>#7676</td>
-          <td>Santa Cruz</td>
-          <td>Staff</td>
-          <td>st2310@gmail.com</td>
-          <td>Inactive</td>
-          <td>11/15/2024 09:45 AM</td>
-          <td><button>Edit</button></td>
-        </tr>
+      <?php
+      $sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status AS Status, LastLogin FROM user";
+      $result = $conn->query($sql);
+
+      if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+          echo "<tr>";
+          echo "<td>#{$row['UserID']}</td>";
+          echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
+          echo "<td>" . htmlspecialchars($row['LastLogin'] ?? 'Never') . "</td>";
+          echo "<td><a href='usersedit.php?UserID={$row['UserID']}'><button>Edit</button></a></td>";
+          echo "</tr>";
+        }
+      } else {
+        echo "<tr><td colspan='7'>No users found.</td></tr>";
+      }
+      ?>
       </tbody>
     </table>
   </div>
 
   <script>
-    function toggleSidebar() {
-      const sidebar = document.querySelector('.sidebar');
-      const mainContent = document.querySelector('.main-content');
+    function searchTable() {
+      const searchInput = document.getElementById("searchInput").value.toLowerCase();
+      const table = document.getElementById("userTable");
+      const rows = table.getElementsByTagName("tr");
 
-      sidebar.classList.toggle('collapsed');
-      mainContent.classList.toggle('collapsed');
+      for (let i = 1; i < rows.length; i++) {  
+        let cells = rows[i].getElementsByTagName("td");
+        let match = false;
+
+        for (let j = 0; j < cells.length; j++) {
+          if (cells[j]) {
+            if (cells[j].textContent.toLowerCase().indexOf(searchInput) > -1) {
+              match = true;
+              break;
+            }
+          }
+        }
+
+        if (match) {
+          rows[i].style.display = "";
+        } else {
+          rows[i].style.display = "none";
+        }
+      }
     }
   </script>
 </div>
 
 <style>
   button, .add-user-btn {
-  font-family: 'Poppins', sans-serif;
-}
-    .header .add-user-btn {
-      background-color: #E10F0F; 
-      color: #fff;
+    font-family: 'Poppins', sans-serif;
+  }
+  .header .add-user-btn {
+    background-color: #E10F0F;
+    color: #fff;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-left: auto; 
+    margin-left: auto;
     align-self: center;
+  }
+
+  .search-container {
+    margin-bottom: 20px;
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
   }
 </style>
