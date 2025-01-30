@@ -3,7 +3,7 @@ session_start();
 
 // Redirect to login if not logged in
 if (!isset($_SESSION['UserID'])) {
-    header("Location: /DrafterAutotech/Drafter-Management-System/login.php");
+    header("Location: \Drafter-Management-System\login.php");
     exit();
 }
 
