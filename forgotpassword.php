@@ -7,42 +7,6 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- Add SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function sendOTP() {
-            let email = document.getElementById("email").value;
-            if (email) {
-                fetch("send_otp.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: "email=" + encodeURIComponent(email)
-                })
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Debugging response
-                    alert(data); // Temporary alert for debug
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("An error occurred. Please try again.");
-                });
-            } else {
-                alert("Please enter your email first.");
-            }
-        }
-
-        function resendOTP() {
-            sendOTP();
-        }
-
-        // This function will be triggered in case OTP is invalid in verifyotp.php
-        function showInvalidOTPAlert() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid OTP',
-                text: 'The OTP you entered is incorrect. Please try again.',
-            });
-        }
-    </script>
 </head>
 <body>
     <div class="container">
@@ -75,4 +39,100 @@
     </div>
 </body>
 </html>
+<script>
+    let attemptCount = 0;
+    let isBlocked = false;
+    let countdownTimer;
+
+    function sendOTP(isResend = false) {
+        let email = document.getElementById("email").value;
+        let sendOtpLink = document.querySelector(".send-otp-link");
+        let resendCodeLink = document.querySelector(".resend-code");
+
+        if (!email) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Email!',
+                text: 'Please enter your email first.',
+            });
+            return;
+        }
+
+        fetch("send_otp.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "email=" + encodeURIComponent(email)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "blocked") {
+                isBlocked = true;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Too Many Attempts!',
+                    text: 'You have exceeded the maximum attempts. Try again in 24 hours.',
+                });
+                resendCodeLink.style.display = "none";
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP Sent!',
+                    text: 'Check your email for the OTP.',
+                });
+
+                attemptCount = data.attempts;
+
+                if (!isResend) {
+                    sendOtpLink.style.display = "none"; // Hide "Send OTP"
+                }
+
+                // Start countdown for resend OTP
+                startCountdown(resendCodeLink);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'An error occurred. Please try again.',
+            });
+        });
+    }
+
+    function resendOTP() {
+        if (!isBlocked) {
+            sendOTP(true);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Blocked!',
+                text: 'You have reached the maximum attempts. Try again later.',
+            });
+        }
+    }
+
+    function startCountdown(button) {
+        let countdown = 120; // 2 minutes in seconds
+        button.style.pointerEvents = "none";
+        button.style.color = "gray";
+
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+        }
+
+        countdownTimer = setInterval(() => {
+            button.innerText = `Resend Code (${countdown}s)`;
+            countdown--;
+
+            if (countdown < 0) {
+                clearInterval(countdownTimer);
+                button.innerText = "Resend Code";
+                button.style.pointerEvents = "auto";
+                button.style.color = "";
+            }
+        }, 1000);
+    }
+</script>
+
 
