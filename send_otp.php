@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     $stmt->bind_param("sis", $otp, $expiry, $email);
     if ($stmt->execute()) {
         $_SESSION['email'] = $email;
-        echo "OTP stored successfully in DB.";
+        echo "OTP sent to $email.";
     } else {
         error_log("Failed to store OTP: " . $stmt->error);
         die("Database error. Please try again later.");

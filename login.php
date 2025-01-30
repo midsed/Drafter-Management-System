@@ -40,11 +40,7 @@
     <script>
         function togglePassword() {
             var x = document.getElementById("password");
-            if (x.type === "password") {
-                x.type = "text";
-            } else {
-                x.type = "password";
-            }
+            x.type = (x.type === "password") ? "text" : "password";
         }
     </script>
 
@@ -72,8 +68,8 @@ if (isset($_POST['login'])) {
         exit();
     }
 
-    $username = $_POST['username'];
-    $password = $_POST['password']; 
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']); 
 
     $stmt = $conn->prepare("SELECT * FROM user WHERE Username = ?");
     $stmt->bind_param("s", $username);
@@ -93,12 +89,12 @@ if (isset($_POST['login'])) {
         </script>";
     } else {
         $user = $result->fetch_assoc();
-        if ($user['Password'] !== $password) {
-            // Password is incorrect
+        
+        if (!password_verify($password, $user['Password'])) {
             $_SESSION['failed_attempts']++;
-
+            
             if ($_SESSION['failed_attempts'] >= 5) {
-                $_SESSION['lockout_time'] = time() + 60; // Lock for 1 minute
+                $_SESSION['lockout_time'] = time() + 60;
                 echo "<script>
                     Swal.fire({
                         icon: 'error',
@@ -125,18 +121,15 @@ if (isset($_POST['login'])) {
             $_SESSION['failed_attempts'] = 0;
             $_SESSION['lockout_time'] = null;
 
-            $user_id = $user['UserID'];
-            $role = $user['RoleType'];
-
-            $_SESSION['UserID'] = $user_id;
-            $_SESSION['RoleType'] = $role;
+            $_SESSION['UserID'] = $user['UserID'];
+            $_SESSION['RoleType'] = $user['RoleType'];
 
             if (isset($_POST['remember_me'])) {
-                setcookie("UserID", $user_id, time() + (86400 * 30), "/");
-                setcookie("RoleType", $role, time() + (86400 * 30), "/");
+                setcookie("UserID", $user['UserID'], time() + (86400 * 30), "/");
+                setcookie("RoleType", $user['RoleType'], time() + (86400 * 30), "/");
             }
 
-            $redirect_path = match($role) {
+            $redirect_path = match($user['RoleType']) {
                 'Admin' => './admin/dashboard.php',
                 'Staff' => './staff/dashboard.php',
                 default => './login.php'
