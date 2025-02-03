@@ -6,22 +6,19 @@ if (!isset($_SESSION['UserID'])) {
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
+include('dbconnect.php');
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
-<?php include('dbconnect.php'); ?>
-
 <link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="main-content">
     <div class="header">
-    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-    </a>
+        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
         <h1>Edit User</h1>
     </div>
 
@@ -37,36 +34,42 @@ if (!isset($_SESSION['Username'])) {
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
         } else {
-            echo "<p>User not found.</p>";
+            echo "<script>Swal.fire('Error', 'User not found.', 'error');</script>";
             exit;
         }
     } else {
-        echo "<p>Invalid request.</p>";
+        echo "<script>Swal.fire('Error', 'Invalid request.', 'error');</script>";
         exit;
     }
     ?>
 
-    <form action="process_edit_user.php" method="post">
+    <form id="editUserForm" action="process_edit_user.php" method="post">
         <input type="hidden" name="UserID" value="<?php echo $user['UserID']; ?>">
 
         <div class="form-group">
             <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['FName']); ?>" required>
+            <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['FName']); ?>" maxlength="40" required>
         </div>
 
         <div class="form-group">
             <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['LName']); ?>" required>
+            <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['LName']); ?>" maxlength="40" required>
         </div>
 
         <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['Email']); ?>" required>
+            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['Email']); ?>" maxlength="64" required>
         </div>
 
         <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['Username']); ?>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">New Password:</label>
+            <input type="password" id="password" name="password">
+            <small>(Minimum 8 characters, at least one uppercase letter, one lowercase letter, and one number.)</small>
         </div>
 
         <div class="form-group">
@@ -97,13 +100,39 @@ if (!isset($_SESSION['Username'])) {
 </div>
 
 <script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+document.getElementById("editUserForm").addEventListener("submit", function(event) {
+    let firstname = document.getElementById("firstname").value.trim();
+    let lastname = document.getElementById("lastname").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let username = document.getElementById("username").value.trim();
+    let password = document.getElementById("password").value.trim();
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
+    if (firstname.length === 0 || lastname.length === 0 || email.length === 0 || username.length === 0) {
+        Swal.fire("Error", "All fields must be filled out.", "error");
+        event.preventDefault();
+        return;
     }
+
+    if (firstname.length > 40 || lastname.length > 40) {
+        Swal.fire("Error", "First Name and Last Name cannot exceed 40 characters.", "error");
+        event.preventDefault();
+        return;
+    }
+
+    if (email.length > 64) {
+        Swal.fire("Error", "Email cannot exceed 64 characters.", "error");
+        event.preventDefault();
+        return;
+    }
+
+    if (password.length > 0) {
+        let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        if (!passwordPattern.test(password)) {
+            Swal.fire("Error", "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number.", "error");
+            event.preventDefault();
+        }
+    }
+});
 </script>
 
 <style>

@@ -67,20 +67,20 @@ $username = $user['Username'];
         <h1>Add User</h1>
     </div>
 
-    <form id="userForm" method="POST">
+    <form id="userForm" method="POST" onsubmit="return validateForm()">
         <div class="form-group">
             <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname" required pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+            <input type="text" id="firstname" name="firstname" required maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
         </div>
 
         <div class="form-group">
             <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname" required pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+            <input type="text" id="lastname" name="lastname" required maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
         </div>
 
         <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" required maxlength="64">
         </div>
 
         <div class="form-group">
@@ -105,6 +105,40 @@ $username = $user['Username'];
     </form>
 </div>
 
+<script>
+function validateForm() {
+    let password = document.getElementById("password").value;
+    let email = document.getElementById("email").value;
+    let firstname = document.getElementById("firstname").value;
+    let lastname = document.getElementById("lastname").value;
+    
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!passwordRegex.test(password)) {
+        Swal.fire({
+            title: "Invalid Password!",
+            text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
+            icon: "error",
+            confirmButtonText: "Ok"
+        });
+        return false;
+    }
+
+    if (!emailRegex.test(email)) {
+        Swal.fire({
+            title: "Invalid Email!",
+            text: "Please enter a valid email address.",
+            icon: "error",
+            confirmButtonText: "Ok"
+        });
+        return false;
+    }
+
+    return true;
+}
+</script>
+
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $firstname = trim($_POST['firstname'] ?? ''); 
@@ -114,7 +148,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_role = trim($_POST['user_role'] ?? '');
     $password = trim($_POST['password'] ?? ''); 
     $date_created = date('Y-m-d H:i:s');
-    
+
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/', $password)) {
+        echo "<script>
+            Swal.fire({
+                title: 'Invalid Password!',
+                text: 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        </script>";
+        exit();
+    }
+
     $check = $conn->prepare("SELECT COUNT(*) FROM user WHERE Email = ? OR Username = ?");
     $check->bind_param("ss", $email, $username);
     $check->execute();
@@ -139,19 +185,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             VALUES (NOW(), ?, ?, ?, ?, ?, ?)"
         );
         $add->bind_param("ssssss", $email, $firstname, $lastname, $username, $user_role, $hashedPassword);
-        
-        if ($add->execute()) {
-            $new_user_id = $conn->insert_id;
-            
-            $actionType = "Added new user: " . $username;
-            $log = $conn->prepare(
-                "INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) 
-                VALUES (?, ?, NOW(), ?, NULL, ?)"
-            );
-            $log->bind_param("ssis", $_SESSION['Username'], $actionType, $_SESSION['UserID'], $_SESSION['RoleType']); 
-            $log->execute();
-            $log->close();
 
+        if ($add->execute()) {
             echo "<script>
                 Swal.fire({
                     title: 'Success!',
@@ -172,10 +207,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 });
             </script>";
         }
-
         $add->close();
     }
-    
+
     $conn->close();
 }
 ?>
