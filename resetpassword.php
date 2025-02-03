@@ -1,3 +1,14 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['verified_email'])) {
+    header("Location: forgotpassword.php");
+    exit();
+}
+
+$email = $_SESSION['verified_email']; // ✅ Use email stored in session
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,14 +21,16 @@
     <div class="container">
         <div class="form-container">
             <h1>Reset Your Password</h1>
-            <form action="reset_password_process.php?email=<?php echo isset($_GET['email']) ? $_GET['email'] : ''; ?>" method="post">
+            <form action="reset_password_process.php" method="post">
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
+                
                 <label for="new_password">Enter Password</label>
                 <input type="password" id="new_password" name="new_password" placeholder="New Password" required>
 
                 <label for="confirm_password">Confirm New Password</label>
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Verify Password" required>
 
-                <button type="submit">Reset Password</button>
+                <button type="submit" name="reset_password">Reset Password</button>
 
                 <p class="center-text">
                     <a href="login.php">Back to Login Page</a>
@@ -30,12 +43,3 @@
     </div>
 </body>
 </html>
-<?php
-// Fetch user email and OTP from query string or session
-if (isset($_GET['email'])) {
-    $email = $_GET['email'];
-    // Optionally, use $email to prefill the form or verify the user
-} else {
-    echo "Invalid access.";
-}
-?>

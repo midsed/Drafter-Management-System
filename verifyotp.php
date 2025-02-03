@@ -2,12 +2,9 @@
 session_start();
 require_once "dbconnect.php";
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_POST['otp'])) {
-    $email = $_POST['email'];
-    $otp = $_POST['otp'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'], $_POST['otp'])) {
+    $email = trim($_POST['email']);
+    $otp = trim($_POST['otp']);
 
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -39,26 +36,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_PO
     }
 
     if ($otp == $storedOtp) {
-        // Reset OTP attempts
-        $stmt = $conn->prepare("UPDATE user SET otp_attempts = 0 WHERE email = ?");
-        if (!$stmt) {
-            die("SQL Error: " . $conn->error);
-        }
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-
+        // ✅ Store verified email in session
         $_SESSION['verified_email'] = $email;
+
+        // Reset OTP attempts after successful verification
+        $stmt = $conn->prepare("UPDATE user SET otp_attempts = 0 WHERE email = ?");
+        if ($stmt) {
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->close();
+        }
+
         header("Location: resetpassword.php");
         exit;
     } else {
         // Increment OTP attempts
         $otpAttempts++;
         $stmt = $conn->prepare("UPDATE user SET otp_attempts = ? WHERE email = ?");
-        if (!$stmt) {
-            die("SQL Error: " . $conn->error);
+        if ($stmt) {
+            $stmt->bind_param("is", $otpAttempts, $email);
+            $stmt->execute();
+            $stmt->close();
         }
-        $stmt->bind_param("is", $otpAttempts, $email);
-        $stmt->execute();
 
         die("Invalid OTP. Attempts left: " . (3 - $otpAttempts));
     }
