@@ -130,13 +130,12 @@ if (isset($_POST['login'])) {
                 setcookie("RoleType", $user['RoleType'], time() + (86400 * 30), "/");
             }
 
-            // Insert log entry for login
             $log_username = $user['Username'];
             $log_action = "Logged In";
             $timestamp = date("Y-m-d H:i:s");
             $user_id = $user['UserID'];
             $role_type = $user['RoleType'];
-            $part_id = NULL; // No specific part associated with login
+            $part_id = NULL; 
 
             $log_stmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
             $log_stmt->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);

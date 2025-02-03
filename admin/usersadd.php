@@ -1,18 +1,10 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
-    exit();
-}
-
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+session_start(); 
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
+require_once "dbconnect.php";
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -51,7 +43,7 @@ if (!isset($_SESSION['Username'])) {
         <h1>Add User</h1>
     </div>
 
-    <form id="userForm">
+    <form id="userForm" method="POST">
         <div class="form-group">
             <label for="firstname">First Name:</label>
             <input type="text" id="firstname" name="firstname" required pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
@@ -64,17 +56,17 @@ if (!isset($_SESSION['Username'])) {
 
         <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Enter a valid email format.">
+            <input type="email" id="email" name="email" required>
         </div>
 
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required pattern="^\S{8,}$" title="Password must be at least 8 characters, no spaces allowed.">
+            <input type="password" id="password" name="password" required>
         </div>
 
         <div class="form-group">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required pattern="^[a-zA-Z0-9_]+$" title="No spaces or special characters allowed.">
+            <input type="text" id="username" name="username" required>
         </div>
 
         <div class="form-group">
@@ -85,32 +77,11 @@ if (!isset($_SESSION['Username'])) {
             </select>
         </div>
 
-        <button type="button" class="btn" onclick="confirmRegistration()">Register</button>
+        <button type="submit" class="btn">Register</button>
     </form>
 </div>
 
-<script>
-    function confirmRegistration() {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to add this user?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Register!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById("userForm").submit(); // Submit form if confirmed
-            } else {
-                location.reload(); // Refresh the page if canceled
-            }
-        });
-    }
-</script>
-
 <?php
-require_once "dbconnect.php"; 
-
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -126,12 +97,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_role = trim($_POST['user_role'] ?? '');
     $password = trim($_POST['password'] ?? ''); 
 
+    $logged_in_user_id = $_SESSION['UserID'] ?? null;
+    $logged_in_username = $_SESSION['Username'] ?? 'Unknown';
+    $logged_in_role = $_SESSION['RoleType'] ?? 'Unknown';
+
     try {
-        $checkStmt = $conn->prepare("SELECT COUNT(*) FROM user WHERE Email = :Email OR Username = :Username");
-        $checkStmt->bindParam(':Email', $email);
-        $checkStmt->bindParam(':Username', $username);
-        $checkStmt->execute();
-        $exists = $checkStmt->fetchColumn();
+        $check = $conn->prepare("SELECT COUNT(*) FROM user WHERE Email = :Email OR Username = :Username");
+        $check->bindParam(':Email', $email);
+        $check->bindParam(':Username', $username);
+        $check->execute();
+        $exists = $check->fetchColumn();
 
         if ($exists > 0) {
             echo "<script>
@@ -145,36 +120,57 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            $stmt = $conn->prepare(
+            $add = $conn->prepare(
                 "INSERT INTO user (DateCreated, Email, FName, LName, Username, RoleType, Password) 
                 VALUES (NOW(), :Email, :FName, :LName, :Username, :RoleType, :Password)"
             );
 
-            $stmt->bindParam(':Email', $email);
-            $stmt->bindParam(':FName', $firstname);
-            $stmt->bindParam(':LName', $lastname);
-            $stmt->bindParam(':Username', $username);
-            $stmt->bindParam(':RoleType', $user_role);
-            $stmt->bindParam(':Password', $hashedPassword);
+            $add->bindParam(':Email', $email);
+            $add->bindParam(':FName', $firstname);
+            $add->bindParam(':LName', $lastname);
+            $add->bindParam(':Username', $username);
+            $add->bindParam(':RoleType', $user_role);
+            $add->bindParam(':Password', $hashedPassword);
+            $add->execute();
 
-            $stmt->execute();
+            $actionType = "Added User";
+            $log = $conn->prepare(
+                "INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) 
+                VALUES (:ActionBy, :ActionType, NOW(), :UserID, NULL, :RoleType)"
+            );
 
-            echo "<script>
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'User added successfully!',
-                    icon: 'success',
-                    confirmButtonText: 'Ok'
-                }).then(() => {
-                    window.location = 'users.php';
-                });
-            </script>";
+            $log->bindParam(':ActionBy', $logged_in_username);
+            $log->bindParam(':ActionType', $actionType);
+            $log->bindParam(':UserID', $logged_in_user_id);
+            $log->bindParam(':RoleType', $logged_in_role);
+
+            if ($log->execute()) {
+                echo "<script>
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'User added successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'Ok'
+                    }).then(() => {
+                        window.location = 'users.php';
+                    });
+                </script>";
+            } else {
+                echo "<script>
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to log the action.',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                </script>";
+            }
         }
     } catch (PDOException $e) {
         echo "<script>
             Swal.fire({
                 title: 'Error',
-                text: 'There was an error with the database: " . $e->getMessage() . "',
+                text: 'Database error: " . $e->getMessage() . "',
                 icon: 'error',
                 confirmButtonText: 'Ok'
             });
