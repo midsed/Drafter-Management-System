@@ -32,7 +32,6 @@ if (!isset($_SESSION['Username'])) {
         <table>
             <thead>
                 <tr>
-                    <th>Username</th>
                     <th>Log ID</th>
                     <th>Action By</th>
                     <th>Action Type</th>
@@ -41,21 +40,20 @@ if (!isset($_SESSION['Username'])) {
             </thead>
             <tbody>
             <?php
-     $query = "SELECT LogID, ActionBy, RoleType, ActionType, Timestamp FROM logs";
-     $result = $conn->query($query);
+      $sql = "SELECT LogsID, ActionBy, ActionType, Timestamp FROM logs";
+      $result = $conn->query($sql);
 
-     if ($result->num_rows > 0) {
-      while ($row = $result->fetch_assoc()) {
+      if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
           echo "<tr>";
+          echo "<td>#{$row['LogsID']}</td>";
           echo "<td>" . htmlspecialchars($row['ActionBy']) . "</td>";
-          echo "<td>#{$row['LogID']}</td>";
-          echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
           echo "<td>" . htmlspecialchars($row['ActionType']) . "</td>";
           echo "<td>" . htmlspecialchars($row['Timestamp']) . "</td>";
           echo "</tr>";
         }
       } else {
-        echo "<tr><td colspan='5'>No logs found.</td></tr>";
+        echo "<tr><td colspan='4'>No users found.</td></tr>";
       }
       ?>
             </tbody>
