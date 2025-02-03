@@ -123,11 +123,24 @@ if (isset($_POST['login'])) {
 
             $_SESSION['UserID'] = $user['UserID'];
             $_SESSION['RoleType'] = $user['RoleType'];
+            $_SESSION['Username'] = $user['Username'];
 
             if (isset($_POST['remember_me'])) {
                 setcookie("UserID", $user['UserID'], time() + (86400 * 30), "/");
                 setcookie("RoleType", $user['RoleType'], time() + (86400 * 30), "/");
             }
+
+            // Insert log entry for login
+            $log_username = $user['Username'];
+            $log_action = "Logged In";
+            $timestamp = date("Y-m-d H:i:s");
+            $user_id = $user['UserID'];
+            $role_type = $user['RoleType'];
+            $part_id = NULL; // No specific part associated with login
+
+            $log_stmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
+            $log_stmt->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
+            $log_stmt->execute();
 
             $redirect_path = match($user['RoleType']) {
                 'Admin' => './admin/dashboard.php',
@@ -141,5 +154,6 @@ if (isset($_POST['login'])) {
     }
 }
 ?>
+
 </body>
 </html>
