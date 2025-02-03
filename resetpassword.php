@@ -10,7 +10,7 @@
     <div class="container">
         <div class="form-container">
             <h1>Reset Your Password</h1>
-            <form action="reset_password_process.php" method="post">
+            <form action="reset_password_process.php?email=<?php echo isset($_GET['email']) ? $_GET['email'] : ''; ?>" method="post">
                 <label for="new_password">Enter Password</label>
                 <input type="password" id="new_password" name="new_password" placeholder="New Password" required>
 
