@@ -4,7 +4,8 @@ session_start();
 require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID'])) {
-    die("Access Denied: User not logged in. Please log in again.");
+    header("Location: \Drafter-Management-System\login.php");
+    exit();
 }
 
 $user_id = $_SESSION['UserID'];

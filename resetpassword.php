@@ -6,7 +6,7 @@ if (!isset($_SESSION['verified_email'])) {
     exit();
 }
 
-$email = $_SESSION['verified_email']; // ✅ Use email stored in session
+$email = $_SESSION['verified_email'];
 ?>
 
 <!DOCTYPE html>
