@@ -29,7 +29,7 @@
             confirmButtonText: 'Yes, log me out'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '/DrafterAutotech/Drafter-Management-System/logout.php';
+                window.location.href = '/Drafter-Management-System/login.php';
             }
         });
     }
