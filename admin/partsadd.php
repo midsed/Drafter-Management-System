@@ -3,15 +3,12 @@ ob_start();
 session_start();
 require_once "dbconnect.php"; 
 
-// Enable MySQLi error reporting
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-// Check if user is logged in
 if (!isset($_SESSION['UserID'])) {
     die("Access Denied: User not logged in. Please log in again.");
 }
 
-// Fetch user details from the database
 $user_id = $_SESSION['UserID'];
 $stmt = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
 $stmt->bind_param("i", $user_id);
@@ -24,7 +21,6 @@ if (!$user) {
     die("Access Denied: Invalid user session. Please log in again.");
 }
 
-// Store user details in the session
 $_SESSION['UserID'] = $user['UserID'];
 $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
@@ -205,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $media = '';
 
     if (!is_dir('uploads')) {
-        mkdir('uploads', 0777, true); // Create uploads directory if it does not exist
+        mkdir('uploads', 0777, true); 
     }
     
     if (!empty($_FILES['part_image']['name'])) {
