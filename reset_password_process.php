@@ -2,44 +2,44 @@
 session_start();
 require_once 'dbconnect.php';
 
-// Ensure the email is set in the session
+header("Content-Type: application/json");
+
 if (!isset($_SESSION['verified_email'])) {
-    die("Invalid access.");
+    echo json_encode(["status" => "error", "message" => "Invalid access."]);
+    exit();
 }
 
 $email = $_SESSION['verified_email'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_password'], $_POST['confirm_password'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_password'])) {
     $new_password = trim($_POST['new_password']);
-    $confirm_password = trim($_POST['confirm_password']);
 
-    if ($new_password !== $confirm_password) {
-        die("Error: Passwords do not match.");
+    if (strlen($new_password) < 6) {
+        echo json_encode(["status" => "error", "message" => "Password must be at least 6 characters."]);
+        exit();
     }
 
-    // Hash the new password securely
     $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
-    // Prepare update query
     $query = "UPDATE user SET password = ? WHERE email = ?";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
-        die("Error preparing update query: " . $conn->error);
+        echo json_encode(["status" => "error", "message" => "Database error: " . $conn->error]);
+        exit();
     }
 
     $stmt->bind_param("ss", $hashed_password, $email);
     if ($stmt->execute()) {
-        // ✅ Clear session after successful reset
         unset($_SESSION['verified_email']);
 
-        // Redirect to login page after success
-        header("Location: login.php");
-        exit();
+        echo json_encode(["status" => "success"]);
     } else {
-        die("Error updating password: " . $stmt->error);
+        echo json_encode(["status" => "error", "message" => "Error updating password: " . $stmt->error]);
     }
 
     $stmt->close();
+} else {
+    echo json_encode(["status" => "error", "message" => "Invalid request."]);
 }
 
 $conn->close();

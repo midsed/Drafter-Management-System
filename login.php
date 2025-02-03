@@ -53,15 +53,15 @@ if (!isset($_SESSION['failed_attempts'])) {
     $_SESSION['lockout_time'] = null;
 }
 
-if (isset($_POST['login'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     if ($_SESSION['lockout_time'] && time() < $_SESSION['lockout_time']) {
         $remaining_time = $_SESSION['lockout_time'] - time();
         echo "<script>
             Swal.fire({
                 icon: 'error',
                 title: 'Account Locked!',
-                text: 'Please try again after $remaining_time seconds.',
-                timer: 1500,
+                text: 'Try again after $remaining_time seconds.',
+                timer: 3000,
                 showConfirmButton: false
             });
         </script>";
@@ -71,6 +71,30 @@ if (isset($_POST['login'])) {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']); 
 
+    if (empty($username)) {
+        echo "<script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Username Required!',
+                text: 'Please enter your username.',
+                showConfirmButton: true
+            });
+        </script>";
+        exit();
+    }
+
+    if (empty($password)) {
+        echo "<script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Password Required!',
+                text: 'Please enter your password.',
+                showConfirmButton: true
+            });
+        </script>";
+        exit();
+    }
+
     $stmt = $conn->prepare("SELECT * FROM user WHERE Username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -79,80 +103,87 @@ if (isset($_POST['login'])) {
     if ($result->num_rows === 0) {
         echo "<script>
             Swal.fire({
-                position: 'center',
                 icon: 'error',
-                title: 'Wrong Username or Password!',
-                text: 'Try again.',
-                showConfirmButton: false,
-                timer: 1500
+                title: 'Invalid Username!',
+                text: 'This username does not exist.',
+                showConfirmButton: true
             });
         </script>";
-    } else {
-        $user = $result->fetch_assoc();
-        
-        if (!password_verify($password, $user['Password'])) {
-            $_SESSION['failed_attempts']++;
-            
-            if ($_SESSION['failed_attempts'] >= 5) {
-                $_SESSION['lockout_time'] = time() + 60;
-                echo "<script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Too Many Attempts!',
-                        text: 'Your account is locked for 1 minute.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                </script>";
-            } else {
-                $remaining_attempts = 5 - $_SESSION['failed_attempts'];
-                echo "<script>
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'Wrong Password!',
-                        text: 'You have $remaining_attempts attempts left.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                </script>";
-            }
-        } else {
-            $_SESSION['failed_attempts'] = 0;
-            $_SESSION['lockout_time'] = null;
-
-            $_SESSION['UserID'] = $user['UserID'];
-            $_SESSION['RoleType'] = $user['RoleType'];
-            $_SESSION['Username'] = $user['Username'];
-
-            if (isset($_POST['remember_me'])) {
-                setcookie("UserID", $user['UserID'], time() + (86400 * 30), "/");
-                setcookie("RoleType", $user['RoleType'], time() + (86400 * 30), "/");
-            }
-
-            $log_username = $user['Username'];
-            $log_action = "Logged In";
-            $timestamp = date("Y-m-d H:i:s");
-            $user_id = $user['UserID'];
-            $role_type = $user['RoleType'];
-            $part_id = NULL; 
-
-            $log_stmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
-            $log_stmt->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
-            $log_stmt->execute();
-
-            $redirect_path = match($user['RoleType']) {
-                'Admin' => './admin/dashboard.php',
-                'Staff' => './staff/dashboard.php',
-                default => './login.php'
-            };
-
-            header("Location: $redirect_path");
-            exit();
-        }
+        exit();
     }
+
+    $user = $result->fetch_assoc();
+    if (!password_verify($password, $user['Password'])) {
+        $_SESSION['failed_attempts']++;
+
+        if ($_SESSION['failed_attempts'] >= 5) {
+            $_SESSION['lockout_time'] = time() + 60;
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Too Many Attempts!',
+                    text: 'Your account is locked for 1 minute.',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+            </script>";
+        } else {
+            $remaining_attempts = 5 - $_SESSION['failed_attempts'];
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Incorrect Password!',
+                    text: 'You have $remaining_attempts attempts left.',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+            </script>";
+        }
+        exit();
+    }
+
+    $_SESSION['failed_attempts'] = 0;
+    $_SESSION['lockout_time'] = null;
+
+    $_SESSION['UserID'] = $user['UserID'];
+    $_SESSION['RoleType'] = $user['RoleType'];
+    $_SESSION['Username'] = $user['Username'];
+
+    if (isset($_POST['remember_me'])) {
+        setcookie("UserID", $user['UserID'], time() + (86400 * 30), "/");
+        setcookie("RoleType", $user['RoleType'], time() + (86400 * 30), "/");
+    }
+
+    $log_username = $user['Username'];
+    $log_action = "Logged In";
+    $timestamp = date("Y-m-d H:i:s");
+    $user_id = $user['UserID'];
+    $role_type = $user['RoleType'];
+    $part_id = NULL;
+
+    $log_stmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
+    $log_stmt->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
+    $log_stmt->execute();
+
+    $redirect_path = match($user['RoleType']) {
+        'Admin' => './admin/dashboard.php',
+        'Staff' => './staff/dashboard.php',
+        default => './login.php'
+    };
+
+    echo "<script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Welcome, {$user['RoleType']}!',
+            text: 'Redirecting...',
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = '$redirect_path';
+        });
+    </script>";
+    exit();
 }
 ?>
-
 </body>
 </html>
