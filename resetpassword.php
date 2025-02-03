@@ -60,7 +60,7 @@ $email = $_SESSION['verified_email'];
             return;
         }
 
-        if (newPassword.length < 8) {
+        if (newPassword.length < 8) { //validation
             Swal.fire({
                 icon: "error",
                 title: "Weak Password!",

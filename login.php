@@ -39,7 +39,7 @@
 
     <script>
         function togglePassword() {
-            var x = document.getElementById("password");
+            var x = document.getElementById("password"); //asd
             x.type = (x.type === "password") ? "text" : "password";
         }
     </script>

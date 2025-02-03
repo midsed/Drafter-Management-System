@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_PO
         $stmt->bind_param("s", $email);
         $stmt->execute();
 
-        $_SESSION['verified_email'] = $email;
+        $_SESSION['verified_email'] = $email; //change
         echo json_encode(["status" => "success"]);
         exit;
     } else {

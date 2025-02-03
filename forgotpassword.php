@@ -147,7 +147,7 @@
             return;
         }
 
-        fetch("verifyotp.php", {
+        fetch("verifyotp.php", { //validation
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: `email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`

@@ -14,8 +14,8 @@ $email = $_SESSION['verified_email'];
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_password'])) {
     $new_password = trim($_POST['new_password']);
 
-    if (strlen($new_password) < 6) {
-        echo json_encode(["status" => "error", "message" => "Password must be at least 6 characters."]);
+    if (strlen($new_password) < 8) {
+        echo json_encode(["status" => "error", "message" => "Password must be at least 8 characters."]);
         exit();
     }
 
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_password'])) {
         exit();
     }
 
-    $stmt->bind_param("ss", $hashed_password, $email);
+    $stmt->bind_param("ss", $hashed_password, $email); //change
     if ($stmt->execute()) {
         unset($_SESSION['verified_email']);
 
