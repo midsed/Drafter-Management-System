@@ -1,15 +1,13 @@
 <?php
 session_start();
 
-// Redirect to login if not logged in
 if (!isset($_SESSION['UserID'])) {
     header("Location: \Drafter-Management-System\login.php");
     exit();
 }
 
-// Ensure the 'Username' key exists in session
 if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username']; // Default value if not set
+    $_SESSION['Username'];
 }
 ?>
 

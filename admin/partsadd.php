@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: \Drafter-Management-System\login.php");
+    exit();
+}
+
+if (!isset($_SESSION['Username'])) {
+    $_SESSION['Username'];
+}
+?>
+
 <?php 
 ob_start();
 session_start();
