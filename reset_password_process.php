@@ -3,11 +3,13 @@
 include 'dbconnect.php'; // Adjust based on your database connection
 
 // Check if the email parameter is available in the URL
-if (isset($_GET['Email'])) {
-    $email = $_GET['Email'];
+if (isset($_GET['email'])) {
+    $email = $_GET['email'];
+} elseif (isset($_POST['email'])) {
+    $email = $_POST['email'];
 } else {
     echo "Error: Email parameter is missing.";
-    exit(); // Stop the script if email is not available
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -21,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
         // Use prepared statements to prevent SQL injection
-        $query = "UPDATE users SET password = ? WHERE email = ?";
+        $query = "UPDATE user SET password = ? WHERE email = ?";
 
         // Prepare the query
         if ($stmt = $conn->prepare($query)) {
