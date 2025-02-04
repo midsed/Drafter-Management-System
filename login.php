@@ -95,10 +95,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         exit();
     }
 
-    $stmt = $conn->prepare("SELECT * FROM user WHERE Username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $check = $conn->prepare("SELECT * FROM user WHERE Username = ?");
+    $check->bind_param("s", $username);
+    $check->execute();
+    $result = $check->get_result();
 
     if ($result->num_rows === 0) {
         echo "<script>
@@ -135,9 +135,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         $role_type = $user['RoleType'];
         $part_id = NULL;
 
-        $log_stmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
-        $log_stmt->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
-        $log_stmt->execute();
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, ?, ?)");
+        $log->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
+        $log->execute();
 
         $redirect_path = match($user['RoleType']) {
             'Admin' => './admin/dashboard.php',
