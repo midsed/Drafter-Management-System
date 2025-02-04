@@ -23,6 +23,7 @@ if (!isset($_SESSION['Username'])) {
     <div class="content">
         <div class="chart-container">
             <h2>Stock Levels</h2>
+            <canvas id="stockLevelChart"></canvas>
         </div>
 
         <div class="transaction-history">
@@ -119,4 +120,41 @@ if (!isset($_SESSION['Username'])) {
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('stockLevelChart').getContext('2d');
+        const stockLevelChart = new Chart(ctx, {
+            type: 'bar', // You can change this to 'line', 'pie', etc.
+            data: {
+                labels: ['Inverter', 'Battery', 'Part 3', 'Part 4', 'Part 5'], // Example labels
+                datasets: [{
+                    label: 'Stock Levels',
+                    data: [21, 32, 15, 10, 25], // Example data
+                    backgroundColor: 'rgb(59, 59, 59)', // Black with some transparency
+                    borderColor: 'rgb(0, 0, 0)', // Red border
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+    });
 </script>

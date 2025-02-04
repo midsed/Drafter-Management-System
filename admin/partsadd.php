@@ -105,6 +105,12 @@ $username = $user['Username'];
             <label for="part_price">Part Price:</label>
             <input type="number" id="part_price" name="part_price" required>
         </div>
+
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+        </div>
+        
         
         <div class="form-group">
             <label for="make">Make:</label>
@@ -184,6 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $authenticity = $_POST['authenticity'];
     $category = $_POST['category'];
     $condition = $_POST['condition'];
+    $quantity = $_POST['Quantity'];
     $status = $_POST['status'];
     $date_added = date('Y-m-d H:i:s');
     $last_updated = date('Y-m-d H:i:s');
