@@ -1,11 +1,12 @@
 <?php include('navigation/sidebar.php'); ?>
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <div class="main-content">
     <div class="header">
-        <a href="dashboard.php" style="text-decoration: none;"><i class="fa fa-arrow-left"></i> Back</a>
-        <h1>Parts Selection List</h1>
+    <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        <h1 style="font-family: 'Poppins', sans-serif;">Parts Selection List</h1>
     </div>
 
     <div class="content">
@@ -13,9 +14,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Product Details</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
+                        <th style="font-family: 'Poppins', sans-serif;">Product Details</th>
+                        <th style="font-family: 'Poppins', sans-serif;">Quantity</th>
+                        <th style="font-family: 'Poppins', sans-serif;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -23,42 +24,48 @@
                         <td>
                             <img src="images/brand1_model1.png" alt="Brand 1 Model 1" class="product-image">
                             <div>
-                                <strong>Brand 1</strong><br>
-                                Model 1<br>
-                                <span class="price">Php 25,000</span>
+                                <strong style="font-family: 'Poppins', sans-serif;">Brand 1</strong><br>
+                                <span style="font-family: 'Poppins', sans-serif;">Model 1</span><br>
+                                <span class="price" style="font-family: 'Poppins', sans-serif;">Php 25,000</span>
+                                <div class="button-container">
+                                    <button class="remove-btn">Remove</button>
+                                </div>
                             </div>
                         </td>
                         <td>
-                            <button>-</button>
-                            <input type="text" value="1" readonly>
-                            <button>+</button>
+                            <button class="qty-btn">-</button>
+                            <input type="text" value="1" readonly style="font-family: 'Poppins', sans-serif;">
+                            <button class="qty-btn">+</button>
                         </td>
-                        <td>Php 25,000</td>
+                        <td style="font-family: 'Poppins', sans-serif;">Php 25,000</td>
                     </tr>
                     <tr>
                         <td>
                             <img src="images/brand3_model3.png" alt="Brand 3 Model 3" class="product-image">
                             <div>
-                                <strong>Brand 3</strong><br>
-                                Model 3<br>
-                                <span class="price">Php 30,000</span>
+                                <strong style="font-family: 'Poppins', sans-serif;">Brand 3</strong><br>
+                                <span style="font-family: 'Poppins', sans-serif;">Model 3</span><br>
+                                <span class="price" style="font-family: 'Poppins', sans-serif;">Php 30,000</span>
+                                <div class="button-container">
+                                    <button class="remove-btn">Remove</button>
+                                </div>
                             </div>
                         </td>
                         <td>
-                            <button>-</button>
-                            <input type="text" value="2" readonly>
-                            <button>+</button>
+                            <button class="qty-btn">-</button>
+                            <input type="text" value="2" readonly style="font-family: 'Poppins', sans-serif;">
+                            <button class="qty-btn">+</button>
                         </td>
-                        <td>Php 60,000</td>
+                        <td style="font-family: 'Poppins', sans-serif;">Php 60,000</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="summary">
-            <h2>Selected List Summary</h2>
-            <p>No. of Items: <strong>3</strong></p>
-            <p>Total Cost: <strong>Php 85,000</strong></p>
+            <h2 style="font-family: 'Poppins', sans-serif;">Selected List Summary</h2>
+            <p style="font-family: 'Poppins', sans-serif;">No. of Items: <strong>3</strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php 85,000</strong></p>
             <button class="confirm-btn">Confirm and Update Stock</button>
         </div>
     </div>
@@ -72,3 +79,61 @@
         mainContent.classList.toggle('collapsed');
     }
 </script>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .button-container {
+        margin-top: 10px;
+    }
+
+    .remove-btn {
+        background-color: gray;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    .remove-btn:hover {
+        background-color: darkgray;
+    }
+
+    .qty-btn {
+        background-color: red;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    .summary {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .confirm-btn {
+        background-color: red;
+        color: white;
+        font-size: 20px;
+        padding: 15px 30px;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        width: 100%;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        margin-top: 15px; 
+        margin-bottom: 15px; 
+    }
+
+    .confirm-btn:hover {
+        background-color: darkred;
+    }
+</style>
