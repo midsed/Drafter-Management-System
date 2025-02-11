@@ -1,14 +1,17 @@
 <?php
 session_start();
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+$lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
+$lowStockResult = mysqli_query($conn, $lowStockQuery);
+
+$recentPartsQuery = "SELECT * FROM part ORDER BY LastUpdated DESC LIMIT 5"; 
+$recentPartsResult = mysqli_query($conn, $recentPartsQuery);
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -61,22 +64,16 @@ if (!isset($_SESSION['Username'])) {
                     <th>Quantity</th>
                     <th>Details</th>
                 </tr>
-                <tr>
-                    <td>#1</td>
-                    <td>Inverter</td>
-                    <td>cat1</td>
-                    <td>Brand New</td>
-                    <td>21</td>
-                    <td><a href="#">More Details</a></td>
-                </tr>
-                <tr>
-                    <td>#2</td>
-                    <td>Battery</td>
-                    <td>cat2</td>
-                    <td>Brand New</td>
-                    <td>32</td>
-                    <td><a href="#">More Details</a></td>
-                </tr>
+                <?php while ($row = mysqli_fetch_assoc($lowStockResult)) { ?>
+                    <tr>
+                        <td>#<?php echo $row['PartID']; ?></td>
+                        <td><?php echo $row['Name']; ?></td>
+                        <td><?php echo $row['Category']; ?></td>
+                        <td><?php echo $row['PartCondition']; ?></td>
+                        <td><?php echo $row['Quantity']; ?></td>
+                        <td><a href="parts.php?part_id=<?php echo $row['PartID']; ?>">More Details</a></td>
+                    </tr>
+                <?php } ?>
             </table>
         </div>
 
@@ -91,22 +88,16 @@ if (!isset($_SESSION['Username'])) {
                     <th>Quantity</th>
                     <th>Details</th>
                 </tr>
-                <tr>
-                    <td>#1</td>
-                    <td>Inverter</td>
-                    <td>cat1</td>
-                    <td>Brand New</td>
-                    <td>21</td>
-                    <td><a href="#">More Details</a></td>
-                </tr>
-                <tr>
-                    <td>#2</td>
-                    <td>Battery</td>
-                    <td>cat2</td>
-                    <td>Brand New</td>
-                    <td>32</td>
-                    <td><a href="#">More Details</a></td>
-                </tr>
+                <?php while ($row = mysqli_fetch_assoc($recentPartsResult)) { ?>
+                    <tr>
+                        <td>#<?php echo $row['PartID']; ?></td>
+                        <td><?php echo $row['Name']; ?></td>
+                        <td><?php echo $row['Category']; ?></td>
+                        <td><?php echo $row['PartCondition']; ?></td>
+                        <td><?php echo $row['Quantity']; ?></td>
+                        <td><a href="parts.php?part_id=<?php echo $row['PartID']; ?>">More Details</a></td>
+                    </tr>
+                <?php } ?>
             </table>
         </div>
     </div>
