@@ -236,10 +236,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $add->bind_param("sdssssssssis", $name, $price, $quantity, $make, $model, $year_model, $description, $date_added, $last_updated, $media, $user_id, $location);
 
     if ($add->execute()) {
-        echo "<script>alert('Part added successfully!'); window.location.href = 'parts.php';</script>";
-    } else {
-        echo "<script>alert('Error adding part: " . $add->error . "');</script>";
-    }
+        
+                echo "<script>
+        Swal.fire({
+            title: 'Success!',
+            text: 'Part added successfully!',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+        }).then(() => {
+            window.location = 'users.php';
+        });
+    </script>";
+} else {
+    echo "<script>
+        Swal.fire({
+            title: 'Error!',
+            text: 'Error adding part: " . $add->error . "',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
+    </script>";
+}
 
     $add->close();
     $conn->close();
