@@ -10,7 +10,7 @@ if (!isset($_SESSION['UserID'])) {
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
 $lowStockResult = mysqli_query($conn, $lowStockQuery);
 
-$recentPartsQuery = "SELECT * FROM part ORDER BY LastUpdated DESC LIMIT 5"; 
+$recentPartsQuery = "SELECT * FROM part ORDER BY LastUpdated DESC LIMIT 5";
 $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
 ?>
 
