@@ -187,6 +187,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $add->bind_param("ssssss", $email, $firstname, $lastname, $username, $user_role, $hashedPassword);
 
         if ($add->execute()) {
+            $timestamp = date("Y-m-d H:i:s");
+             $adminId = $_SESSION['UserID'];
+
+            $actionBy = $_SESSION['Username'];
+            $actionType = "Added new user";
+            $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
+            $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
+            $log->execute();
+            $log->close();
+
             echo "<script>
                 Swal.fire({
                     title: 'Success!',

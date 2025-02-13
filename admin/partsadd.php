@@ -167,6 +167,11 @@ $username = $user['Username'];
             </div>
 
             <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" required>
+            </div>
+
+            <div class="form-group">
                 <label for="description">Description:</label>
                 <textarea id="description" name="description"></textarea>
             </div>
@@ -206,6 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
+    $location = $_POST['location'];
     $description = $_POST['description'];
     $date_added = date('Y-m-d H:i:s');
     $last_updated = date('Y-m-d H:i:s');
@@ -224,10 +230,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $sql = "INSERT INTO part (Name, Price, Quantity, Make, Model, YearModel, Description, DateAdded, LastUpdated, Media, UserID) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO part (Name, Price, Quantity, Make, Model, YearModel, Description, DateAdded, LastUpdated, Media, UserID, Location) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
-    $add->bind_param("sdssssssssi", $name, $price, $quantity, $make, $model, $year_model, $description, $date_added, $last_updated, $media, $user_id);
+    $add->bind_param("sdssssssssis", $name, $price, $quantity, $make, $model, $year_model, $description, $date_added, $last_updated, $media, $user_id, $location);
 
     if ($add->execute()) {
         echo "<script>alert('Part added successfully!'); window.location.href = 'parts.php';</script>";
