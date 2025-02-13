@@ -24,10 +24,17 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
     </div>
 
     <div class="content">
-        <div class="chart-container">
-            <h2>Stock Levels</h2>
-            <canvas id="stockLevelChart"></canvas>
-        </div>
+    <div class="chart-container">
+    <div class="chart-box">
+        <h2>Stock Levels</h2>
+        <canvas id="stockLevelChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h2>Recent Updates</h2>
+        <canvas id="recentUpdatesChart"></canvas>
+    </div>
+</div>
+
 
         <div class="transaction-history">
             <h2>Recent Transaction History</h2>
@@ -103,49 +110,55 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
     </div>
 </div>
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
-</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('stockLevelChart').getContext('2d');
-        const stockLevelChart = new Chart(ctx, {
-            type: 'bar', // You can change this to 'line', 'pie', etc.
-            data: {
-                labels: ['Inverter', 'Battery', 'Part 3', 'Part 4', 'Part 5'], // Example labels
-                datasets: [{
-                    label: 'Stock Levels',
-                    data: [21, 32, 15, 10, 25], // Example data
-                    backgroundColor: 'rgb(59, 59, 59)', // Black with some transparency
-                    borderColor: 'rgb(0, 0, 0)', // Red border
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+        // Stock Level Chart
+        const stockCanvas = document.getElementById('stockLevelChart');
+        if (stockCanvas) {
+            new Chart(stockCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Inverter', 'Battery', 'Part 3', 'Part 4', 'Part 5'],
+                    datasets: [{
+                        label: 'Stock Levels',
+                        data: [10, 32, 15, 10, 25],
+                        backgroundColor: 'rgb(59, 59, 59)',
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderWidth: 1
+                    }]
                 },
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
-                    tooltip: {
-                        enabled: true
-                    }
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: true, position: 'top' } }
                 }
-            }
-        });
+            });
+        }
+
+        // Recent Updates Chart
+        const updatesCanvas = document.getElementById('recentUpdatesChart');
+        if (updatesCanvas) {
+            new Chart(updatesCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Recent Updates',
+                        data: [5, 15, 8, 20, 12],
+                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                        borderColor: 'blue',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: true, position: 'top' } }
+                }
+            });
+        }
     });
 </script>

@@ -298,3 +298,44 @@ table td button:hover, table td a:hover {
         padding-top: 100px;
     }
 }
+
+.main-content {
+    padding: 20px;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 60px;
+    margin-bottom: 20px;
+}
+
+.chart-box {
+    width: 10%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+canvas {
+    width: 100% !important;
+    height: 250px !important; /* Reduce the height */
+}
+
+
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.content th, .content td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.content th {
+    background-color: #f4f4f4;
+}
