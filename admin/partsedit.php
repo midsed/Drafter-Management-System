@@ -1,6 +1,7 @@
 <?php 
+ob_start();
 session_start();
-require_once "dbconnect.php";
+require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: \Drafter-Management-System\login.php");
@@ -23,6 +24,22 @@ $_SESSION['UserID'] = $user['UserID'];
 $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
+
+if (!isset($_GET['id'])) {
+    die("Error: No part ID provided.");
+}
+
+$part_id = $_GET['id'];
+$query = $conn->prepare("SELECT * FROM part WHERE PartID = ?");
+$query->bind_param("i", $part_id);
+$query->execute();
+$result = $query->get_result();
+$part = $result->fetch_assoc();
+$query->close();
+
+if (!$part) {
+    die("Error: Part not found.");
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -33,13 +50,13 @@ $username = $user['Username'];
     .form-group {
         margin-bottom: 15px;
     }
-
+    
     label {
         display: block;
         margin-bottom: 5px;
         font-weight: bold;
     }
-
+    
     input, select, textarea {
         width: 100%;
         padding: 10px;
@@ -47,12 +64,12 @@ $username = $user['Username'];
         border-radius: 3px;
         font-size: 14px;
     }
-
+    
     textarea {
         resize: vertical;
         height: 100px;
     }
-
+    
     .btn {
         background-color: #272727;
         color: white;
@@ -61,23 +78,23 @@ $username = $user['Username'];
         border-radius: 3px;
         cursor: pointer;
     }
-
+    
     .black-button {
         background-color: #272727;
     }
-
+    
     .black-button:hover {
         background-color: #444;
     }
-
+    
     .red-button {
         background-color: red;
     }
-
+    
     .red-button:hover {
         background-color: darkred;
     }
-
+    
     .actions {
         margin-top: 20px;
         display: flex;
@@ -94,32 +111,6 @@ $username = $user['Username'];
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
-
-    .quantity-container {
-        display: flex;
-        align-items: center;
-    }
-
-    .quantity-container button {
-        background-color: #272727;
-        color: white;
-        border: none;
-        width: 30px;
-        height: 30px;
-        font-size: 18px;
-        cursor: pointer;
-        margin: 0 5px;
-        border-radius: 3px;
-    }
-
-    .quantity-container button:hover {
-        background-color: #444;
-    }
-
-    .quantity-container input {
-        text-align: center;
-        width: 60px;
-    }
 </style>
 
 <div class="main-content">
@@ -127,73 +118,89 @@ $username = $user['Username'];
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
             <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
-        <h1>Edit Parts</h1>
+        <h1>Edit Part</h1>
     </div>
-
     <div class="center-container">
-        <form action="partsedit_process.php" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="part_id" value="<?php echo $part['PartID']; ?>">
+
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
-                <input type="text" id="part_name" name="part_name" required>
+                <input type="text" id="part_name" name="part_name" value="<?php echo htmlspecialchars($part['Name']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="part_price">Part Price:</label>
-                <input type="number" id="part_price" name="part_price" required>
+                <input type="number" id="part_price" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <div class="quantity-container">
-                    <button type="button" onclick="decreaseQuantity()">−</button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" required>
-                    <button type="button" onclick="increaseQuantity()">+</button>
-                </div>
+                <input type="number" id="quantity" name="quantity" value="<?php echo htmlspecialchars($part['Quantity']); ?>" min="1" required>
             </div>
 
             <div class="form-group">
                 <label for="make">Make:</label>
-                <input type="text" id="make" name="make" required>
+                <input type="text" id="make" name="make" value="<?php echo htmlspecialchars($part['Make']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="model">Model:</label>
-                <input type="text" id="model" name="model" required>
+                <input type="text" id="model" name="model" value="<?php echo htmlspecialchars($part['Model']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="year_model">Year Model:</label>
-                <input type="text" id="year_model" name="year_model" required>
+                <input type="text" id="year_model" name="year_model" value="<?php echo htmlspecialchars($part['YearModel']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($part['Location']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="description">Description:</label>
-                <textarea id="description" name="description"></textarea>
+                <textarea id="description" name="description"><?php echo htmlspecialchars($part['Description']); ?></textarea>
             </div>
 
             <div class="form-group">
-                <label for="part_image">Upload Image:</label>
+                <label for="part_image">Upload New Image:</label>
                 <input type="file" id="part_image" name="part_image">
             </div>
 
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
-                <button type="reset" class="red-button btn">Clear</button>
+                <button type="reset" class="red-button btn">Reset</button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-    function increaseQuantity() {
-        let quantity = document.getElementById('quantity');
-        quantity.value = parseInt(quantity.value) + 1;
+<?php 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name = $_POST['part_name'];
+    $price = $_POST['part_price'];
+    $quantity = $_POST['quantity'];
+    $make = $_POST['make'];
+    $model = $_POST['model'];
+    $year_model = $_POST['year_model'];
+    $location = $_POST['location'];
+    $description = $_POST['description'];
+    $last_updated = date('Y-m-d H:i:s');
+    $part_id = $_POST['part_id'];
+    
+    $sql = "UPDATE part SET Name=?, Price=?, Quantity=?, Make=?, Model=?, YearModel=?, Description=?, LastUpdated=?, Location=? WHERE PartID=?";
+    $update = $conn->prepare($sql);
+    $update->bind_param("sdsssssssi", $name, $price, $quantity, $make, $model, $year_model, $description, $last_updated, $location, $part_id);
+
+    if ($update->execute()) {
+        echo "<script>alert('Part updated successfully!'); window.location='users.php';</script>";
+    } else {
+        echo "<script>alert('Error updating part: " . $update->error . "');</script>";
     }
 
-    function decreaseQuantity() {
-        let quantity = document.getElementById('quantity');
-        if (quantity.value > 1) {
-            quantity.value = parseInt(quantity.value) - 1;
-        }
-    }
-</script>
+    $update->close();
+    $conn->close();
+}
+?>

@@ -45,7 +45,7 @@ include('navigation/topbar.php');
         $totalRow = $totalResult->fetch_assoc();
         $totalPages = ceil($totalRow['total'] / $limit);
 
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part LIMIT $limit OFFSET $offset";
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -60,12 +60,13 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
-                            <a href='partsedit.php?id={$part['PartID']}' class='edit-button'>Edit</a>
-                            <button class='red-button'>Archive</button>
+                            <a href='partsedit.php?id={$part['PartID']}'>Edit</a>
+                            <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
                             <button class='red-button'>Add to Cart</button>
                         </div>
                     </div>
                 ";
+
             }
         } else {
             echo "<p>No parts found.</p>";
@@ -87,6 +88,45 @@ include('navigation/topbar.php');
         <?php endif; ?>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function archivePart(partID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to archive this part?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, archive it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('archive_part.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + partID
+            })
+            .then(response => response.text())
+            .then(data => {
+                Swal.fire({
+                    title: "Archived!",
+                    text: data,
+                    icon: "success"
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
+</script>
+
 
 <script>
 function searchParts() {

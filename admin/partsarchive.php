@@ -1,243 +1,140 @@
 <?php
 session_start();
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: \Drafter-Management-System\login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
 <div class="main-content">
     <div class="header">
-    <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
-    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-    </a>
-    <h1 style="margin: 0;">Archived Parts List</h1>
+        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
+        <h1>Archived Parts List</h1>
     </div>
 
-    <div class="search-actions">
-        <div class="search-container">
-            <input type="text" placeholder="Quick search">
-            <button class="red-button">Search</button>
-            <button class="white-button">Filter</button>
-            <button class="white-button">Parts</button>
-            <button class="white-button">Sort</button>
-        </div>
-    </div>
-
-    <div class="parts-container">
+    <div class="card-container">
         <?php
-        // Example of parts display (Replace with DB query)
-        $parts = [
-            ["Brand 1", "Model 1", "Shelf A", "1"],
-            ["Brand 2", "Model 2", "Shelf A", "2"],
-            ["Brand 3", "Model 3", "Shelf B", "1"],
-            ["Brand 4", "Model 4", "Shelf B", "0"],
-        ];
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 1";
+        $result = $conn->query($sql);
 
-        foreach ($parts as $index => $part) {
-            echo "
-                <div class='part-card'>
-                    <img src='images/part$index.jpg' alt='Part Image'>
-                    <p>Make</p>
-                    <p>Model</p>
-                    <p>Brand: {$part[0]}</p>
-                    <p>Model: {$part[1]}</p>
-                    <p>Location: {$part[2]}</p>
-                    <p>Quantity: {$part[3]}</p>
-                    <div class='actions'>
-                        <button class='red-button'>Re-list</button>
+        if ($result->num_rows > 0) {
+            while ($part = $result->fetch_assoc()) {
+                $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
+                echo "
+                    <div class='card'>
+                        <img class='card-img' src='$imageSrc' alt='Part Image'>
+                        <div class='card-body'>
+                            <h2 class='card-title'>{$part['Name']}</h2>
+                            <p><strong>Make:</strong> {$part['Make']}</p>
+                            <p><strong>Model:</strong> {$part['Model']}</p>
+                            <p><strong>Location:</strong> {$part['Location']}</p>
+                            <p><strong>Quantity:</strong> {$part['Quantity']}</p>
+                            <button class='btn relist-btn' onclick='relistPart({$part['PartID']})'>Re-list</button>
+                        </div>
                     </div>
-                </div>
-            ";
+                ";
+            }
+        } else {
+            echo "<p>No archived parts found.</p>";
         }
         ?>
     </div>
-
-    <div class="pagination">
-        <a href="#" class="pagination-button">Previous</a>
-        <span class="active-page">1</span>
-        <a href="#" class="pagination-button">2</a>
-        <a href="#" class="pagination-button">3</a>
-        <a href="#" class="pagination-button">Next</a>
-    </div>
 </div>
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+<script>
+function relistPart(partID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to re-list this part?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, re-list it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('relist_part.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + partID
+            })
+            .then(response => response.text())
+            .then(data => {
+                Swal.fire({
+                    title: "Success!",
+                    text: data,
+                    icon: "success"
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
 </script>
 
+
 <style>
-.search-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.search-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.search-container input[type="text"] {
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.search-container input[type="text"]:focus {
-    outline: none;
-    border-color: #007bff;
-}
-
-.right-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.red-button {
-    background: #E10F0F;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    text-decoration: none;
-    transition: background 0.3s ease;
-}
-
-.red-button:hover {
-    background: darkred;
-}
-
-.white-button {
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.3s ease;
-}
-
-.white-button:hover {
-    background: #f0f0f0;
-    border-color: #888;
-}
-
-.edit-button {
-    background: grey;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    text-decoration: none;
-}
-
-.edit-button:hover {
-    background: #555;
-}
-
-.parts-container {
+.card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
+    padding: 20px;
 }
 
-.part-card {
-    background: white;
-    padding: 15px;
+.card {
+    background: #fff;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
 }
 
-.part-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
+.card:hover {
+    transform: scale(1.05);
 }
 
-.part-card img {
+.card-img {
     width: 100%;
-    height: 150px;
+    height: 200px;
     object-fit: cover;
-    border-radius: 4px;
 }
 
-.part-card p {
-    margin: 8px 0;
-    font-size: 14px;
+.card-body {
+    padding: 15px;
+    text-align: center;
 }
 
-.part-card .actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-
-.part-card .actions button {
-    padding: 6px 12px;
-    font-size: 13px;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.pagination-button {
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: white;
-    border: 1px solid black;
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.pagination-button:hover {
-    background: #f0f0f0;
-}
-
-.active-page {
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: black;
-    color: white;
+.card-title {
+    font-size: 1.2em;
     font-weight: bold;
+}
+
+.btn.relist-btn {
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn.relist-btn:hover {
+    background: #218838;
 }
 </style>
