@@ -278,42 +278,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Insert into database
-    $sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+$sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 // Prepare the statement
 $add = $conn->prepare($sql);
 if ($add === false) {
-die("Error preparing the SQL query: " . $conn->error);
+    die("Error preparing the SQL query: " . $conn->error);
 }
 
 // Bind parameters (correct the types and match them with SQL columns)
-$add->bind_param("sssssssssss", 
-$condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
-$name, $price, $quantity
+$add->bind_param("sssssssssssssss", 
+    $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
+    $name, $price, $quantity, $category, $make, $model, $year_model
 );
 
 // Execute the query
 if ($add->execute()) {
-echo "<script>
-    Swal.fire({
-        title: 'Success!',
-        text: 'Part added successfully!',
-        icon: 'success',
-        confirmButtonText: 'Ok'
-    }).then(() => {
-        window.location = 'users.php';
-    });
-</script>";
+    echo "<script>
+        Swal.fire({
+            title: 'Success!',
+            text: 'Part added successfully!',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+        }).then(() => {
+            window.location = 'users.php';
+        });
+    </script>";
 } else {
-echo "<script>
-    Swal.fire({
-        title: 'Error!',
-        text: 'Error adding part: " . addslashes($add->error) . "',
-        icon: 'error',
-        confirmButtonText: 'Ok'
-    });
-</script>";
+    echo "<script>
+        Swal.fire({
+            title: 'Error!',
+            text: 'Error adding part: " . addslashes($add->error) . "',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
+    </script>";
 }
 
 // Close the statement and connection
