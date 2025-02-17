@@ -8,14 +8,16 @@ if (!isset($_SESSION['UserID'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $part_id = $_POST['part_id'];  // Ensure this is passed from partsedit.php
-    $part_name = $_POST['part_name'];
+    // Ensure these fields are passed from partsedit.php
+    $part_id = $_POST['part_id'];  
+    $part_name = $_POST['part_name'];  // Rename according to the table column
     $part_price = $_POST['part_price'];
     $quantity = $_POST['quantity'];
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
     $description = $_POST['description'];
+    $part_condition = $_POST['part_condition']; // Ensure this field is populated
     
     // Image upload handling
     if (!empty($_FILES['part_image']['name'])) {
@@ -37,18 +39,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else {
         // If no new image is uploaded, keep the existing image
-        $query = $conn->prepare("SELECT part_image FROM parts WHERE part_id = ?");
+        $query = $conn->prepare("SELECT Media FROM part WHERE PartID = ?");
         $query->bind_param("i", $part_id);
         $query->execute();
         $result = $query->get_result();
         $row = $result->fetch_assoc();
-        $image_path = $row['part_image'];
+        $image_path = $row['Media']; // Use the column name Media
     }
 
-    // Update query
-    $stmt = $conn->prepare("UPDATE parts SET part_name = ?, part_price = ?, quantity = ?, make = ?, model = ?, year_model = ?, description = ?, part_image = ? WHERE part_id = ?");
-    $stmt->bind_param("sdisssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $description, $image_path, $part_id);
+    // Prepare update query with error handling
+    $stmt = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, PartCondition = ?, Description = ?, Media = ? WHERE PartID = ?");
+    
+    if ($stmt === false) {
+        die('Error preparing statement: ' . $conn->error);
+    }
 
+    // Bind the parameters correctly
+    $stmt->bind_param("sdissssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $part_condition, $description, $image_path, $part_id);
+
+    // Execute and check if it worked
     if ($stmt->execute()) {
         echo "<script>alert('Part updated successfully!'); window.location.href='parts.php';</script>";
     } else {
