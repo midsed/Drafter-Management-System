@@ -48,12 +48,12 @@ include('dbconnect.php');
 
         <div class="form-group">
             <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['FName']); ?>" maxlength="40" required>
+            <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['FName']); ?>" maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed." required>
         </div>
 
         <div class="form-group">
             <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['LName']); ?>" maxlength="40" required>
+            <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['LName']); ?>" maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed." required>
         </div>
 
         <div class="form-group">
