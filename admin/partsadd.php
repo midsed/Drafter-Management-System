@@ -166,6 +166,43 @@ $username = $user['Username'];
                 <input type="text" id="year_model" name="year_model" required>
             </div>
 
+            <!-- New Form Fields Added Here -->
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="Engine">Engine</option>
+                    <option value="Suspension">Suspension</option>
+                    <option value="Body Panel">Body Panel</option>
+                    <option value="Interior">Interior</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="authenticity">Authenticity:</label>
+                <select id="authenticity" name="authenticity" required>
+                    <option value="Genuine">Genuine</option>
+                    <option value="Replacement">Replacement</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="condition">Condition:</label>
+                <select id="condition" name="condition" required>
+                    <option value="Used">Used</option>
+                    <option value="New">New</option>
+                    <option value="For Repair">For Repair</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="item_status">Item Status:</label>
+                <select id="item_status" name="item_status" required>
+                    <option value="Available">Available</option>
+                    <option value="Used for Service">Used for Service</option>
+                    <option value="Surrendered">Surrendered</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="location">Location:</label>
                 <input type="text" id="location" name="location" required>
@@ -211,6 +248,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
+    $category = $_POST['category'];
+    $authenticity = $_POST['authenticity'];
+    $condition = $_POST['condition'];
+    $item_status = $_POST['item_status'];
     $location = $_POST['location'];
     $description = $_POST['description'];
     $date_added = date('Y-m-d H:i:s');
@@ -230,35 +271,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $sql = "INSERT INTO part (Name, Price, Quantity, Make, Model, YearModel, Description, DateAdded, LastUpdated, Media, UserID, Location) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO part (Name, Price, Quantity, Make, Model, YearModel, Category, Authenticity, Condition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
-    $add->bind_param("sdssssssssis", $name, $price, $quantity, $make, $model, $year_model, $description, $date_added, $last_updated, $media, $user_id, $location);
+    $add->bind_param("sdi".str_repeat('s',11)."is", $name, $price, $quantity, $make, $model, $year_model, $category, $authenticity, $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location);
 
     if ($add->execute()) {
-        
-                echo "<script>
-        Swal.fire({
-            title: 'Success!',
-            text: 'Part added successfully!',
-            icon: 'success',
-            confirmButtonText: 'Ok'
-        }).then(() => {
-            window.location = 'users.php';
-        });
-    </script>";
-} else {
-    echo "<script>
-        Swal.fire({
-            title: 'Error!',
-            text: 'Error adding part: " . $add->error . "',
-            icon: 'error',
-            confirmButtonText: 'Ok'
-        });
-    </script>";
-}
+        echo "<script>
+            Swal.fire({
+                title: 'Success!',
+                text: 'Part added successfully!',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location = 'users.php';
+            });
+        </script>";
+    } else {
+        echo "<script>
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error adding part: " . $add->error . "',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        </script>";
+    }
 
     $add->close();
     $conn->close();
 }
 ?>
+
+
+
+
+
+
+
+

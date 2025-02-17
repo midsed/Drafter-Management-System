@@ -1,7 +1,7 @@
 <div class="topbar">
     <div class="toggle-btn" onclick="toggleSidebar()">☰</div>
     <div class="topbar-logo">
-        <img src="images/Drafter Logo Cropped.png" alt="Logo">
+        <img src="https://i.ibb.co/dw4xd3Wd/Drafter-Transparent.png" alt="Logo">
     </div>
     <div class="username">
         <span>

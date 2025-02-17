@@ -13,6 +13,7 @@ include('navigation/topbar.php');
 
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <div class="main-content">
     <div class="header">
@@ -26,9 +27,23 @@ include('navigation/topbar.php');
         <div class="search-container">
             <input type="text" placeholder="Quick search" id="searchInput">
             <button onclick="searchParts()" class="red-button">Search</button>
+            <div class="filter-container">
+                <span>Filter</span>
+                <a href="#" class="filter-icon" title="Filter">
+                    <i class="fas fa-filter"></i>
+                </a>
+            </div>
+            <div class="sort-container">
+                <span>Sort By</span>
+                <a href="#" class="sort-icon" title="Sort">
+                    <i class="fas fa-sort"></i>
+                </a>
+            </div>
         </div>
         <div class="right-actions">
-            <button class="red-button">Cart</button>
+            <a href="#" class="cart-icon" title="Cart">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
             <a href="partsarchive.php" class="red-button">Archives</a>
             <a href="partsadd.php" class="red-button">+ New Stock</a>
         </div>
@@ -60,13 +75,12 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
-                            <a href='partsedit.php?id={$part['PartID']}'>Edit</a>
+                        <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
                             <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
                             <button class='red-button'>Add to Cart</button>
                         </div>
                     </div>
                 ";
-
             }
         } else {
             echo "<p>No parts found.</p>";
@@ -127,7 +141,6 @@ function archivePart(partID) {
 }
 </script>
 
-
 <script>
 function searchParts() {
     const input = document.getElementById("searchInput").value.toLowerCase();
@@ -140,9 +153,9 @@ function searchParts() {
 }
 </script>
 <style>
- body {
-        font-family: 'Poppins', sans-serif;
-    }
+body {
+    font-family: 'Poppins', sans-serif;
+}
 
 .search-actions {
     display: flex;
@@ -173,6 +186,7 @@ function searchParts() {
 
 .right-actions {
     display: flex;
+    align-items: center;
     gap: 10px;
 }
 
@@ -193,35 +207,39 @@ function searchParts() {
     background: darkred;
 }
 
-.white-button {
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 4px;
+.cart-icon {
+    color: #E10F0F;
+    font-size: 20px;
     cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.3s ease;
-}
-
-.white-button:hover {
-    background: #f0f0f0;
-    border-color: #888;
-}
-
-.edit-button {
-    background: grey;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+    transition: color 0.3s ease;
     text-decoration: none;
 }
 
-.edit-button:hover {
-    background: #555;
+.cart-icon:hover {
+    color: darkred;
+}
+
+.filter-container, .sort-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.filter-container span, .sort-container span {
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.filter-icon, .sort-icon {
+    color: #E10F0F;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+
+.filter-icon:hover, .sort-icon:hover {
+    color: darkred;
 }
 
 .parts-container {
