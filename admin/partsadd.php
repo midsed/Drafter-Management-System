@@ -134,7 +134,7 @@ $username = $user['Username'];
         <form action="" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
-                <input type="text" id="part_name" name="part_name" required>
+                <input type="text" id="part_name" name="part_name" pattern='/^[a-zA-Z\s\-]+$/'  title="Name should contain only letters and spaces." required>
             </div>
             
             <div class="form-group">
@@ -153,17 +153,17 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="make">Make:</label>
-                <input type="text" id="make" name="make" required>
+                <input type="text" id="make" name="make" pattern='/^[a-zA-Z\s\-]+$/'  title="Make should contain only letters and spaces." required>
             </div>
 
             <div class="form-group">
                 <label for="model">Model:</label>
-                <input type="text" id="model" name="model" required>
+                <input type="text" id="model" name="model" pattern='/^[a-zA-Z\s\-]+$/'  title="Model should contain only letters and spaces." required>
             </div>
 
             <div class="form-group">
                 <label for="year_model">Year Model:</label>
-                <input type="text" id="year_model" name="year_model" required>
+                <input type="text" id="year_model" name="year_model" pattern='/^[0-9]+$/'  title="Year Model should be numeric." required>
             </div>
 
             <div class="form-group">
@@ -204,7 +204,7 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="location">Location:</label>
-                <input type="text" id="location" name="location" required>
+                <input type="text" id="location"  name="location" pattern='/^[a-zA-Z\s\-]+$/'  title="Location should contain only letters and spaces." required>
             </div>
 
             <div class="form-group">
@@ -257,7 +257,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $last_updated = date('Y-m-d H:i:s');
     $media = '';
 
-    // Ensure 'uploads' directory exists
     $upload_dir = 'uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
@@ -268,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
+            $target_file = $upload_dir . time() . "_" . $file_name; 
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
                 $media = $target_file;
             }
@@ -277,50 +276,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // Insert into database
-$sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    $sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-// Prepare the statement
-$add = $conn->prepare($sql);
-if ($add === false) {
-    die("Error preparing the SQL query: " . $conn->error);
+    $add = $conn->prepare($sql);
+    if ($add === false) {
+        die("Error preparing the SQL query: " . $conn->error);
+    }
+
+    $add->bind_param("sssssssssssssss", 
+        $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
+        $name, $price, $quantity, $category, $make, $model, $year_model
+    );
+
+    if ($add->execute()) {
+        echo "<script>
+            Swal.fire({
+                title: 'Success!',
+                text: 'Part added successfully!',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location = 'users.php';
+            });
+        </script>";
+    } else {
+        echo "<script>
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error adding part: " . addslashes($add->error) . "',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        </script>";
+    }
+
+    $add->close();
+    $conn->close();
 }
-
-// Bind parameters (correct the types and match them with SQL columns)
-$add->bind_param("sssssssssssssss", 
-    $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
-    $name, $price, $quantity, $category, $make, $model, $year_model
-);
-
-// Execute the query
-if ($add->execute()) {
-    echo "<script>
-        Swal.fire({
-            title: 'Success!',
-            text: 'Part added successfully!',
-            icon: 'success',
-            confirmButtonText: 'Ok'
-        }).then(() => {
-            window.location = 'users.php';
-        });
-    </script>";
-} else {
-    echo "<script>
-        Swal.fire({
-            title: 'Error!',
-            text: 'Error adding part: " . addslashes($add->error) . "',
-            icon: 'error',
-            confirmButtonText: 'Ok'
-        });
-    </script>";
-}
-
-// Close the statement and connection
-$add->close();
-$conn->close();
-
-
-}
-
 ?>
