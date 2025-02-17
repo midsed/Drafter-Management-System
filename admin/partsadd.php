@@ -166,7 +166,6 @@ $username = $user['Username'];
                 <input type="text" id="year_model" name="year_model" required>
             </div>
 
-            <!-- New Form Fields Added Here -->
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
@@ -258,55 +257,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $last_updated = date('Y-m-d H:i:s');
     $media = '';
 
-    if (!is_dir('uploads')) {
-        mkdir('uploads', 0777, true); 
+    // Ensure 'uploads' directory exists
+    $upload_dir = 'uploads/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
     }
-    
+
     if (!empty($_FILES['part_image']['name'])) {
-        $target_dir = "uploads/";
-        $target_file = $target_dir . basename($_FILES['part_image']['name']);
-        
-        if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-            $media = $target_file;
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $file_type = $_FILES['part_image']['type'];
+        if (in_array($file_type, $allowed_types)) {
+            $file_name = basename($_FILES['part_image']['name']);
+            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
+            if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
+                $media = $target_file;
+            }
+        } else {
+            die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
         }
     }
 
-    $sql = "INSERT INTO part (Name, Price, Quantity, Make, Model, YearModel, Category, Authenticity, Condition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $add = $conn->prepare($sql);
-    $add->bind_param("sdi".str_repeat('s',11)."is", $name, $price, $quantity, $make, $model, $year_model, $category, $authenticity, $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location);
+    // Insert into database
+    $sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-    if ($add->execute()) {
-        echo "<script>
-            Swal.fire({
-                title: 'Success!',
-                text: 'Part added successfully!',
-                icon: 'success',
-                confirmButtonText: 'Ok'
-            }).then(() => {
-                window.location = 'users.php';
-            });
-        </script>";
-    } else {
-        echo "<script>
-            Swal.fire({
-                title: 'Error!',
-                text: 'Error adding part: " . $add->error . "',
-                icon: 'error',
-                confirmButtonText: 'Ok'
-            });
-        </script>";
-    }
-
-    $add->close();
-    $conn->close();
+// Prepare the statement
+$add = $conn->prepare($sql);
+if ($add === false) {
+die("Error preparing the SQL query: " . $conn->error);
 }
+
+// Bind parameters (correct the types and match them with SQL columns)
+$add->bind_param("sssssssssss", 
+$condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
+$name, $price, $quantity
+);
+
+// Execute the query
+if ($add->execute()) {
+echo "<script>
+    Swal.fire({
+        title: 'Success!',
+        text: 'Part added successfully!',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+    }).then(() => {
+        window.location = 'users.php';
+    });
+</script>";
+} else {
+echo "<script>
+    Swal.fire({
+        title: 'Error!',
+        text: 'Error adding part: " . addslashes($add->error) . "',
+        icon: 'error',
+        confirmButtonText: 'Ok'
+    });
+</script>";
+}
+
+// Close the statement and connection
+$add->close();
+$conn->close();
+
+
+}
+
 ?>
-
-
-
-
-
-
-
-
