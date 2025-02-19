@@ -116,7 +116,7 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
-                <input type="text" id="part_name" name="part_name" value="<?php echo htmlspecialchars($part['Name']); ?>" pattern='/^[a-zA-Z\s\-]+$/'  title="Name should contain only letters and spaces." required>
+                <input type="text" id="part_name" name="part_name" value="<?php echo htmlspecialchars($part['Name']); ?>" required>
             </div>
 
             <div class="form-group">
@@ -131,12 +131,12 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="make">Make:</label>
-                <input type="text" id="make" name="make" value="<?php echo htmlspecialchars($part['Make']); ?>" pattern='/^[a-zA-Z\s\-]+$/'  title="Make should contain only letters and spaces." required>
+                <input type="text" id="make" name="make" value="<?php echo htmlspecialchars($part['Make']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="model">Model:</label>
-                <input type="text" id="model" name="model" value="<?php echo htmlspecialchars($part['Model']); ?>" pattern='/^[a-zA-Z\s\-]+$/'  title="Model should contain only letters and spaces." required>
+                <input type="text" id="model" name="model" value="<?php echo htmlspecialchars($part['Model']); ?>" required>
             </div>
 
             <div class="form-group">
