@@ -26,7 +26,7 @@ if (!isset($_SESSION['Username'])) {
     <h1 style="margin: 0;">Supplier</h1>
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
-            <a href="addsupplier.php" class="btn btn-add">+ Add Supplier</a>
+            <a href="supplieradd.php" class="btn btn-add">+ Add Supplier</a>
         </div>
     </div>
     <div class="search-container">
@@ -52,7 +52,7 @@ if (!isset($_SESSION['Username'])) {
                     <td>toyotacarsmindanaoave@gmail.com</td>
                     <td>Toyota Cars Mindanao Ave.</td>
                     <td>445-4865</td>
-                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
+                    <td><a href="supplieredit.php?id=7676" class="btn btn-edit">Edit</a></td>
                     <td><button class="btn btn-archive">Archive</button></td>
                 </tr>
             </tbody>

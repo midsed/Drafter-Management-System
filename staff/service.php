@@ -25,7 +25,7 @@ if (!isset($_SESSION['Username'])) {
     <h1 style="margin: 0;">Service</h1>
         <div class="actions">
             <a href="servicearchive.php" class="btn btn-archive">Archives</a>
-            <a href="addsupplier.php" class="btn btn-add">+ Add Service</a>
+            <a href="serviceadd.php" class="btn btn-add">+ Add Service</a>
         </div>
     </div>
     <div class="search-container">
@@ -53,7 +53,7 @@ if (!isset($_SESSION['Username'])) {
                     <td>sample</td>
                     <td>sample</td>
                     <td>sample</td>
-                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
+                    <td><a href="serviceedit.php?id=7676" class="btn btn-edit">Edit</a></td>
                     <td><button class="btn btn-archive">Archive</button></td>
                 </tr>
             </tbody>
