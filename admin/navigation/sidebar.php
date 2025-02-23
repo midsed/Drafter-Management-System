@@ -17,10 +17,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <span>Parts</span>
             </a>
         </li>
-        <li class="<?php echo ($current_page == 'transactions.php') ? 'active' : ''; ?>">
-            <a href="transactions.php">
+        <li class="<?php echo ($current_page == 'receipts.php') ? 'active' : ''; ?>">
+            <a href="receipts.php">
                 <img src="images/sideicon.png" alt="Transactions Icon" class="nav-icon">
-                <span>Transactions</span>
+                <span>Receipts</span>
             </a>
         </li>
         <li class="<?php echo ($current_page == 'logs.php') ? 'active' : ''; ?>">
