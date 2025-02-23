@@ -11,6 +11,7 @@ include('navigation/sidebar.php');
 include('navigation/topbar.php');
 ?>
 
+
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -191,9 +192,7 @@ function archivePart(partID) {
         }
     });
 }
-</script>
 
-<script>
 // Search functionality
 function searchParts() {
     const input = document.getElementById("searchInput").value.toLowerCase();
@@ -282,16 +281,20 @@ document.addEventListener("DOMContentLoaded", function () {
 function filterParts(selectedMakes, selectedModels) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1];
-        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1];
+        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1].trim().toLowerCase(); // Convert to lowercase
+        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1].trim().toLowerCase(); // Convert to lowercase
 
-        const matchesMake = selectedMakes.length === 0 || selectedMakes.includes(make);
-        const matchesModel = selectedModels.length === 0 || selectedModels.includes(model);
+        // Convert selected makes and models to lowercase for comparison
+        const lowerSelectedMakes = selectedMakes.map(make => make.toLowerCase());
+        const lowerSelectedModels = selectedModels.map(model => model.toLowerCase());
 
+        const matchesMake = lowerSelectedMakes.length === 0 || lowerSelectedMakes.includes(make);
+        const matchesModel = lowerSelectedModels.length === 0 || lowerSelectedModels.includes(model);
+
+        // Show part if it matches both the selected makes and models
         part.style.display = matchesMake && matchesModel ? "" : "none";
     });
 }
-
 // Sort parts by name (ascending or descending)
 function sortParts(order) {
     const partsContainer = document.getElementById("partsList");
@@ -307,8 +310,8 @@ function sortParts(order) {
     partsArray.forEach(part => partsContainer.appendChild(part));
 }
 
-// Update model filter based on selected make
-function updateModelFilter(selectedMake = null) {
+// Update model filter based on selected makes
+function updateModelFilter() {
     const modelFilter = document.getElementById("modelFilter");
     modelFilter.innerHTML = "";
 
@@ -335,14 +338,26 @@ function updateModelFilter(selectedMake = null) {
         Isuzu: ["D-Max", "MU-X", "Traviz", "N-Series", "F-Series", "Rodeo", "Alterra", "Crosswind"]
     };
 
-    if (selectedMake && models[selectedMake]) {
-        models[selectedMake].forEach(model => {
-            modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
-        });
-    }
-}
+    // Get all selected makes
+    const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked')).map(cb => cb.value);
 
-// Complete the script
+    // Create a set to avoid duplicate models
+    const modelSet = new Set();
+
+    // Loop through selected makes and add their models to the set
+    selectedMakes.forEach(make => {
+        if (models[make]) {
+            models[make].forEach(model => {
+                modelSet.add(model);
+            });
+        }
+    });
+
+    // Populate the model filter with unique models
+    modelSet.forEach(model => {
+        modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
+    });
+}
 </script>
 
 <style>
