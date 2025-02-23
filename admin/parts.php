@@ -29,15 +29,67 @@ include('navigation/topbar.php');
             <button onclick="searchParts()" class="red-button">Search</button>
             <div class="filter-container">
                 <span>Filter</span>
-                <a href="#" class="filter-icon" title="Filter">
-                    <i class="fas fa-filter"></i>
-                </a>
+                <div class="dropdown">
+                    <button id="filterButton" class="filter-icon" title="Filter">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <div id="filterDropdown" class="dropdown-content">
+                        <!-- Make Filter -->
+                        <div class="filter-section">
+                            <h4>Make</h4>
+                            <div class="filter-options" id="makeFilter">
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Toyota"> Toyota</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Honda"> Honda</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Ford"> Ford</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Chevrolet"> Chevrolet</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Nissan"> Nissan</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="BMW"> BMW</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mercedes-Benz"> Mercedes-Benz</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Audi"> Audi</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Hyundai"> Hyundai</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Kia"> Kia</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Volkswagen"> Volkswagen</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Subaru"> Subaru</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mazda"> Mazda</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Lexus"> Lexus</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Jeep"> Jeep</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Tesla"> Tesla</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="BYD"> BYD</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Suzuki"> Suzuki</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mitsubishi"> Mitsubishi</label>
+                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Isuzu"> Isuzu</label>
+                            </div>
+                        </div>
+
+                        <!-- Model Filter -->
+                        <div class="filter-section">
+                            <h4>Model</h4>
+                            <div class="filter-options" id="modelFilter">
+                                <!-- Models will be dynamically populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="filter-actions">
+                            <button id="applyFilter" class="red-button">Apply</button>
+                            <button id="clearFilter" class="red-button">Clear</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Sort Dropdown -->
             <div class="sort-container">
                 <span>Sort By</span>
-                <a href="#" class="sort-icon" title="Sort">
-                    <i class="fas fa-sort"></i>
-                </a>
+                <div class="dropdown">
+                    <button id="sortButton" class="sort-icon" title="Sort">
+                        <i class="fas fa-sort"></i>
+                    </button>
+                    <div id="sortDropdown" class="dropdown-content">
+                        <button class="sort-option red-button" data-sort="asc">Ascending</button>
+                        <button class="sort-option red-button" data-sort="desc">Descending</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="right-actions">
@@ -51,7 +103,7 @@ include('navigation/topbar.php');
 
     <div class="parts-container" id="partsList">
         <?php
-        $limit = 8; 
+        $limit = 8;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($page - 1) * $limit;
 
@@ -75,7 +127,7 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
-                        <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
                             <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
                             <button class='red-button'>Add to Cart</button>
                         </div>
@@ -142,6 +194,7 @@ function archivePart(partID) {
 </script>
 
 <script>
+// Search functionality
 function searchParts() {
     const input = document.getElementById("searchInput").value.toLowerCase();
     const parts = document.querySelectorAll(".part-card");
@@ -151,7 +204,147 @@ function searchParts() {
         part.style.display = text.includes(input) ? "" : "none";
     });
 }
+
+// DOMContentLoaded event listener
+document.addEventListener("DOMContentLoaded", function () {
+    const filterDropdown = document.getElementById("filterDropdown");
+    const sortDropdown = document.getElementById("sortDropdown");
+    const filterButton = document.getElementById("filterButton");
+    const sortButton = document.getElementById("sortButton");
+    const applyFilterButton = document.getElementById("applyFilter");
+    const clearFilterButton = document.getElementById("clearFilter");
+    const makeFilter = document.getElementById("makeFilter");
+    const modelFilter = document.getElementById("modelFilter");
+
+    // Toggle filter dropdown
+    filterButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        filterDropdown.classList.toggle("show");
+        sortDropdown.classList.remove("show");
+    });
+
+    // Toggle sort dropdown
+    sortButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        sortDropdown.classList.toggle("show");
+        filterDropdown.classList.remove("show");
+    });
+
+    // Close dropdowns when clicking outside
+    window.addEventListener("click", function (event) {
+        if (!event.target.matches('.filter-icon') && !event.target.matches('.sort-icon')) {
+            filterDropdown.classList.remove("show");
+            sortDropdown.classList.remove("show");
+        }
+    });
+
+    // Prevent dropdown from closing when clicking checkboxes
+    filterDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    // Apply filter
+    applyFilterButton.addEventListener("click", function () {
+        const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked')).map(checkbox => checkbox.value);
+        const selectedModels = Array.from(document.querySelectorAll('.filter-option[data-filter="model"]:checked')).map(checkbox => checkbox.value);
+        filterParts(selectedMakes, selectedModels);
+    });
+
+    // Clear filter
+    clearFilterButton.addEventListener("click", function () {
+        document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
+        filterParts([], []);
+    });
+
+    // Sort functionality
+    document.querySelectorAll(".sort-option").forEach(option => {
+        option.addEventListener("click", function () {
+            sortParts(option.dataset.sort);
+            sortDropdown.classList.remove("show");
+        });
+    });
+
+    // Dynamic model filtering
+    makeFilter.addEventListener("change", function (event) {
+        const selectedMake = event.target.value;
+        if (event.target.checked) {
+            updateModelFilter(selectedMake);
+        } else {
+            updateModelFilter();
+        }
+    });
+
+    // Initial model filter update
+    updateModelFilter();
+});
+
+// Filter parts based on selected makes and models
+function filterParts(selectedMakes, selectedModels) {
+    const parts = document.querySelectorAll(".part-card");
+    parts.forEach(part => {
+        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1];
+        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1];
+
+        const matchesMake = selectedMakes.length === 0 || selectedMakes.includes(make);
+        const matchesModel = selectedModels.length === 0 || selectedModels.includes(model);
+
+        part.style.display = matchesMake && matchesModel ? "" : "none";
+    });
+}
+
+// Sort parts by name (ascending or descending)
+function sortParts(order) {
+    const partsContainer = document.getElementById("partsList");
+    const partsArray = Array.from(partsContainer.children);
+
+    partsArray.sort((a, b) => {
+        const nameA = a.querySelector("p").textContent.toLowerCase();
+        const nameB = b.querySelector("p").textContent.toLowerCase();
+        return order === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    });
+
+    partsContainer.innerHTML = "";
+    partsArray.forEach(part => partsContainer.appendChild(part));
+}
+
+// Update model filter based on selected make
+function updateModelFilter(selectedMake = null) {
+    const modelFilter = document.getElementById("modelFilter");
+    modelFilter.innerHTML = "";
+
+    const models = {
+        Toyota: ["Camry", "Corolla", "Vios", "Fortuner", "Innova", "Hilux", "RAV4", "Land Cruiser"],
+        Honda: ["Civic", "Accord", "CR-V", "City", "BR-V", "HR-V", "Jazz", "Brio"],
+        Ford: ["Mustang", "Ranger", "Everest", "EcoSport", "Explorer", "Fiesta", "Focus", "Territory"],
+        Chevrolet: ["Trailblazer", "Colorado", "Spark", "Cruze", "Trax", "Captiva", "Malibu", "Tahoe"],
+        Nissan: ["Altima", "Navara", "Terra", "Sentra", "Juke", "Patrol", "Kicks", "Almera"],
+        BMW: ["3 Series", "5 Series", "X1", "X3", "X5", "X7", "7 Series", "M3"],
+        MercedesBenz: ["C-Class", "E-Class", "S-Class", "GLC", "GLE", "GLA", "A-Class", "G-Class"],
+        Audi: ["A4", "A6", "Q3", "Q5", "Q7", "A3", "A5", "Q2"],
+        Hyundai: ["Elantra", "Tucson", "Santa Fe", "Accent", "Creta", "Kona", "Staria", "Venue"],
+        Kia: ["Seltos", "Sorento", "Sportage", "Stonic", "Picanto", "Carnival", "Rio", "Forte"],
+        Volkswagen: ["Golf", "Tiguan", "Santana", "Lavida", "Passat", "Touareg", "Polo", "Teramont"],
+        Subaru: ["Outback", "Forester", "XV", "Impreza", "BRZ", "Legacy", "Crosstrek", "WRX"],
+        Mazda: ["CX-5", "CX-9", "Mazda3", "Mazda6", "CX-30", "MX-5", "BT-50", "CX-8"],
+        Lexus: ["RX", "NX", "ES", "LS", "UX", "GX", "LX", "IS"],
+        Jeep: ["Wrangler", "Cherokee", "Compass", "Renegade", "Gladiator", "Grand Cherokee", "Commander", "Patriot"],
+        Tesla: ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck", "Roadster"],
+        BYD: ["Han", "Tang", "Song", "Qin", "Yuan", "Dolphin", "Seal", "Atto 3"],
+        Suzuki: ["Ertiga", "Swift", "Vitara", "Jimny", "Ciaz", "APV", "Carry", "XL7"],
+        Mitsubishi: ["Montero Sport", "Mirage", "Strada", "Xpander", "Outlander", "Eclipse Cross", "L300", "Pajero"],
+        Isuzu: ["D-Max", "MU-X", "Traviz", "N-Series", "F-Series", "Rodeo", "Alterra", "Crosswind"]
+    };
+
+    if (selectedMake && models[selectedMake]) {
+        models[selectedMake].forEach(model => {
+            modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
+        });
+    }
+}
+
+// Complete the script
 </script>
+
 <style>
 body {
     font-family: 'Poppins', sans-serif;
@@ -318,5 +511,98 @@ body {
     background: black;
     color: white;
     font-weight: bold;
+}
+
+/* Dropdown Menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 500px; /* Increased width */
+    max-height: 500px; /* Increased height */
+    overflow-y: auto;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.filter-section {
+    margin-bottom: 15px;
+}
+
+.filter-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}
+
+.filter-options input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px 0;
+}
+
+.filter-actions button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #E10F0F;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.filter-actions button:hover {
+    background-color: darkred;
+}
+
+.filter-actions #clearFilter {
+    background-color: #ccc;
+    color: #333;
+}
+
+.filter-actions #clearFilter:hover {
+    background-color: #bbb;
+}
+
+/* Sort Buttons */
+.sort-option.red-button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 5px 0;
+    background-color: white; /* Changed to white */
+    color: #E10F0F; /* Changed text color */
+    border: 1px solid #E10F0F; /* Added border */
 }
 </style>
