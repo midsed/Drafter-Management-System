@@ -11,7 +11,6 @@ include('navigation/sidebar.php');
 include('navigation/topbar.php');
 ?>
 
-
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -94,8 +93,9 @@ include('navigation/topbar.php');
             </div>
         </div>
         <div class="right-actions">
-            <a href="#" class="cart-icon" title="Cart">
+            <a href="cart.php" class="cart-icon" title="Cart">
                 <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
             </a>
             <a href="partsarchive.php" class="red-button">Archives</a>
             <a href="partsadd.php" class="red-button">+ New Stock</a>
@@ -130,7 +130,7 @@ include('navigation/topbar.php');
                         <div class='actions'>
                             <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
                             <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
-                            <button class='red-button'>Add to Cart</button>
+                            <button class='red-button' onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
                         </div>
                     </div>
                 ";
@@ -201,6 +201,29 @@ function searchParts() {
     parts.forEach(part => {
         const text = part.textContent.toLowerCase();
         part.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+// Add to Cart functionality
+function addToCart(partID, name, make, model) {
+    fetch('add_to_cart.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${partID}&name=${encodeURIComponent(name)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`
+    })
+    .then(response => response.text())
+    .then(data => {
+        Swal.fire({
+            title: "Added to Cart!",
+            text: data,
+            icon: "success"
+        }).then(() => {
+            location.reload(); // Reload the page to see the updated cart
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire("Error", "Something went wrong!", "error");
     });
 }
 
@@ -295,6 +318,7 @@ function filterParts(selectedMakes, selectedModels) {
         part.style.display = matchesMake && matchesModel ? "" : "none";
     });
 }
+
 // Sort parts by name (ascending or descending)
 function sortParts(order) {
     const partsContainer = document.getElementById("partsList");
@@ -396,6 +420,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative; /* Added for positioning the cart count */
 }
 
 .red-button {
@@ -425,6 +450,19 @@ body {
 
 .cart-icon:hover {
     color: darkred;
+}
+
+/* Cart Count Style */
+.cart-count {
+    position: relative;
+    top: -13px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    background-color: green;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
 }
 
 .filter-container, .sort-container {
