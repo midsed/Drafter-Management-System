@@ -15,16 +15,18 @@ if (!isset($_SESSION['Username'])) {
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
 <div class="main-content">
     <div class="header">
     <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
     <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
       <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
     </a>
-      <h1 style="margin: 0;">Supplier</h1>
+    <h1 style="margin: 0;">Supplier</h1>
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
-            <a href="addsupplier.php" class="btn btn-add">+ Add Supplier</a>
+            <a href="supplieradd.php" class="btn btn-add">+ Add Supplier</a>
         </div>
     </div>
     <div class="search-container">
@@ -50,7 +52,7 @@ if (!isset($_SESSION['Username'])) {
                     <td>toyotacarsmindanaoave@gmail.com</td>
                     <td>Toyota Cars Mindanao Ave.</td>
                     <td>445-4865</td>
-                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
+                    <td><a href="supplieredit.php?id=7676" class="btn btn-edit">Edit</a></td>
                     <td><button class="btn btn-archive">Archive</button></td>
                 </tr>
             </tbody>
@@ -69,11 +71,15 @@ if (!isset($_SESSION['Username'])) {
 </script>
 
 <style>
+.btn {
+    font-family: 'Poppins', sans-serif;
+}
 
 .actions a.btn,
 .actions button.btn {
     color: white !important;
 }
+
 .btn {
     padding: 8px 12px;
     border: none;
@@ -130,6 +136,5 @@ if (!isset($_SESSION['Username'])) {
     margin-bottom: 10px;
     font-size: 14px;
 }
-
-
 </style>
+
