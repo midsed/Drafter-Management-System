@@ -204,12 +204,11 @@ function searchParts() {
     });
 }
 
-// Add to Cart functionality
-function addToCart(partID, name, make, model) {
+function addToCart(partID, name, make, model, price, image, location) {
     fetch('add_to_cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${partID}&name=${encodeURIComponent(name)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`
+        body: `id=${partID}&name=${encodeURIComponent(name)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}&price=${price}&image=${encodeURIComponent(image)}&location=${encodeURIComponent(location)}`
     })
     .then(response => response.text())
     .then(data => {

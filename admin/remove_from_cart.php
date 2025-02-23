@@ -2,19 +2,19 @@
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    echo "Unauthorized";
     exit();
 }
 
-if (isset($_GET['id'])) {
-    $partID = $_GET['id'];
-
-    // Remove the part from the cart
+if (isset($_POST['partID'])) {
+    $partID = $_POST['partID'];
     if (isset($_SESSION['cart'][$partID])) {
         unset($_SESSION['cart'][$partID]);
+        echo "Item removed";
+    } else {
+        echo "Item not found in cart";
     }
-
-    header("Location: cart.php");
-    exit();
+} else {
+    echo "Invalid request";
 }
 ?>
