@@ -7,6 +7,7 @@ if (!isset($_SESSION['UserID'])) {
     exit();
 }
 
+
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
 ?>
@@ -18,7 +19,9 @@ include('navigation/topbar.php');
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" 
+                 alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Parts List</h1>
     </div>
@@ -27,19 +30,52 @@ include('navigation/topbar.php');
         <div class="search-container">
             <input type="text" placeholder="Quick search" id="searchInput">
             <button onclick="searchParts()" class="red-button">Search</button>
+
             <div class="filter-container">
                 <span>Filter</span>
-                <a href="#" class="filter-icon" title="Filter">
-                    <i class="fas fa-filter"></i>
-                </a>
+                <div class="dropdown">
+                    <button id="filterButton" class="filter-icon" title="Filter">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <div id="filterDropdown" class="dropdown-content">
+                        <div class="filter-section">
+                            <h4>Make</h4>
+                            <div class="filter-options">
+                                <label><input type="checkbox"> Toyota</label>
+                                <label><input type="checkbox"> Honda</label>
+                                <label><input type="checkbox"> Ford</label>
+                            </div>
+                        </div>
+                        <div class="filter-section">
+                            <h4>Model</h4>
+                            <div class="filter-options">
+                                <label><input type="checkbox"> Corolla</label>
+                                <label><input type="checkbox"> Accord</label>
+                                <label><input type="checkbox"> Ranger</label>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="red-button">Apply</button>
+                            <button class="red-button">Clear</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="sort-container">
                 <span>Sort By</span>
-                <a href="#" class="sort-icon" title="Sort">
-                    <i class="fas fa-sort"></i>
-                </a>
+                <div class="dropdown">
+                    <button id="sortButton" class="sort-icon" title="Sort">
+                        <i class="fas fa-sort"></i>
+                    </button>
+                    <div id="sortDropdown" class="dropdown-content">
+                        <button class="red-button">Ascending</button>
+                        <button class="red-button">Descending</button>
+                    </div>
+                </div>
             </div>
         </div>
+
         <div class="right-actions">
             <a href="#" class="cart-icon" title="Cart">
                 <i class="fas fa-shopping-cart"></i>
@@ -51,7 +87,7 @@ include('navigation/topbar.php');
 
     <div class="parts-container" id="partsList">
         <?php
-        $limit = 8; 
+        $limit = 8;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($page - 1) * $limit;
 
@@ -60,7 +96,10 @@ include('navigation/topbar.php');
         $totalRow = $totalResult->fetch_assoc();
         $totalPages = ceil($totalRow['total'] / $limit);
 
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media 
+                FROM part 
+                WHERE archived = 0 
+                LIMIT $limit OFFSET $offset";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -68,14 +107,16 @@ include('navigation/topbar.php');
                 $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
                 echo "
                     <div class='part-card'>
-                        <a href='partdetail.php?id={$part['PartID']}'><img src='$imageSrc' alt='Part Image'></a>
+                        <a href='partdetail.php?id={$part['PartID']}'>
+                            <img src='$imageSrc' alt='Part Image'>
+                        </a>
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
-                        <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
                             <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
                             <button class='red-button'>Add to Cart</button>
                         </div>
@@ -94,7 +135,10 @@ include('navigation/topbar.php');
         <?php endif; ?>
 
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?>" 
+               class="pagination-button <?= $i == $page ? 'active-page' : '' ?>">
+               <?= $i ?>
+            </a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPages): ?>
@@ -104,7 +148,6 @@ include('navigation/topbar.php');
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 function archivePart(partID) {
     Swal.fire({
@@ -139,22 +182,64 @@ function archivePart(partID) {
         }
     });
 }
-</script>
 
-<script>
 function searchParts() {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    const parts = document.querySelectorAll(".part-card");
+    const cards = document.querySelectorAll(".part-card");
 
-    parts.forEach(part => {
-        const text = part.textContent.toLowerCase();
-        part.style.display = text.includes(input) ? "" : "none";
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(input) ? "" : "none";
     });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const filterButton = document.getElementById("filterButton");
+    const filterDropdown = document.getElementById("filterDropdown");
+    const sortButton = document.getElementById("sortButton");
+    const sortDropdown = document.getElementById("sortDropdown");
+
+    if (filterButton && filterDropdown) {
+        filterButton.addEventListener("click", e => {
+            e.stopPropagation();
+            filterDropdown.classList.toggle("show");
+            if (sortDropdown) sortDropdown.classList.remove("show");
+        });
+    }
+    if (sortButton && sortDropdown) {
+        sortButton.addEventListener("click", e => {
+            e.stopPropagation();
+            sortDropdown.classList.toggle("show");
+            if (filterDropdown) filterDropdown.classList.remove("show");
+        });
+    }
+
+    window.addEventListener("click", () => {
+        if (filterDropdown) filterDropdown.classList.remove("show");
+        if (sortDropdown) sortDropdown.classList.remove("show");
+    });
+});
 </script>
+
 <style>
+
+.main-content {
+    margin-left: 160px;
+    padding-top: 80px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .search-actions {
@@ -176,18 +261,11 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .search-container input[type="text"]:focus {
     outline: none;
     border-color: #007bff;
-}
-
-.right-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 
 .red-button {
@@ -198,7 +276,6 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
     text-decoration: none;
     transition: background 0.3s ease;
 }
@@ -207,12 +284,24 @@ body {
     background: darkred;
 }
 
+.red-button:active {
+    background: #fff;      
+    color: #000;         
+    border: 1px solid #000; 
+}
+
+.right-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .cart-icon {
     color: #E10F0F;
     font-size: 20px;
     cursor: pointer;
-    transition: color 0.3s ease;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .cart-icon:hover {
@@ -228,7 +317,6 @@ body {
 
 .filter-container span, .sort-container span {
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
     color: #333;
 }
 
@@ -242,24 +330,71 @@ body {
     color: darkred;
 }
 
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.filter-section {
+    margin-bottom: 15px;
+}
+
+.filter-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    background: white;
+    padding: 10px 0;
+}
+
 .parts-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+    margin-bottom: 40px; 
 }
 
 .part-card {
-    background: white;
+    background: #fff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .part-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 6px 10px rgba(0,0,0,0.15);
 }
 
 .part-card img {
@@ -274,13 +409,14 @@ body {
     font-size: 14px;
 }
 
-.part-card .actions {
+.actions {
     display: flex;
     justify-content: space-around;
     margin-top: 10px;
 }
 
-.part-card .actions button {
+.actions button,
+.actions a {
     padding: 6px 12px;
     font-size: 13px;
 }
@@ -290,11 +426,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-bottom: 40px;
 }
 
 .pagination-button {
@@ -313,10 +445,9 @@ body {
 }
 
 .active-page {
-    padding: 6px 12px;
-    border-radius: 4px;
     background: black;
     color: white;
     font-weight: bold;
 }
 </style>
+
