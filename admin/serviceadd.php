@@ -75,8 +75,23 @@ $username = $user['Username'];
             </div>
 
             <div class="form-group">
-                <label for="name">Customer Name:</label>
-                <input type="text" id="name" name="name" required>
+                <label for="fName">Customer First Name:</label>
+                <input type="text" id="fName" name="fName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lName">Customer Last Name:</label>
+                <input type="text" id="lName" name="lName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cEmail">Customer Email:</label>
+                <input type="email" id="cEmail" name="cEmail" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pNumber">Customer Phone Number:</label>
+                <input type="number" id="pNumber" name="pNumber" required maxlength="11">
             </div>
             
             <div class="form-group">
@@ -90,30 +105,54 @@ $username = $user['Username'];
     <?php 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $part = $_POST['part'];
-    $customer_name = $_POST['name'];
+    $fName = $_POST['fName'];
+    $lName = $_POST['lName'];
+    $pNumber = $_POST['pNumber'];
     $price = $_POST['price'];
+    $cEmail = $_POST['cEmail'];
     $date_added = date('Y-m-d H:i:s');
 
+    $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
+    $checkClient->bind_param("s", $cEmail);
+    $checkClient->execute();
+    $checkClient->store_result();
 
-    $sql = "INSERT INTO service (Type, Date, Price, CustomerName) VALUES (?, ?, ?, ?)";
-    
+    if ($checkClient->num_rows == 0) {
+        $insertClient = "INSERT INTO client (ClientEmail, FName, LName, PhoneNumber) VALUES (?, ?, ?, ?)";
+        $addClient = $conn->prepare($insertClient);
+
+        if ($addClient === false) {
+            die("Error preparing client insert query: " . $conn->error);
+        }
+
+        $addClient->bind_param("ssss", $cEmail, $fName, $lName, $pNumber);
+
+        if (!$addClient->execute()) {
+            die("Error inserting client: " . $addClient->error);
+        }
+        $addClient->close();
+    }
+    $checkClient->close();
+
+    $sql = "INSERT INTO service (Type, Date, Price, ClientEmail) VALUES (?, ?, ?, ?)";
     $add = $conn->prepare($sql);
+
     if ($add === false) {
-        die("Error preparing the SQL query: " . $conn->error);
+        die("Error preparing service insert query: " . $conn->error);
     }
 
-    $add->bind_param("ssss", $part, $date_added, $price, $customer_name);
+    $add->bind_param("ssss", $part, $date_added, $price, $cEmail);
 
     if ($add->execute()) {
-            $timestamp = date("Y-m-d H:i:s");
-             $adminId = $_SESSION['UserID'];
+        $timestamp = date("Y-m-d H:i:s");
+        $adminId = $_SESSION['UserID'];
+        $actionBy = $_SESSION['Username'];
+        $actionType = "Added new Service";
 
-            $actionBy = $_SESSION['Username'];
-            $actionType = "Added new Service";
-            $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
-            $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
-            $log->execute();
-            $log->close();
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
+        $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
+        $log->execute();
+        $log->close();
 
         echo "<script>
             Swal.fire({
@@ -139,4 +178,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $add->close();
     $conn->close();
 }
+
 ?>
