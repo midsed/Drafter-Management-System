@@ -134,7 +134,7 @@ $username = $user['Username'];
         <form action="" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
-                <input type="text" id="part_name" name="part_name" pattern='/^[a-zA-Z\s\-]+$/'  title="Name should contain only letters and spaces." required>
+                <input type="text" id="part_name" name="part_name" required>
             </div>
             
             <div class="form-group">
@@ -153,17 +153,17 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="make">Make:</label>
-                <input type="text" id="make" name="make" pattern='/^[a-zA-Z\s\-]+$/'  title="Make should contain only letters and spaces." required>
+                <input type="text" id="make" name="make" required>
             </div>
 
             <div class="form-group">
                 <label for="model">Model:</label>
-                <input type="text" id="model" name="model" pattern='/^[a-zA-Z\s\-]+$/'  title="Model should contain only letters and spaces." required>
+                <input type="text" id="model" name="model" required>
             </div>
 
             <div class="form-group">
                 <label for="year_model">Year Model:</label>
-                <input type="text" id="year_model" name="year_model" pattern='/^[0-9]+$/'  title="Year Model should be numeric." required>
+                <input type="text" id="year_model" name="year_model" required>
             </div>
 
             <div class="form-group">
@@ -204,7 +204,7 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="location">Location:</label>
-                <input type="text" id="location"  name="location" pattern='/^[a-zA-Z\s\-]+$/'  title="Location should contain only letters and spaces." required>
+                <input type="text" id="location"  name="location" required>
             </div>
 
             <div class="form-group">
@@ -290,16 +290,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     );
 
     if ($add->execute()) {
+        $partID = $conn->insert_id; 
         $timestamp = date("Y-m-d H:i:s");
-         $adminId = $_SESSION['UserID'];
-
+        $adminId = $_SESSION['UserID'];
         $actionBy = $_SESSION['Username'];
         $actionType = "Added new Part";
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
-        $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
+    
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) VALUES (?, ?, ?, ?, ?)");
+        if ($log === false) {
+            die("Error preparing log query: " . $conn->error);
+        }
+    
+        $log->bind_param("sssii", $actionBy, $actionType, $timestamp, $adminId, $partID);
         $log->execute();
         $log->close();
-
+    
         echo "<script>
             Swal.fire({
                 title: 'Success!',
