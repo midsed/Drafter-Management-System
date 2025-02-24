@@ -15,22 +15,22 @@ if (!isset($_SESSION['Username'])) {
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
 <div class="main-content">
     <div class="header">
-    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-    </a>
-    <h1 style="margin: 0;">Service</h1>
+        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
+        <h1 style="margin: 0;">Service</h1>
         <div class="actions">
             <a href="servicearchive.php" class="btn btn-archive">Archives</a>
-            <a href="serviceadd.php" class="btn btn-add">+ Add Service</a>
+            <a href="addsupplier.php" class="btn btn-add">+ Add Service</a>
         </div>
     </div>
+
     <div class="search-container">
-    <input type="text" placeholder="Quick search" id="searchInput">
+        <input type="text" placeholder="Quick search" id="searchInput">
     </div>
+
     <div class="table-container">
         <table class="supplier-table">
             <thead>
@@ -53,7 +53,7 @@ if (!isset($_SESSION['Username'])) {
                     <td>sample</td>
                     <td>sample</td>
                     <td>sample</td>
-                    <td><a href="serviceedit.php?id=7676" class="btn btn-edit">Edit</a></td>
+                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
                     <td><button class="btn btn-archive">Archive</button></td>
                 </tr>
             </tbody>
@@ -72,12 +72,8 @@ if (!isset($_SESSION['Username'])) {
 </script>
 
 <style>
-.btn {
-    font-family: 'Poppins', sans-serif;
-}
-
-.actions a.btn,
-.actions button.btn {
+/* Button Styles */
+.actions a.btn, .actions button.btn {
     color: white !important;
 }
 
@@ -90,17 +86,7 @@ if (!isset($_SESSION['Username'])) {
     color: white;
 }
 
-.btn-archive {
-    background-color: #E10F0F;
-    color: white;
-}
-
-.btn-add {
-    background-color: #E10F0F;
-    color: white;
-}
-
-.btn-edit {
+.btn-archive, .btn-add, .btn-edit {
     background-color: #E10F0F;
     color: white;
 }
@@ -114,24 +100,40 @@ if (!isset($_SESSION['Username'])) {
     margin-left: 10px;
 }
 
+/* Table Styles */
 .table-container {
     margin-top: 20px;
+    width: 100%;
 }
 
 .supplier-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Ensures columns have equal width */
     margin-top: 10px;
 }
 
 .supplier-table th,
 .supplier-table td {
     border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
+    padding: 12px;
+    text-align: center;
+    word-wrap: break-word;
 }
 
-.search-box {
+.supplier-table th {
+    background-color: #f4f4f4;
+}
+
+.supplier-table td a, .supplier-table td button {
+    display: inline-block;
+    width: 80px;
+    text-align: center;
+    padding: 6px;
+}
+
+/* Search Bar */
+.search-container input {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
