@@ -7,11 +7,29 @@ if (!isset($_SESSION['UserID'])) {
     exit();
 }
 
+// Fetch low stock parts
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
 $lowStockResult = mysqli_query($conn, $lowStockQuery);
 
+// Fetch recent parts
 $recentPartsQuery = "SELECT * FROM part ORDER BY LastUpdated DESC LIMIT 5";
 $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
+
+// Fetch stock levels for chart
+$stockLevelsQuery = "SELECT Name, Quantity FROM part";
+$stockLevelsResult = mysqli_query($conn, $stockLevelsQuery);
+$stockLevels = [];
+while ($row = mysqli_fetch_assoc($stockLevelsResult)) {
+    $stockLevels[$row['Name']] = $row['Quantity'];
+}
+
+// Fetch parts added for the line chart
+$partsAddedQuery = "SELECT DATE(DateAdded) as date, COUNT(*) as count FROM part GROUP BY DATE(DateAdded)";
+$partsAddedResult = mysqli_query($conn, $partsAddedQuery);
+$partsAddedData = [];
+while ($row = mysqli_fetch_assoc($partsAddedResult)) {
+    $partsAddedData[$row['date']] = $row['count'];
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -24,27 +42,32 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
     </div>
 
     <div class="content">
-    <div class="chart-container">
-    <div class="chart-box">
-        <h2>Stock Levels</h2>
-        <canvas id="stockLevelChart"></canvas>
-    </div>
-    <div class="chart-box">
-        <h2>Recent Updates</h2>
-        <canvas id="recentUpdatesChart"></canvas>
-    </div>
-</div>
-
+        <div class="chart-container">
+            <div class="chart-box">
+                <h2>Stock Levels</h2>
+                <canvas id="stockLevelChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Parts Added</h2>
+                <select id="timePeriod" onchange="updateLineChart()">
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <canvas id="recentUpdatesChart"></canvas>
+            </div>
+        </div>
 
         <div class="transaction-history">
-            <h2>Recent Transaction History</h2>
+            <h2>Recent Checkout History</h2>
             <table>
                 <tr>
-                    <th>Transaction ID</th>
+                    <th>Receipt ID</th>
                     <th>Action By</th>
                     <th>Timestamp</th>
-                    <th>Print</th>
+                    <th>Print Receipt</th>
                 </tr>
+                <!-- Example static data; replace with dynamic data as needed -->
                 <tr>
                     <td>#7676</td>
                     <td>Admin - Jade</td>
@@ -54,7 +77,7 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
                 <tr>
                     <td>#7677</td>
                     <td>Staff - Name N.</td>
-                    <td>2024-11-3 10:00:00</td>
+                    <td>2024-11-03 10:00:00</td>
                     <td><button>Print</button></td>
                 </tr>
             </table>
@@ -78,7 +101,7 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
                         <td><?php echo $row['Category']; ?></td>
                         <td><?php echo $row['PartCondition']; ?></td>
                         <td><?php echo $row['Quantity']; ?></td>
-                        <td><a href="parts.php?part_id=<?php echo $row['PartID']; ?>">More Details</a></td>
+                        <td><a href="partdetail.php?id=<?php echo $row['PartID']; ?>">More Details</a></td>
                     </tr>
                 <?php } ?>
             </table>
@@ -112,53 +135,187 @@ $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    let partsAddedData = <?php echo json_encode($partsAddedData); ?>;
+
     document.addEventListener('DOMContentLoaded', function () {
         // Stock Level Chart
         const stockCanvas = document.getElementById('stockLevelChart');
-        if (stockCanvas) {
-            new Chart(stockCanvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ['Inverter', 'Battery', 'Part 3', 'Part 4', 'Part 5'],
-                    datasets: [{
-                        label: 'Stock Levels',
-                        data: [10, 32, 15, 10, 25],
-                        backgroundColor: 'rgb(59, 59, 59)',
-                        borderColor: 'rgb(0, 0, 0)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { display: true, position: 'top' } }
-                }
+        const stockData = {
+            labels: <?php echo json_encode(array_keys($stockLevels)); ?>,
+            datasets: [{
+                label: 'Stock Levels',
+                data: <?php echo json_encode(array_values($stockLevels)); ?>,
+                backgroundColor: 'rgba(59, 59, 59, 0.6)',
+                borderColor: 'rgba(0, 0, 0, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(stockCanvas.getContext('2d'), {
+            type: 'bar',
+            data: stockData,
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: true, position: 'top' } }
+            }
+        });
+
+        // Initial load of the recent updates chart
+        updateLineChart();
+    });
+
+    function updateLineChart() {
+        const updatesCanvas = document.getElementById('recentUpdatesChart');
+        const labels = Object.keys(partsAddedData);
+        const data = Object.values(partsAddedData);
+
+        // Update the chart based on the selected time period
+        const selectedPeriod = document.getElementById('timePeriod').value;
+        let filteredData = [];
+        let filteredLabels = [];
+
+        if (selectedPeriod === 'daily') {
+            filteredData = data; // Use daily data directly
+            filteredLabels = labels;
+        } else if (selectedPeriod === 'monthly') {
+            // Aggregate data by month
+            const monthlyData = {};
+            labels.forEach(date => {
+                const month = date.substring(0, 7); // Get YYYY-MM
+                monthlyData[month] = (monthlyData[month] || 0) + partsAddedData[date];
             });
+            filteredLabels = Object.keys(monthlyData);
+            filteredData = Object.values(monthlyData);
+        } else if (selectedPeriod === 'yearly') {
+            // Aggregate data by year
+            const yearlyData = {};
+            labels.forEach(date => {
+                const year = date.substring(0, 4); // Get YYYY
+                yearlyData[year] = (yearlyData[year] || 0) + partsAddedData[date];
+            });
+            filteredLabels = Object.keys(yearlyData);
+            filteredData = Object.values(yearlyData);
         }
 
-        // Recent Updates Chart
-        const updatesCanvas = document.getElementById('recentUpdatesChart');
-        if (updatesCanvas) {
-            new Chart(updatesCanvas.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                    datasets: [{
-                        label: 'Recent Updates',
-                        data: [5, 15, 8, 20, 12],
-                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                        borderColor: 'blue',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { display: true, position: 'top' } }
-                }
-            });
-        }
-    });
+        // Create the chart
+        new Chart(updatesCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: filteredLabels,
+                datasets: [{
+                    label: 'Parts Added',
+                    data: filteredData,
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    borderColor: 'blue',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: true, position: 'top' } }
+            }
+        });
+    }
 </script>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .chart-box {
+        flex: 1;
+        margin: 0 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+
+    .chart-box h2 {
+        margin-bottom: 15px;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .transaction-history, .low-stock-alerts, .new-updated-parts {
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    button {
+        background-color: #E10F0F;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: darkred;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    select {
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        width: 100%;
+    }
+</style>
