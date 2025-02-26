@@ -34,39 +34,53 @@ include('dbconnect.php');
         <table class="supplier-table">
             <thead>
                 <tr>
+                    <th>Service ID</th>
                     <th>Service Type</th>
                     <th>Service Price</th>
-                    <th>Service ID</th>
-                    <th>Customer</th>
-                    <th>Staff</th>
-                    <th>Part ID</th>
-                    <th>Edit Supplier</th>
+                    <th>Customer Name</th>
+                    <th>Customer Email</th>
+                    <th>Customer Number</th>
+                    <th>Staff Name</th>
+                    <th>Part Name</th>
+                    <th>Edit Service</th>
                     <th>Archive</th>
                 </tr>
             </thead>
             <tbody>
             <?php
-                $sql = "SELECT ServiceID, Type, Price, ClientEmail, StaffName, PartID FROM service";
+                $sql = "SELECT 
+                            s.ServiceID, 
+                            s.Type, 
+                            s.Price, 
+                            c.FName AS CustomerFName, 
+                            c.LName AS CustomerLName, 
+                            s.ClientEmail, 
+                            c.PhoneNumber, 
+                            s.StaffName, 
+                            COALESCE(p.Name, 'N/A') AS PartName
+                        FROM service s
+                        LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+                        LEFT JOIN part p ON s.PartID = p.PartID
+                        WHERE s.Archived = 0";
+
                 $result = $conn->query($sql);
-                
-    
-    $result = $conn->query($sql);
-    
 
                 if (!$result) {
-                    echo "<tr><td colspan='8'>SQL Error: " . $conn->error . "</td></tr>";
+                    echo "<tr><td colspan='10'>SQL Error: " . $conn->error . "</td></tr>";
                 } elseif ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                 ?>
                 <tr>
+                    <td><?php echo htmlspecialchars($row['ServiceID']); ?></td>
                     <td><?php echo htmlspecialchars($row['Type']); ?></td>
                     <td><?php echo htmlspecialchars($row['Price']); ?></td>
-                    <td><?php echo htmlspecialchars($row['ServiceID']); ?></td>
+                    <td><?php echo htmlspecialchars($row['CustomerFName'] . ' ' . $row['CustomerLName']); ?></td>
                     <td><?php echo htmlspecialchars($row['ClientEmail'] ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row['PhoneNumber'] ?? 'N/A'); ?></td>
                     <td><?php echo htmlspecialchars($row['StaffName'] ?? 'N/A'); ?></td>
-                    <td><?php echo htmlspecialchars($row['PartID'] ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row['PartName']); ?></td>
                     <td>
-                        <a href="serviceedit.php?ServiceID=<?php echo $row['ServiceID']; ?>" class="btn btn-edit">Edit</a>
+                        <a href="serviceedit.php?id=<?php echo $row['ServiceID']; ?>" class="btn btn-edit">Edit</a>
                     </td>
                     <td>
                         <button class="btn btn-archive" onclick="archiveService(<?php echo $row['ServiceID']; ?>)">Archive</button>
@@ -75,7 +89,7 @@ include('dbconnect.php');
                 <?php
                     }
                 } else {
-                    echo "<tr><td colspan='8'>No services found.</td></tr>";
+                    echo "<tr><td colspan='10'>No services found.</td></tr>";
                 }
                 ?>
             </tbody>
@@ -84,12 +98,76 @@ include('dbconnect.php');
 </div>
 
 <script>
+
+function searchTable() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const table = document.querySelector(".supplier-table");
+    const rows = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < rows.length; i++) { 
+        let cells = rows[i].getElementsByTagName("td");
+        let match = false;
+
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j] && cells[j].textContent.toLowerCase().includes(searchInput)) {
+                match = true;
+                break;
+            }
+        }
+
+        rows[i].style.display = match ? "" : "none";
+    }
+}
+
+    document.getElementById("searchInput").addEventListener("keyup", searchTable);
+
+
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+    
+    function archiveService(serviceID) {
+        if (confirm("Are you sure you want to archive this service?")) {
+            window.location.href = "servicearchive.php?archive=" + serviceID;
+        }
+    }
+
+    function archiveService(serviceID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to archive this service?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, archive it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('archive_service.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'service_id=' + serviceID
+            })
+            .then(response => response.text())
+            .then(data => {
+                Swal.fire({
+                    title: "Success!",
+                    text: data,
+                    icon: "success"
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
 </script>
 
 <style>
