@@ -132,7 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $checkClient->close();
 
-    // Check for matching PartID where Type matches Description and PartCondition is 'Used'
     $partCheck = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND PartCondition = 'Used' LIMIT 1");
     $partCheck->bind_param("s", $type);
     $partCheck->execute();
@@ -142,7 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $partID = $part ? $part['PartID'] : NULL;
 
-    // Insert into service table
     $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartID, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
 
@@ -153,9 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partID, $username);
 
     if ($add->execute()) {
-        $serviceID = $add->insert_id; // Get the newly inserted ServiceID
+        $serviceID = $add->insert_id;
 
-        // If a PartID exists, update the part table with the ServiceID
         if ($partID) {
             $updatePart = $conn->prepare("UPDATE part SET ServiceID = ? WHERE PartID = ?");
             $updatePart->bind_param("ii", $serviceID, $partID);
@@ -163,7 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $updatePart->close();
         }
 
-        // Log the action with PartID included
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
         $actionBy = $_SESSION['Username'];
