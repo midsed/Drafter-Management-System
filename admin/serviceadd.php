@@ -112,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $price = $_POST['price'];
     $date_added = date('Y-m-d H:i:s');
 
+    // Check if client exists
     $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
     $checkClient->bind_param("s", $cEmail);
     $checkClient->execute();
@@ -131,7 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $checkClient->close();
 
-    $partCheck = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND PartCondition = 'Used'");
+    // Check for matching PartID where Type matches Description and PartCondition is 'Used'
+    $partCheck = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND PartCondition = 'Used' LIMIT 1");
     $partCheck->bind_param("s", $type);
     $partCheck->execute();
     $partResult = $partCheck->get_result();
@@ -140,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $partID = $part ? $part['PartID'] : NULL;
 
+    // Insert into service table
     $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartID, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
 
@@ -150,8 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partID, $username);
 
     if ($add->execute()) {
-        $serviceID = $add->insert_id;
+        $serviceID = $add->insert_id; // Get the newly inserted ServiceID
 
+        // If a PartID exists, update the part table with the ServiceID
         if ($partID) {
             $updatePart = $conn->prepare("UPDATE part SET ServiceID = ? WHERE PartID = ?");
             $updatePart->bind_param("ii", $serviceID, $partID);
@@ -159,13 +163,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $updatePart->close();
         }
 
+        // Log the action with PartID included
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
         $actionBy = $_SESSION['Username'];
-        $actionType = "Added new Service with PartID: " . ($partID ?: "None");
+        $actionType = "Added new Service";
 
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
-        $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) VALUES (?, ?, ?, ?, ?)");
+        $log->bind_param("sssii", $actionBy, $actionType, $timestamp, $adminId, $partID);
         $log->execute();
         $log->close();
 
