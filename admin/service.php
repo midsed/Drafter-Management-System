@@ -2,35 +2,34 @@
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
+include('dbconnect.php');
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <div class="main-content">
     <div class="header">
-    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-    </a>
-    <h1 style="margin: 0;">Service</h1>
+        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
+        <h1 style="margin: 0;">Service</h1>
         <div class="actions">
             <a href="servicearchive.php" class="btn btn-archive">Archives</a>
             <a href="serviceadd.php" class="btn btn-add">+ Add Service</a>
         </div>
     </div>
+
     <div class="search-container">
-    <input type="text" placeholder="Quick search" id="searchInput">
+        <input type="text" placeholder="Quick search" id="searchInput">
     </div>
+
     <div class="table-container">
         <table class="supplier-table">
             <thead>
@@ -46,16 +45,39 @@ if (!isset($_SESSION['Username'])) {
                 </tr>
             </thead>
             <tbody>
+            <?php
+                $sql = "SELECT ServiceID, Type, Price, ClientEmail, StaffName, PartID FROM service";
+                $result = $conn->query($sql);
+                
+    
+    $result = $conn->query($sql);
+    
+
+                if (!$result) {
+                    echo "<tr><td colspan='8'>SQL Error: " . $conn->error . "</td></tr>";
+                } elseif ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                ?>
                 <tr>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td><a href="serviceedit.php?id=7676" class="btn btn-edit">Edit</a></td>
-                    <td><button class="btn btn-archive">Archive</button></td>
+                    <td><?php echo htmlspecialchars($row['Type']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Price']); ?></td>
+                    <td><?php echo htmlspecialchars($row['ServiceID']); ?></td>
+                    <td><?php echo htmlspecialchars($row['ClientEmail'] ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row['StaffName'] ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row['PartID'] ?? 'N/A'); ?></td>
+                    <td>
+                        <a href="serviceedit.php?ServiceID=<?php echo $row['ServiceID']; ?>" class="btn btn-edit">Edit</a>
+                    </td>
+                    <td>
+                        <button class="btn btn-archive" onclick="archiveService(<?php echo $row['ServiceID']; ?>)">Archive</button>
+                    </td>
                 </tr>
+                <?php
+                    }
+                } else {
+                    echo "<tr><td colspan='8'>No services found.</td></tr>";
+                }
+                ?>
             </tbody>
         </table>
     </div>
@@ -65,76 +87,75 @@ if (!isset($_SESSION['Username'])) {
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
 </script>
 
 <style>
-.btn {
-    font-family: 'Poppins', sans-serif;
-}
+    .btn {
+        font-family: 'Poppins', sans-serif;
+    }
 
-.actions a.btn,
-.actions button.btn {
-    color: white !important;
-}
+    .actions a.btn,
+    .actions button.btn {
+        color: white !important;
+    }
 
-.btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    color: white;
-}
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        color: white;
+    }
 
-.btn-archive {
-    background-color: #E10F0F;
-    color: white;
-}
+    .btn-archive {
+        background-color: #E10F0F;
+        color: white;
+    }
 
-.btn-add {
-    background-color: #E10F0F;
-    color: white;
-}
+    .btn-add {
+        background-color: #E10F0F;
+        color: white;
+    }
 
-.btn-edit {
-    background-color: #E10F0F;
-    color: white;
-}
+    .btn-edit {
+        background-color: #E10F0F;
+        color: white;
+    }
 
-.actions {
-    text-align: right;
-    width: 100%;
-}
+    .actions {
+        text-align: right;
+        width: 100%;
+    }
 
-.actions .btn {
-    margin-left: 10px;
-}
+    .actions .btn {
+        margin-left: 10px;
+    }
 
-.table-container {
-    margin-top: 20px;
-}
+    .table-container {
+        margin-top: 20px;
+    }
 
-.supplier-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
+    .supplier-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
 
-.supplier-table th,
-.supplier-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
+    .supplier-table th,
+    .supplier-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
 
-.search-box {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
+    .search-box {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
 </style>
