@@ -262,7 +262,7 @@ $username = $user['Username'];
     }
 </script>
 
-<?php 
+<?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Part Details
     $name = $_POST['part_name'];
@@ -308,18 +308,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // Insert Supplier
-    $supplier_sql = "INSERT INTO supplier (CompanyName, Email, PhoneNumber, Address, TransactionDate) 
-                     VALUES (?, ?, ?, ?, ?)";
+    // Check if the supplier already exists
+    $supplier_sql = "SELECT SupplierID FROM supplier WHERE Email = ?";
     $supplier_stmt = $conn->prepare($supplier_sql);
     if ($supplier_stmt === false) {
         die("Error preparing supplier query: " . $conn->error);
     }
-    $supplier_stmt->bind_param("sssss", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $transaction_date);
-    if (!$supplier_stmt->execute()) {
-        die("<script>Swal.fire('Error!', 'Failed to add supplier: " . addslashes($supplier_stmt->error) . "', 'error');</script>");
+    $supplier_stmt->bind_param("s", $supplier_email);
+    $supplier_stmt->execute();
+    $supplier_result = $supplier_stmt->get_result();
+
+    if ($supplier_result->num_rows > 0) {
+        // Supplier exists, use the existing SupplierID
+        $supplier_row = $supplier_result->fetch_assoc();
+        $supplier_id = $supplier_row['SupplierID'];
+    } else {
+        // Supplier does not exist, insert a new supplier
+        $insert_supplier_sql = "INSERT INTO supplier (CompanyName, Email, PhoneNumber, Address, TransactionDate) 
+                                VALUES (?, ?, ?, ?, ?)";
+        $insert_supplier_stmt = $conn->prepare($insert_supplier_sql);
+        if ($insert_supplier_stmt === false) {
+            die("Error preparing supplier insert query: " . $conn->error);
+        }
+        $insert_supplier_stmt->bind_param("sssss", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $transaction_date);
+
+        if ($insert_supplier_stmt->execute()) {
+            $supplier_id = $conn->insert_id; // Get the new SupplierID
+        } else {
+            die("<script>Swal.fire('Error!', 'Failed to add supplier: " . addslashes($insert_supplier_stmt->error) . "', 'error');</script>");
+        }
+        $insert_supplier_stmt->close();
     }
-    $supplier_id = $conn->insert_id; // Get the SupplierID of the newly added supplier
     $supplier_stmt->close();
 
     // Insert Part
