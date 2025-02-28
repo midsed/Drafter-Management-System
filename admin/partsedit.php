@@ -30,7 +30,10 @@ if (!isset($_GET['id'])) {
 }
 
 $part_id = $_GET['id'];
-$query = $conn->prepare("SELECT * FROM part WHERE PartID = ?");
+$query = $conn->prepare("SELECT part.*, supplier.CompanyName, supplier.Email, supplier.PhoneNumber, supplier.Address 
+                         FROM part 
+                         LEFT JOIN supplier ON part.SupplierID = supplier.SupplierID 
+                         WHERE part.PartID = ?");
 $query->bind_param("i", $part_id);
 $query->execute();
 $result = $query->get_result();
@@ -114,6 +117,7 @@ if (!$part) {
         <form action="partsedit_process.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="part_id" value="<?php echo $part['PartID']; ?>">
 
+            <!-- Part Details -->
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
                 <input type="text" id="part_name" name="part_name" value="<?php echo htmlspecialchars($part['Name']); ?>" required>
@@ -171,7 +175,6 @@ if (!$part) {
                 </select>
             </div>
 
-
             <div class="form-group">
                 <label for="item_status">Item Status:</label>
                 <select id="item_status" name="item_status" required>
@@ -194,6 +197,28 @@ if (!$part) {
             <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
                 <input type="file" id="part_image" name="part_image">
+            </div>
+
+            <!-- Supplier Details -->
+            <h2>Supplier Details</h2>
+            <div class="form-group">
+                <label for="supplier_name">Supplier Name:</label>
+                <input type="text" id="supplier_name" name="supplier_name" value="<?php echo htmlspecialchars($part['CompanyName'] ?? ''); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_email">Supplier Email:</label>
+                <input type="email" id="supplier_email" name="supplier_email" value="<?php echo htmlspecialchars($part['Email'] ?? ''); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_phone">Supplier Phone Number:</label>
+                <input type="text" id="supplier_phone" name="supplier_phone" value="<?php echo htmlspecialchars($part['PhoneNumber'] ?? ''); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_address">Supplier Address:</label>
+                <textarea id="supplier_address" name="supplier_address" required><?php echo htmlspecialchars($part['Address'] ?? ''); ?></textarea>
             </div>
 
             <div class="actions">
