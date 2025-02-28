@@ -8,17 +8,23 @@ if (!isset($_SESSION['UserID'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Ensure these fields are passed from partsedit.php
+    // Part Details
     $part_id = $_POST['part_id'];  
-    $part_name = $_POST['part_name'];  // Rename according to the table column
+    $part_name = $_POST['part_name'];  
     $part_price = $_POST['part_price'];
     $quantity = $_POST['quantity'];
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
     $description = $_POST['description'];
-    $part_condition = $_POST['part_condition']; // Ensure this field is populated
+    $part_condition = $_POST['part_condition']; 
     
+    // Supplier Details
+    $supplier_name = $_POST['supplier_name'];
+    $supplier_email = $_POST['supplier_email'];
+    $supplier_phone = $_POST['supplier_phone'];
+    $supplier_address = $_POST['supplier_address'];
+
     // Image upload handling
     if (!empty($_FILES['part_image']['name'])) {
         $target_dir = "uploads/";
@@ -47,19 +53,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image_path = $row['Media']; // Use the column name Media
     }
 
-    // Prepare update query with error handling
+    // Update Part Details
     $stmt = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, PartCondition = ?, Description = ?, Media = ? WHERE PartID = ?");
     
     if ($stmt === false) {
         die('Error preparing statement: ' . $conn->error);
     }
 
-    // Bind the parameters correctly
     $stmt->bind_param("sdissssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $part_condition, $description, $image_path, $part_id);
 
-    // Execute and check if it worked
     if ($stmt->execute()) {
-        echo "<script>alert('Part updated successfully!'); window.location.href='parts.php';</script>";
+        // Fetch the SupplierID associated with the part
+        $supplier_query = $conn->prepare("SELECT SupplierID FROM part WHERE PartID = ?");
+        $supplier_query->bind_param("i", $part_id);
+        $supplier_query->execute();
+        $supplier_result = $supplier_query->get_result();
+        $supplier_row = $supplier_result->fetch_assoc();
+        $supplier_id = $supplier_row['SupplierID'];
+        $supplier_query->close();
+
+        // Update Supplier Details
+        $supplier_stmt = $conn->prepare("UPDATE supplier SET CompanyName = ?, Email = ?, PhoneNumber = ?, Address = ? WHERE SupplierID = ?");
+        
+        if ($supplier_stmt === false) {
+            die('Error preparing supplier statement: ' . $conn->error);
+        }
+
+        $supplier_stmt->bind_param("ssssi", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $supplier_id);
+
+        if ($supplier_stmt->execute()) {
+            echo "<script>alert('Part and supplier updated successfully!'); window.location.href='parts.php';</script>";
+        } else {
+            echo "<script>alert('Error updating supplier.'); window.history.back();</script>";
+        }
+
+        $supplier_stmt->close();
     } else {
         echo "<script>alert('Error updating part.'); window.history.back();</script>";
     }
