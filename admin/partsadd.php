@@ -132,6 +132,7 @@ $username = $user['Username'];
     </div>
     <div class="center-container">
         <form action="" method="POST" enctype="multipart/form-data">
+            <!-- Part Details -->
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
                 <input type="text" id="part_name" name="part_name" required>
@@ -217,6 +218,28 @@ $username = $user['Username'];
                 <input type="file" id="part_image" name="part_image">
             </div>
 
+            <!-- Supplier Details -->
+            <h2>Supplier Details</h2>
+            <div class="form-group">
+                <label for="supplier_name">Supplier Name:</label>
+                <input type="text" id="supplier_name" name="supplier_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_email">Supplier Email:</label>
+                <input type="email" id="supplier_email" name="supplier_email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_phone">Supplier Phone Number:</label>
+                <input type="text" id="supplier_phone" name="supplier_phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier_address">Supplier Address:</label>
+                <textarea id="supplier_address" name="supplier_address" required></textarea>
+            </div>
+
             <div class="actions">
                 <button type="submit" class="black-button btn">Add</button>
                 <button type="reset" class="red-button btn">Clear</button>
@@ -241,6 +264,7 @@ $username = $user['Username'];
 
 <?php 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Part Details
     $name = $_POST['part_name'];
     $price = $_POST['part_price'];
     $quantity = $_POST['quantity'];
@@ -257,6 +281,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $last_updated = date('Y-m-d H:i:s');
     $media = '';
 
+    // Supplier Details
+    $supplier_name = $_POST['supplier_name'];
+    $supplier_email = $_POST['supplier_email'];
+    $supplier_phone = $_POST['supplier_phone'];
+    $supplier_address = $_POST['supplier_address'];
+    $transaction_date = date('Y-m-d H:i:s');
+
+    // Handle Image Upload
     $upload_dir = 'uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
@@ -276,20 +308,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
-    $add = $conn->prepare($sql);
-    if ($add === false) {
-        die("Error preparing the SQL query: " . $conn->error);
+    // Insert Supplier
+    $supplier_sql = "INSERT INTO supplier (CompanyName, Email, PhoneNumber, Address, TransactionDate) 
+                     VALUES (?, ?, ?, ?, ?)";
+    $supplier_stmt = $conn->prepare($supplier_sql);
+    if ($supplier_stmt === false) {
+        die("Error preparing supplier query: " . $conn->error);
     }
+    $supplier_stmt->bind_param("sssss", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $transaction_date);
+    if (!$supplier_stmt->execute()) {
+        die("<script>Swal.fire('Error!', 'Failed to add supplier: " . addslashes($supplier_stmt->error) . "', 'error');</script>");
+    }
+    $supplier_id = $conn->insert_id; // Get the SupplierID of the newly added supplier
+    $supplier_stmt->close();
 
-    $add->bind_param("sssssssssssssss", 
+    // Insert Part
+    $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel, SupplierID)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $part_stmt = $conn->prepare($part_sql);
+    if ($part_stmt === false) {
+        die("Error preparing part query: " . $conn->error);
+    }
+    $part_stmt->bind_param("sssssssssssssssi", 
         $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
-        $name, $price, $quantity, $category, $make, $model, $year_model
+        $name, $price, $quantity, $category, $make, $model, $year_model, $supplier_id
     );
 
-    if ($add->execute()) {
+    if ($part_stmt->execute()) {
         $partID = $conn->insert_id; 
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
@@ -308,25 +353,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Success!',
-                text: 'Part added successfully!',
+                text: 'Part and supplier added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok'
             }).then(() => {
-                window.location = 'users.php';
+                window.location = 'parts.php';
             });
         </script>";
     } else {
         echo "<script>
             Swal.fire({
                 title: 'Error!',
-                text: 'Error adding part: " . addslashes($add->error) . "',
+                text: 'Error adding part: " . addslashes($part_stmt->error) . "',
                 icon: 'error',
                 confirmButtonText: 'Ok'
             });
         </script>";
     }
 
-    $add->close();
+    $part_stmt->close();
     $conn->close();
 }
 ?>
