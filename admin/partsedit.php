@@ -67,6 +67,7 @@ if (!$part) {
         height: 100px;
     }
     .btn {
+        font-weight: bold;
         background-color: #272727;
         color: white;
         padding: 10px 20px;

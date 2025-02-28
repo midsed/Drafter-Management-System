@@ -177,29 +177,26 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         let filteredLabels = [];
 
         if (selectedPeriod === 'daily') {
-            filteredData = data; // Use daily data directly
+            filteredData = data; 
             filteredLabels = labels;
         } else if (selectedPeriod === 'monthly') {
-            // Aggregate data by month
             const monthlyData = {};
             labels.forEach(date => {
-                const month = date.substring(0, 7); // Get YYYY-MM
+                const month = date.substring(0, 7); // YYYY-MM
                 monthlyData[month] = (monthlyData[month] || 0) + partsAddedData[date];
             });
             filteredLabels = Object.keys(monthlyData);
             filteredData = Object.values(monthlyData);
         } else if (selectedPeriod === 'yearly') {
-            // Aggregate data by year
             const yearlyData = {};
             labels.forEach(date => {
-                const year = date.substring(0, 4); // Get YYYY
+                const year = date.substring(0, 4); // YYYY
                 yearlyData[year] = (yearlyData[year] || 0) + partsAddedData[date];
             });
             filteredLabels = Object.keys(yearlyData);
             filteredData = Object.values(yearlyData);
         }
 
-        // Create the chart
         new Chart(updatesCanvas.getContext('2d'), {
             type: 'line',
             data: {
@@ -256,7 +253,9 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         text-align: center;
     }
 
-    .transaction-history, .low-stock-alerts, .new-updated-parts {
+    .transaction-history,
+    .low-stock-alerts,
+    .new-updated-parts {
         margin-top: 20px;
         background: white;
         border-radius: 8px;
@@ -264,7 +263,9 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         padding: 15px;
     }
 
-    h2 {
+    .transaction-history h2,
+    .low-stock-alerts h2,
+    .new-updated-parts h2 {
         font-size: 20px;
         margin-bottom: 10px;
     }
@@ -274,19 +275,27 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         border-collapse: collapse;
         margin-top: 10px;
     }
-
     th, td {
         padding: 10px;
-        text-align: left;
         border-bottom: 1px solid #ddd;
     }
-
     th {
         background-color: #f4f4f4;
     }
-
     tr:hover {
         background-color: #f1f1f1;
+    }
+
+
+    .transaction-history table th:nth-child(4),
+    .transaction-history table td:nth-child(4) {
+        text-align: center;
+    }
+    .low-stock-alerts table th:nth-child(6),
+    .low-stock-alerts table td:nth-child(6),
+    .new-updated-parts table th:nth-child(6),
+    .new-updated-parts table td:nth-child(6) {
+        text-align: center;
     }
 
     button {
@@ -297,7 +306,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         border-radius: 4px;
         cursor: pointer;
     }
-
     button:hover {
         background-color: darkred;
     }
@@ -306,7 +314,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         color: #007bff;
         text-decoration: none;
     }
-
     a:hover {
         text-decoration: underline;
     }

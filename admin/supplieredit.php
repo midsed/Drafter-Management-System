@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 require_once "dbconnect.php"; // Include the database connection
 
@@ -36,31 +36,10 @@ if (!$supplier) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .form-group {
-        margin-bottom: 15px;
-    }
+    /* Import Poppins font (regular + bold) */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    input, select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-
-    .btn {
-        background-color: #272727;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-    }
-
+    /* Centered container with Poppins font */
     .center-container {
         width: 50%;
         max-width: 1000px;
@@ -69,34 +48,97 @@ if (!$supplier) {
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: 'Poppins', sans-serif; 
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    /* Labels bold */
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    /* Inputs normal weight */
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-weight: 400; /* Normal text weight */
+    }
+
+    /* Button styling */
+    .btn {
+        background-color: #272727;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: bold; /* Buttons can be bold if desired */
+    }
+
+    /* Center the button(s) with a flex container */
+    .actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .header img {
+        cursor: pointer;
+    }
+
+    .header h1 {
+        margin: 0;
     }
 </style>
 
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Edit Supplier</h1>
     </div>
+
     <div class="center-container">
         <form id="entryForm" method="POST">
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($supplier['Email']); ?>" required maxlength="64">
+                <input type="email" id="email" name="email" 
+                       value="<?php echo htmlspecialchars($supplier['Email']); ?>" 
+                       required maxlength="64">
             </div>
             
             <div class="form-group">
                 <label for="supplier">Supplier Name:</label>
-                <input type="text" id="supplier" name="supplier" value="<?php echo htmlspecialchars($supplier['CompanyName']); ?>" required>
+                <input type="text" id="supplier" name="supplier" 
+                       value="<?php echo htmlspecialchars($supplier['CompanyName']); ?>" 
+                       required>
             </div>
             
             <div class="form-group">
                 <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($supplier['PhoneNumber']); ?>" required>
+                <input type="tel" id="phone" name="phone" 
+                       value="<?php echo htmlspecialchars($supplier['PhoneNumber']); ?>" 
+                       required>
             </div>
             
-            <button type="submit" class="btn">Update</button>
+            <div class="actions">
+                <button type="submit" class="btn">Update</button>
+            </div>
         </form>
     </div>
 </div>

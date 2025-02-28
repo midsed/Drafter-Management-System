@@ -134,6 +134,11 @@ include('navigation/topbar.php');
         background-color: #f2f2f2;
     }
 
+    th:nth-child(4),
+    td:nth-child(4) {
+        text-align: center;
+    }
+    
     .print-receipt-button {
         padding: 5px 10px;
         border-radius: 3px;

@@ -21,7 +21,8 @@ if (!isset($_SESSION['Username'])) {
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1 style="margin: 0;">Supplier</h1>
         <div class="actions">
@@ -29,9 +30,14 @@ if (!isset($_SESSION['Username'])) {
             <a href="supplieradd.php" class="btn btn-add">+ Add Supplier</a>
         </div>
     </div>
+    
+    <!-- Quick Search on the left side (Input + Search button) -->
     <div class="search-container">
         <input type="text" placeholder="Quick search" id="searchInput">
+        <button class="red-button" onclick="searchTable()">Search</button>
     </div>
+    
+    <!-- Table below the search -->
     <div class="table-container">
         <table class="supplier-table">
             <thead>
@@ -79,16 +85,16 @@ if (!isset($_SESSION['Username'])) {
 </div>
 
 <script>
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase();
+    // Search functionality: filters table rows based on input
+    function searchTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const rows = document.querySelectorAll('.supplier-table tbody tr');
 
         rows.forEach(row => {
             const text = row.textContent.toLowerCase();
             row.style.display = text.includes(searchTerm) ? '' : 'none';
         });
-    });
+    }
 
     // Archive supplier functionality with SweetAlert
     function archiveSupplier(supplierID) {
@@ -107,7 +113,7 @@ if (!isset($_SESSION['Username'])) {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `id=${supplierID}`
                 })
-                .then(response => response.json()) // Parse the response as JSON
+                .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         Swal.fire({
@@ -116,11 +122,7 @@ if (!isset($_SESSION['Username'])) {
                             icon: 'success',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            // Remove the archived supplier row from the table
-                            const row = document.querySelector(`tr[data-supplier-id="${supplierID}"]`);
-                            if (row) {
-                                row.remove();
-                            }
+                            location.reload();
                         });
                     } else {
                         Swal.fire({
@@ -146,74 +148,91 @@ if (!isset($_SESSION['Username'])) {
 </script>
 
 <style>
-.btn {
-    font-family: 'Poppins', sans-serif;
-}
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
 
-.actions a.btn,
-.actions button.btn {
-    color: white !important;
-}
+    .actions a.btn,
+    .actions button.btn {
+        color: white !important;
+    }
 
-.btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    color: white;
-}
+    .btn {
+        font-family: 'Poppins', sans-serif;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        color: white;
+    }
+    .btn-archive, .btn-add, .btn-edit {
+        background-color: #E10F0F;
+    }
 
-.btn-archive {
-    background-color: #E10F0F;
-    color: white;
-}
+    .actions {
+        text-align: right;
+        width: 100%;
+    }
+    .actions .btn {
+        margin-left: 10px;
+    }
 
-.btn-add {
-    background-color: #E10F0F;
-    color: white;
-}
+    .search-container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .search-container input[type="text"] {
+        width: 250px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 
-.btn-edit {
-    background-color: #E10F0F;
-    color: white;
-}
+    .red-button {
+        background: #E10F0F;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        transition: background 0.3s ease;
+        text-decoration: none;
+    }
+    .red-button:hover {
+        background: darkred;
+    }
 
-.actions {
-    text-align: right;
-    width: 100%;
-}
+    .table-container {
+        margin-top: 20px;
+    }
 
-.actions .btn {
-    margin-left: 10px;
-}
+    .supplier-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .supplier-table th,
+    .supplier-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .supplier-table th {
+        background-color: #f4f4f4;
+    }
+    .supplier-table tr:hover {
+        background-color: #f1f1f1;
+    }
 
-.table-container {
-    margin-top: 20px;
-}
-
-.supplier-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.supplier-table th,
-.supplier-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.search-container {
-    margin-bottom: 10px;
-}
-
-.search-container input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+    .supplier-table th:nth-child(6),
+    .supplier-table td:nth-child(6) {
+        text-align: center;
+    }
 </style>

@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
@@ -25,8 +25,10 @@ if (!isset($_SESSION['Username'])) {
     <a href="usersadd.php" class="add-user-btn">+ Add User</a>
   </div>
 
+  <!-- Search container: left aligned input and search button -->
   <div class="search-container">
-    <input type="text" placeholder="Quick search" id="searchInput" onkeyup="searchTable()">
+    <input type="text" placeholder="Quick search" id="searchInput">
+    <button class="red-button" onclick="searchTable()">Search</button>
   </div>
 
   <div class="table-container">
@@ -73,33 +75,75 @@ if (!isset($_SESSION['Username'])) {
       const table = document.getElementById("userTable");
       const rows = table.getElementsByTagName("tr");
 
+      // Start from index 1 to skip the header row
       for (let i = 1; i < rows.length; i++) {  
         let cells = rows[i].getElementsByTagName("td");
         let match = false;
 
         for (let j = 0; j < cells.length; j++) {
-          if (cells[j]) {
-            if (cells[j].textContent.toLowerCase().indexOf(searchInput) > -1) {
-              match = true;
-              break;
-            }
+          if (cells[j] && cells[j].textContent.toLowerCase().indexOf(searchInput) > -1) {
+            match = true;
+            break;
           }
         }
-
-        if (match) {
-          rows[i].style.display = "";
-        } else {
-          rows[i].style.display = "none";
-        }
+        rows[i].style.display = match ? "" : "none";
       }
     }
   </script>
 </div>
 
 <style>
+  .search-container {
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  #searchInput {
+    width: 250px; 
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .red-button {
+    background: #E10F0F;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.3s ease;
+    text-decoration: none;
+  }
+  .red-button:hover {
+    background: darkred;
+  }
+
+  #userTable td:last-child {
+    text-align: center;
+  }
+
+  #userTable td a button {
+    display: block;
+    margin: 0 auto;
+    color: #fff;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
   button, .add-user-btn {
     font-family: 'Poppins', sans-serif;
   }
+
   .header .add-user-btn {
     background-color: #E10F0F;
     color: #fff;
@@ -109,18 +153,5 @@ if (!isset($_SESSION['Username'])) {
     cursor: pointer;
     margin-left: auto;
     align-self: center;
-  }
-
-  .search-container {
-    margin-bottom: 20px;
-  }
-
-  #searchInput {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
   }
 </style>

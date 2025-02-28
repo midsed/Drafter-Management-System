@@ -17,7 +17,8 @@ include('dbconnect.php');
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1 style="margin: 0;">Service</h1>
         <div class="actions">
@@ -26,8 +27,10 @@ include('dbconnect.php');
         </div>
     </div>
 
+    <!-- Quick Search: Left-aligned input and search button -->
     <div class="search-container">
         <input type="text" placeholder="Quick search" id="searchInput">
+        <button class="red-button" onclick="searchTable()">Search</button>
     </div>
 
     <div class="table-container">
@@ -98,29 +101,29 @@ include('dbconnect.php');
 </div>
 
 <script>
+    // Search functionality: Filter table rows based on the search input.
+    function searchTable() {
+        const searchInput = document.getElementById("searchInput").value.toLowerCase();
+        const table = document.querySelector(".supplier-table");
+        const rows = table.getElementsByTagName("tr");
 
-function searchTable() {
-    const searchInput = document.getElementById("searchInput").value.toLowerCase();
-    const table = document.querySelector(".supplier-table");
-    const rows = table.getElementsByTagName("tr");
+        // Start from index 1 to skip the header row
+        for (let i = 1; i < rows.length; i++) { 
+            let cells = rows[i].getElementsByTagName("td");
+            let match = false;
 
-    for (let i = 1; i < rows.length; i++) { 
-        let cells = rows[i].getElementsByTagName("td");
-        let match = false;
-
-        for (let j = 0; j < cells.length; j++) {
-            if (cells[j] && cells[j].textContent.toLowerCase().includes(searchInput)) {
-                match = true;
-                break;
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j] && cells[j].textContent.toLowerCase().includes(searchInput)) {
+                    match = true;
+                    break;
+                }
             }
-        }
 
-        rows[i].style.display = match ? "" : "none";
+            rows[i].style.display = match ? "" : "none";
+        }
     }
-}
 
     document.getElementById("searchInput").addEventListener("keyup", searchTable);
-
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -129,49 +132,44 @@ function searchTable() {
         mainContent.classList.toggle('collapsed');
     }
     
+    // Archive service functionality with SweetAlert
     function archiveService(serviceID) {
-        if (confirm("Are you sure you want to archive this service?")) {
-            window.location.href = "servicearchive.php?archive=" + serviceID;
-        }
-    }
-
-    function archiveService(serviceID) {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to archive this service?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, archive it!"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('archive_service.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'service_id=' + serviceID
-            })
-            .then(response => response.text())
-            .then(data => {
-                Swal.fire({
-                    title: "Success!",
-                    text: data,
-                    icon: "success"
-                }).then(() => {
-                    location.reload();
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to archive this service?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, archive it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('archive_service.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'service_id=' + serviceID
+                })
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire({
+                        title: "Success!",
+                        text: data,
+                        icon: "success"
+                    }).then(() => {
+                        location.reload();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire("Error", "Something went wrong!", "error");
                 });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire("Error", "Something went wrong!", "error");
-            });
-        }
-    });
-}
+            }
+        });
+    }
 </script>
 
 <style>
-    .btn {
+    body {
         font-family: 'Poppins', sans-serif;
     }
 
@@ -181,6 +179,7 @@ function searchTable() {
     }
 
     .btn {
+        font-family: 'Poppins', sans-serif;
         padding: 8px 12px;
         border: none;
         border-radius: 5px;
@@ -188,29 +187,47 @@ function searchTable() {
         font-size: 14px;
         color: white;
     }
-
-    .btn-archive {
+    .btn-archive, .btn-add, .btn-edit {
         background-color: #E10F0F;
-        color: white;
-    }
-
-    .btn-add {
-        background-color: #E10F0F;
-        color: white;
-    }
-
-    .btn-edit {
-        background-color: #E10F0F;
-        color: white;
     }
 
     .actions {
         text-align: right;
         width: 100%;
     }
-
     .actions .btn {
         margin-left: 10px;
+    }
+
+    /* Mimic quick search and search button styling like parts.php */
+    .search-container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .search-container input[type="text"] {
+        width: 250px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .red-button {
+        background: #E10F0F;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        transition: background 0.3s ease;
+        text-decoration: none;
+    }
+    .red-button:hover {
+        background: darkred;
     }
 
     .table-container {
@@ -222,18 +239,16 @@ function searchTable() {
         border-collapse: collapse;
         margin-top: 10px;
     }
-
     .supplier-table th,
     .supplier-table td {
         border: 1px solid #ddd;
         padding: 8px;
-        text-align: left;
+        text-align: center;
     }
-
-    .search-box {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        font-size: 14px;
+    .supplier-table th {
+        background-color: #f4f4f4;
+    }
+    .supplier-table tr:hover {
+        background-color: #f1f1f1;
     }
 </style>
