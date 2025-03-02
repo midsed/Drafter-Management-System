@@ -26,7 +26,7 @@ $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
 // Fetch available parts from database
-$partQuery = $conn->query("SELECT PartID, Name FROM part WHERE PartCondition = 'Used' AND ServiceID IS NULL");
+$partQuery = $conn->query("SELECT PartID, Name FROM part WHERE ItemStatus = 'Used for Service' AND ServiceID IS NULL");
 $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
