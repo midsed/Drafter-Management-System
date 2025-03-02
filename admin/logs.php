@@ -12,8 +12,8 @@ include('navigation/topbar.php');
 include('logging.php'); // Make sure this file exists and contains the logAction function
 
 // Example usage of logging actions
-if (isset($_SESSION['User ID'])) {
-    $userId = $_SESSION['User ID'];
+if (isset($_SESSION['UserID'])) {
+    $userId = $_SESSION['UserID'];
 
     // Log actions based on your application logic
     // For example, you might log a user logging in or performing an action
