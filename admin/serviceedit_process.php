@@ -74,8 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $checkClientQuery->close();
 
-    // ✅ If Part ID does not match any "Used" Part, set Part ID to NULL
-    $checkPartQuery = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND PartCondition = 'Used' LIMIT 1");
+    $checkPartQuery = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND ItemStatus = 'Used for Service' LIMIT 1");
     $checkPartQuery->bind_param("s", $type);
     $checkPartQuery->execute();
     $partResult = $checkPartQuery->get_result();

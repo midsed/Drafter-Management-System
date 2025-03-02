@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Error!',
-                text: 'Error adding service: " . addslashes($add->error) . "',
+                text: 'Error adding service',
                 icon: 'error',
                 confirmButtonText: 'Ok'
             });
