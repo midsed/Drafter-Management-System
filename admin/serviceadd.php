@@ -24,6 +24,10 @@ $_SESSION['UserID'] = $user['UserID'];
 $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
+
+// Fetch available parts from database
+$partQuery = $conn->query("SELECT PartID, Name FROM part WHERE PartCondition = 'Used' AND ServiceID IS NULL");
+$parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -69,30 +73,39 @@ $username = $user['Username'];
 
     <form action="" method="POST">
         <div class="form-group">
+            <label for="part">Select Part:</label>
+            <select id="part" name="partID" required>
+                <option value="">-- Select a Part --</option>
+                <?php foreach ($parts as $part) { ?>
+                    <option value="<?php echo $part['PartID']; ?>"> <?php echo htmlspecialchars($part['Name']); ?> </option>
+                <?php } ?>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="fName">Customer First Name:</label>
             <input type="text" id="fName" name="fName" required>
         </div>
-
+        
         <div class="form-group">
             <label for="lName">Customer Last Name:</label>
             <input type="text" id="lName" name="lName" required>
         </div>
-
+        
         <div class="form-group">
             <label for="cEmail">Customer Email:</label>
             <input type="email" id="cEmail" name="cEmail" required>
         </div>
-
+        
         <div class="form-group">
             <label for="pNumber">Customer Phone Number:</label>
             <input type="number" id="pNumber" name="pNumber" required maxlength="11">
         </div>
-
+        
         <div class="form-group">
-            <label for="type">Type:</label>
+            <label for="type">Service Type:</label>
             <input type="text" id="type" name="type" required>
         </div>
-
+        
         <div class="form-group">
             <label for="price">Price:</label>
             <input type="number" id="price" name="price" required>
@@ -111,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cEmail = $_POST['cEmail'];
     $price = $_POST['price'];
     $date_added = date('Y-m-d H:i:s');
+    $partID = $_POST['partID'];
 
     // Check if client exists
     $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
@@ -121,44 +135,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($checkClient->num_rows == 0) {
         $insertClient = "INSERT INTO client (ClientEmail, FName, LName, PhoneNumber) VALUES (?, ?, ?, ?)";
         $addClient = $conn->prepare($insertClient);
-        if ($addClient === false) {
-            die("Error preparing client insert query: " . $conn->error);
-        }
         $addClient->bind_param("ssss", $cEmail, $fName, $lName, $pNumber);
-        if (!$addClient->execute()) {
-            die("Error inserting client: " . $addClient->error);
-        }
+        $addClient->execute();
         $addClient->close();
     }
     $checkClient->close();
 
-    $partCheck = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND PartCondition = 'Used' LIMIT 1");
-    $partCheck->bind_param("s", $type);
-    $partCheck->execute();
-    $partResult = $partCheck->get_result();
-    $part = $partResult->fetch_assoc();
-    $partCheck->close();
-
-    $partID = $part ? $part['PartID'] : NULL;
-
     $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartID, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
-
-    if ($add === false) {
-        die("Error preparing service insert query: " . $conn->error);
-    }
-
     $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partID, $username);
 
     if ($add->execute()) {
         $serviceID = $add->insert_id;
 
-        if ($partID) {
-            $updatePart = $conn->prepare("UPDATE part SET ServiceID = ? WHERE PartID = ?");
-            $updatePart->bind_param("ii", $serviceID, $partID);
-            $updatePart->execute();
-            $updatePart->close();
-        }
+        $updatePart = $conn->prepare("UPDATE part SET ServiceID = ? WHERE PartID = ? AND Name = (SELECT Name FROM part WHERE PartID = ?)");
+        $updatePart->bind_param("iii", $serviceID, $partID, $partID);
+        $updatePart->execute();
+        $updatePart->close();
 
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
