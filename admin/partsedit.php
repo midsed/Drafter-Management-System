@@ -30,7 +30,11 @@ if (!isset($_GET['id'])) {
 }
 
 $part_id = $_GET['id'];
-$query = $conn->prepare("SELECT part.*, supplier.CompanyName, supplier.Email, supplier.PhoneNumber, supplier.Address 
+$query = $conn->prepare("SELECT part.*, 
+                                COALESCE(supplier.CompanyName, '') AS CompanyName, 
+                                COALESCE(supplier.Email, '') AS Email, 
+                                COALESCE(supplier.PhoneNumber, '') AS PhoneNumber, 
+                                COALESCE(supplier.Address, '') AS Address 
                          FROM part 
                          LEFT JOIN supplier ON part.SupplierID = supplier.SupplierID 
                          WHERE part.PartID = ?");
@@ -204,22 +208,22 @@ if (!$part) {
             <h2>Supplier Details</h2>
             <div class="form-group">
                 <label for="supplier_name">Supplier Name:</label>
-                <input type="text" id="supplier_name" name="supplier_name" value="<?php echo htmlspecialchars($part['CompanyName'] ?? ''); ?>" required>
+                <input type="text" id="supplier_name" name="supplier_name" value="<?php echo htmlspecialchars($part['CompanyName'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="supplier_email">Supplier Email:</label>
-                <input type="email" id="supplier_email" name="supplier_email" value="<?php echo htmlspecialchars($part['Email'] ?? ''); ?>" required>
+                <input type="email" id="supplier_email" name="supplier_email" value="<?php echo htmlspecialchars($part['Email'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="supplier_phone">Supplier Phone Number:</label>
-                <input type="text" id="supplier_phone" name="supplier_phone" value="<?php echo htmlspecialchars($part['PhoneNumber'] ?? ''); ?>" required>
+                <input type="text" id="supplier_phone" name="supplier_phone" value="<?php echo htmlspecialchars($part['PhoneNumber'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="supplier_address">Supplier Address:</label>
-                <textarea id="supplier_address" name="supplier_address" required><?php echo htmlspecialchars($part['Address'] ?? ''); ?></textarea>
+                <textarea id="supplier_address" name="supplier_address"><?php echo htmlspecialchars($part['Address'] ?? ''); ?></textarea>
             </div>
 
             <div class="actions">
