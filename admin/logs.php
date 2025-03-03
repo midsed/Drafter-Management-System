@@ -91,9 +91,10 @@ if (isset($_SESSION['UserID'])) {
     </div>
 
     <!-- Download Logs Button -->
-    <div class="action-buttons">
-        <a href="download_logs.php" class="red-button">Download Logs (CSV)</a>
-    </div>
+    <!-- Download Logs Button -->
+<div class="action-buttons">
+    <a href="download_logs.php?<?= http_build_query(array_intersect_key($_GET, array_flip(['action_type', 'username', 'start_date', 'end_date']))) ?>" class="red-button">Download Logs (CSV)</a>
+</div>
 
     <!-- Logs Table -->
     <div class="table-container">
