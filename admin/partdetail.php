@@ -68,7 +68,11 @@ $conn->close();
 
 <script>
     function toggleSidebar() {
-        document.querySelector('.sidebar').classList.toggle('collapsed');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
     }
 </script>
 

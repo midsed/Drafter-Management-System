@@ -1,66 +1,136 @@
 <?php
 session_start();
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
 <div class="main-content">
     <div class="header">
-    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-    </a>
-        <h1>Archived Service</h1>
+        <a href="service.php" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
+        <h1>Archived Services</h1>
     </div>
-    <div class="search-container">
-    <input type="text" placeholder="Quick search" id="searchInput">
-    </div>
-    <div class="table-container">
-        <table class="supplier-table">
-            <thead>
-            <tr>
-                    <th>Service Type</th>
-                    <th>Service Price</th>
-                    <th>Service ID</th>
-                    <th>Customer</th>
-                    <th>Staff</th>
-                    <th>Part ID</th>
-                    <th>Edit Supplier</th>
-                    <th>Archive</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td>sample</td>
-                    <td><a href="editsupplier.php?id=7676" class="btn btn-edit">Edit</a></td>
-                    <td><button class="btn btn-archive">Archive</button></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+
+    <?php
+        $sql = "SELECT 
+                    s.ServiceID, 
+                    s.Type, 
+                    s.Price, 
+                    c.FName AS CustomerFName, 
+                    c.LName AS CustomerLName, 
+                    s.ClientEmail, 
+                    c.PhoneNumber, 
+                    s.StaffName, 
+                    COALESCE(p.Name, 'N/A') AS PartName
+                FROM service s
+                LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+                LEFT JOIN part p ON s.PartID = p.PartID
+                WHERE s.Archived = 1";
+
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) { ?>
+            <div class="table-container">
+                <table class="supplier-table">
+                    <thead>
+                        <tr>
+                            <th>Service ID</th>
+                            <th>Service Type</th>
+                            <th>Service Price</th>
+                            <th>Customer</th>
+                            <th>Staff</th>
+                            <th>Part Name</th>
+                            <th>Relist</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_assoc()) { ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['ServiceID']); ?></td>
+                                <td><?php echo htmlspecialchars($row['Type']); ?></td>
+                                <td><?php echo htmlspecialchars($row['Price']); ?></td>
+                                <td><?php echo htmlspecialchars($row['CustomerFName'] . ' ' . $row['CustomerLName']); ?></td>
+                                <td><?php echo htmlspecialchars($row['StaffName'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['PartName']); ?></td>
+                                <td><button class='btn btn-relist' onclick='relistService(<?php echo $row['ServiceID']; ?>)'>Relist</button></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+    <?php } else { ?>
+        <p style="text-align: center; font-size: 18px; padding: 20px;">No archived services found.</p>
+    <?php } ?>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    function toggleSidebar() {
+        function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+function relistService(serviceID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to relist this service?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, relist it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('relist_service.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'service_id=' + serviceID
+            })
+            .then(response => response.text())
+            .then(data => {
+                Swal.fire({
+                    title: "Success!",
+                    text: data,
+                    icon: "success"
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
 </script>
+
+<style>
+    .btn-relist {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-relist:hover {
+        background-color: #218838;
+    }
+</style>

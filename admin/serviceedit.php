@@ -207,4 +207,11 @@ if (!$service) {
             })
             .catch(error => console.error("Error fetching part data:", error));
     }
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 </script>

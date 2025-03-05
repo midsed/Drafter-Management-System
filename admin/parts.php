@@ -381,6 +381,13 @@ function updateModelFilter() {
         modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
     });
 }
+function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 </script>
 
 <style>

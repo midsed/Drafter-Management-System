@@ -183,6 +183,13 @@ if (isset($_SESSION['UserID'])) {
 </div>
 
 <script>
+        function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 // Search functionality
 function searchLogs() {
     const input = document.getElementById("searchInput").value.toLowerCase();

@@ -77,6 +77,13 @@ include('navigation/topbar.php');
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+        function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 function relistService(serviceID) {
     Swal.fire({
         title: "Are you sure?",

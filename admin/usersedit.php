@@ -223,6 +223,13 @@ include('dbconnect.php');
 </div>
 
 <script>
+        function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
     document.getElementById("editUserForm").addEventListener("submit", function(event) {
         let firstname = document.getElementById("firstname").value.trim();
         let lastname  = document.getElementById("lastname").value.trim();
