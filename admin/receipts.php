@@ -2,20 +2,46 @@
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
 if (!isset($_SESSION['Username'])) {
     $_SESSION['Username'];
 }
-?>
 
-<?php
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
 include('dbconnect.php');
+
 ?>
+
+<?php
+$userID = $_SESSION['UserID'];
+$queryUser = "SELECT UserID, FName, LName, Email, Username, RoleType, LastLogin FROM user WHERE UserID = ?";
+$stmtUser = $conn->prepare($queryUser);
+$stmtUser->bind_param("i", $userID);
+$stmtUser->execute();
+$resultUser = $stmtUser->get_result();
+$user = $resultUser->fetch_assoc();
+
+$queryTransactions = "SELECT s.ServiceID, s.Type AS ServiceType, s.Price AS ServicePrice, 
+                             p.PartID, p.Name AS PartName, p.Price AS PartPrice, 
+                             (p.Price + s.Price) AS TotalPrice, 
+                             s.Date AS Timestamp, 
+                             CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy
+                      FROM service s
+                      JOIN part p ON s.PartID = p.PartID
+                      JOIN user u ON s.StaffName = u.Username
+                      WHERE u.UserID = ?";
+
+$stmtTrans = $conn->prepare($queryTransactions);
+$stmtTrans->bind_param("i", $userID);
+$stmtTrans->execute();
+$resultTrans = $stmtTrans->get_result();
+$transactions = $resultTrans->fetch_all(MYSQLI_ASSOC);
+?>
+
 
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,93 +60,104 @@ include('dbconnect.php');
         </div>
 
         <table>
+    <thead>
+        <tr>
+            <th>Transaction ID</th>
+            <th>Action by</th>
+            <th>Timestamp</th>
+            <th>Part Name</th>
+            <th>Part Price</th>
+            <th>Service Type</th>
+            <th>Service Price</th>
+            <th>Total Price</th>
+            <th>Receipt</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($transactions as $transaction): ?>
+            <tr>
+                <td>#<?= $transaction['ServiceID'] ?></td>
+                <td><?= $transaction['ActionBy'] ?></td>
+                <td><?= $transaction['Timestamp'] ?></td>
+                <td><?= $transaction['PartName'] ?></td>
+                <td>₱<?= number_format($transaction['PartPrice'], 2) ?></td>
+                <td><?= $transaction['ServiceType'] ?></td>
+                <td>₱<?= number_format($transaction['ServicePrice'], 2) ?></td>
+                <td>₱<?= number_format($transaction['TotalPrice'], 2) ?></td>
+                <td>
+                    <button class="print-receipt-button" 
+                            data-receipt-id="#<?= $transaction['ServiceID'] ?>"
+                            data-action-by="<?= $transaction['ActionBy'] ?>"
+                            data-timestamp="<?= $transaction['Timestamp'] ?>"
+                            data-part-name="<?= $transaction['PartName'] ?>"
+                            data-part-price="<?= $transaction['PartPrice'] ?>"
+                            data-service-type="<?= $transaction['ServiceType'] ?>"
+                            data-service-price="<?= $transaction['ServicePrice'] ?>"
+                            data-total-price="<?= $transaction['TotalPrice'] ?>">
+                        Print
+                    </button>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+    </div>
+</div>
+
+<!-- Hidden print section -->
+<div id="print-section" style="display: none;">
+    <div class="receipt">
+        <h2>Drafter Autotech Inventory System</h2>
+        <p><strong>Transaction ID:</strong> <span id="receipt-id"></span></p>
+        <p><strong>Action by:</strong> <span id="action-by"></span></p>
+        <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+
+        <h3>Item Details</h3>
+        <table class="receipt-table">
             <thead>
                 <tr>
-                    <th>Transaction ID</th>
-                    <th>Action by</th>
-                    <th>Timestamp</th>
-                    <th>Receipt</th>
+                    <th>Item Name</th>
+                    <th>Price</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>#7676</td>
-                    <td>Admin - Name N.</td>
-                    <td>2024-11-15 10:00:00</td>
-                    <td><button class="print-receipt-button" data-receipt-id="#7676">Print</button></td>
+                    <td id="part-name"></td>
+                    <td>₱<span id="part-price"></span></td>
                 </tr>
                 <tr>
-                    <td>#7677</td>
-                    <td>Staff - Name N.</td>
-                    <td>2024-11-13 10:00:00</td>
-                    <td><button class="print-receipt-button" data-receipt-id="#7677">Print</button></td>
-                </tr>
-                <tr>
-                    <td>#7678</td>
-                    <td>Admin - Name N.</td>
-                    <td>2024-11-13 10:00:00</td>
-                    <td><button class="print-receipt-button" data-receipt-id="#7678">Print</button></td>
-                </tr>
-                <tr>
-                    <td>#7679</td>
-                    <td>Admin - Name N.</td>
-                    <td>2024-11-6 10:00:00</td>
-                    <td><button class="print-receipt-button" data-receipt-id="#7679">Print</button></td>
+                    <td id="service-type"></td>
+                    <td>₱<span id="service-price"></span></td>
                 </tr>
             </tbody>
         </table>
-    </div>
-</div>
 
-<div id="print-section" style="display: none;">
-    <div class="receipt">
-        <h2>Retrieve Part Receipt</h2>
-        <p><strong>Transaction ID:</strong> <span id="receipt-id"></span></p>
-        <p><strong>Action by:</strong> <span id="action-by"></span></p>
-        <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
-        <p><strong>Part:</strong></p>
-        <ul id="item-list"></ul>
+        <h3>Total Amount: ₱<span id="total-amount"></span></h3>
         <p><strong>Reason for Retrieval:</strong> To be used for service</p>
     </div>
 </div>
 
 <script>
-    document.querySelector(".print-button").addEventListener("click", function () {
-        window.print();
-    });
-
     document.querySelectorAll(".print-receipt-button").forEach(button => {
-        button.addEventListener("click", function () {
-            const receiptId = this.getAttribute("data-receipt-id");
-            const row = this.closest('tr');
-            const actionBy = row.cells[1].innerText;
-            const timestamp = row.cells[2].innerText;
+    button.addEventListener("click", function () {
+        document.getElementById("receipt-id").innerText = this.getAttribute("data-receipt-id");
+        document.getElementById("action-by").innerText = this.getAttribute("data-action-by");
+        document.getElementById("timestamp").innerText = this.getAttribute("data-timestamp");
+        document.getElementById("part-name").innerText = this.getAttribute("data-part-name");
+        document.getElementById("part-price").innerText = parseFloat(this.getAttribute("data-part-price")).toFixed(2);
+        document.getElementById("service-type").innerText = this.getAttribute("data-service-type");
+        document.getElementById("service-price").innerText = parseFloat(this.getAttribute("data-service-price")).toFixed(2);
+        document.getElementById("total-amount").innerText = parseFloat(this.getAttribute("data-total-price")).toFixed(2);
 
-            document.getElementById("receipt-id").innerText = receiptId;
-            document.getElementById("action-by").innerText = actionBy;
-            document.getElementById("timestamp").innerText = timestamp;
+        document.getElementById("print-section").style.display = "block";
+        document.querySelector(".main-content").style.display = "none";
 
-            const items = [
-                "Part A",
-                "Part B"
-            ];
-            const itemList = document.getElementById("item-list");
-            itemList.innerHTML = "";
-            items.forEach(item => {
-                const li = document.createElement("li");
-                li.innerText = item;
-                itemList.appendChild(li);
-            });
+        window.print();
 
-            document.getElementById("print-section").style.display = "block";
-            document.querySelector(".main-content").style.display = "none";
-
-            window.print();
-
-            document.getElementById("print-section").style.display = "none";
-            document.querySelector(".main-content").style.display = "block";
-        });
+        document.getElementById("print-section").style.display = "none";
+        document.querySelector(".main-content").style.display = "block";
     });
+});
 </script>
 
 <style>
@@ -130,34 +167,6 @@ include('dbconnect.php');
 
     .container {
         margin: 20px;
-    }
-
-    .filter-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 10px;
-    }
-
-    .print-button, .filter-button, .print-receipt-button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    .print-button {
-        background-color: #E10F0F;
-        color: white;
-        margin-left: 10px;
-    }
-
-    .filter-button {
-        background-color: rgb(218, 218, 218);
-        color: black;
-        margin-left: 10px;
     }
 
     table {
@@ -175,16 +184,13 @@ include('dbconnect.php');
         background-color: #f2f2f2;
     }
 
-    th:nth-child(4),
-    td:nth-child(4) {
-        text-align: center;
-    }
-    
     .print-receipt-button {
         padding: 5px 10px;
         border-radius: 3px;
         background-color: #E10F0F;
         color: white;
+        border: none;
+        cursor: pointer;
     }
 
     #print-section {
@@ -200,41 +206,39 @@ include('dbconnect.php');
         text-align: left;
     }
 
-    .receipt h2 {
+    .receipt h2, .receipt h3 {
         text-align: center;
         margin-bottom: 20px;
     }
 
-    .receipt p {
-        margin: 5px 0;
-    }
+    .receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+}
 
-    .receipt ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
+.receipt-table th, .receipt-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+}
     @media print {
-        .main-content {
-            visibility: hidden;
-        }
-
-        #print-section {
-            display: block;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        h1, h2 {
-            page-break-after: avoid;
-        }
-
-        /* Hide sidebar and topbar during print */
-        .sidebar, .topbar {
-            display: none;
-        }
+    body * {
+        visibility: hidden;
     }
-</style>
+
+    #print-section, #print-section * {
+        visibility: visible;
+    }
+
+    #print-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .sidebar, .topbar {
+        display: none !important;
+    }
+}
