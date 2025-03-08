@@ -6,8 +6,10 @@
     <title>Login</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/granim/dist/granim.min.js"></script>
 </head>
 <body>
+    <canvas id="canvas-basic"></canvas>
     <div class="container">
         <div class="form-container">
             <h1>Login</h1>
@@ -42,6 +44,26 @@
             var x = document.getElementById("password");
             x.type = (x.type === "password") ? "text" : "password";
         }
+    
+        var granimInstance = new Granim({
+    element: '#canvas-basic',
+    direction: 'top-bottom',
+    isPausedWhenNotInView: true,
+    image: {
+        source: './images/Drafter BG2.png', // Ensure this path is correct
+        blendingMode: 'multiply' // Change blending mode if needed
+    },
+    states: {
+        "default-state": {
+            gradients: [
+                ['#29323c', '#485563'],
+                ['#FF6B6B', '#FFF5E1'],
+                ['#80d3fe', '#7ea0c4']
+            ],
+            transitionSpeed: 13000
+        }
+    }
+});
     </script>
 
 <?php
@@ -106,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                 icon: 'error',
                 title: 'Invalid Username!',
                 text: 'This username does not exist.',
-                showConfirmButton: true
+                                showConfirmButton: true
             });
         </script>";
         exit();
