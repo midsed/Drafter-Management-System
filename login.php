@@ -60,7 +60,7 @@
                 ['#FF6B6B', '#FFF5E1'],
                 ['#80d3fe', '#7ea0c4']
             ],
-            transitionSpeed: 13000
+            transitionSpeed: 11000
         }
     }
 });
