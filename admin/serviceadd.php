@@ -37,23 +37,27 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .form-group {
-        margin-bottom: 15px;
-    }
+    /* Added font import and matching style rules from serviceedit.php */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
+    .center-container {
+        width: 50%; 
+        max-width: 1000px; 
+        margin: 0 auto; 
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: 'Poppins', sans-serif;
+    }
+    
     label {
         display: block;
         margin-bottom: 5px;
+        font-weight: bold;
     }
-
-    input, select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-
     .btn {
+        font-weight: bold;
         background-color: #272727;
         color: white;
         padding: 10px 20px;
@@ -61,61 +65,124 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
         border-radius: 3px;
         cursor: pointer;
     }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 14px;
+        font-weight: 400; 
+    }
+    
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+
+    .black-button {
+        background-color: #272727;
+    }
+    .black-button:hover {
+        background-color: #444;
+    }
+    .red-button {
+        background-color: red;
+    }
+    .red-button:hover {
+        background-color: darkred;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .header img {
+        cursor: pointer;
+    }
+    .header h1 {
+        margin: 0;
+    }
 </style>
 
 <div class="main-content">
+    <!-- Same header layout as in serviceedit.php -->
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Add Service</h1>
     </div>
 
-    <form action="" method="POST">
-        <div class="form-group">
-            <label for="part">Select Part:</label>
-            <select id="part" name="partID" required>
-                <option value="">-- Select a Part --</option>
-                <?php foreach ($parts as $part) { ?>
-                    <option value="<?php echo $part['PartID']; ?>"> <?php echo htmlspecialchars($part['Name']); ?> </option>
-                <?php } ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="fName">Customer First Name:</label>
-            <input type="text" id="fName" name="fName" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="lName">Customer Last Name:</label>
-            <input type="text" id="lName" name="lName" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="cEmail">Customer Email:</label>
-            <input type="email" id="cEmail" name="cEmail" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="pNumber">Customer Phone Number:</label>
-            <input type="number" id="pNumber" name="pNumber" required maxlength="11">
-        </div>
-        
-        <div class="form-group">
-            <label for="type">Service Type:</label>
-            <input type="text" id="type" name="type" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="price">Price:</label>
-            <input type="number" id="price" name="price" required>
-        </div>
-        
-        <button type="submit" class="btn">Add</button>
-    </form>
+    <!-- Centered container just like in serviceedit.php -->
+    <div class="center-container">
+        <form action="" method="POST">
+            <div class="form-group">
+                <label for="part">Select Part:</label>
+                <select id="part" name="partID" required>
+                    <option value="">-- Select a Part --</option>
+                    <?php foreach ($parts as $part) { ?>
+                        <option value="<?php echo $part['PartID']; ?>"> 
+                            <?php echo htmlspecialchars($part['Name']); ?> 
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fName">Customer First Name:</label>
+                <input type="text" id="fName" name="fName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="lName">Customer Last Name:</label>
+                <input type="text" id="lName" name="lName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cEmail">Customer Email:</label>
+                <input type="email" id="cEmail" name="cEmail" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pNumber">Customer Phone Number:</label>
+                <input type="number" id="pNumber" name="pNumber" required maxlength="11">
+            </div>
+            
+            <div class="form-group">
+                <label for="type">Service Type:</label>
+                <input type="text" id="type" name="type" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" required>
+            </div>
+            
+            <div class="actions">
+                <!-- Matches the styling of serviceedit.php, but keeps the 'Add' function -->
+                <button type="submit" class="black-button btn">Add</button>
+                <button type="reset" class="red-button btn">Reset</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <?php 
+// PHP logic for handling form submission remains unchanged
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $type = $_POST['type']; 
     $fName = $_POST['fName'];
@@ -148,7 +215,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($add->execute()) {
         $serviceID = $add->insert_id;
 
-        $updatePart = $conn->prepare("UPDATE part SET ServiceID = ? WHERE PartID = ? AND Name = (SELECT Name FROM part WHERE PartID = ?)");
+        $updatePart = $conn->prepare("UPDATE part 
+                                      SET ServiceID = ? 
+                                      WHERE PartID = ? 
+                                      AND Name = (SELECT Name FROM part WHERE PartID = ?)");
         $updatePart->bind_param("iii", $serviceID, $partID, $partID);
         $updatePart->execute();
         $updatePart->close();
@@ -158,7 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $actionBy = $_SESSION['Username'];
         $actionType = "Added new Service";
 
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) VALUES (?, ?, ?, ?, ?)");
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) 
+                               VALUES (?, ?, ?, ?, ?)");
         $log->bind_param("sssii", $actionBy, $actionType, $timestamp, $adminId, $partID);
         $log->execute();
         $log->close();
@@ -190,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 

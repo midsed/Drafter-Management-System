@@ -51,7 +51,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </div>
 <style>
  .sidebar li.active a span {
-    color: #ff0000;
+    color:rgb(255, 255, 255);
     font-weight: 700;
 }
 

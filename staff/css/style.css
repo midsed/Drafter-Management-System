@@ -9,17 +9,16 @@
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f5f5f5;
-   
 }
 
 .sidebar {
-    width: 160px;
+    width: 200px; 
     height: 100vh;
     position: fixed;
     left: 0;
     top: 0;
-    overflow-y: auto;
     background: linear-gradient(to bottom, #E10F0F, #000000);
+    border-radius: 0 10px 10px 0; 
     transition: width 0.3s;
     z-index: 0;
     overflow: hidden;
@@ -27,43 +26,54 @@ body {
 
 .sidebar.collapsed {
     width: 50px;
+    visibility: hidden;
+    overflow: hidden;
 }
 
 .sidebar .toggle-btn {
+    position: absolute;
+    top: 10px;
+    left: -30px;
     width: 40px;
     height: 40px;
     margin: 10px auto;
     background-color: #575757;
     border-radius: 50%;
     cursor: pointer;
+    border: none;
+    z-index: 2;
 }
 
 .sidebar ul {
     list-style: none;
     margin-top: 60px;
+    padding: 0 10px; 
 }
 
 .sidebar ul li {
-    padding: 15px;
-    text-align: center;
+    margin-bottom: 10px;
 }
 
 .sidebar ul li a {
-    color: white;
+    color: #FFFFFF; 
     text-decoration: none;
     font-size: 1rem;
+    font-weight: 600; 
     display: flex;
     align-items: center;
-    transition: background 0.3s;
+    padding: 12px 15px;
+    border-radius: 8px; 
+    transition: background 0.3s, color 0.3s;
 }
 
-.sidebar li.active a span {
-    color: #000000;
-    font-weight: 700; 
+.sidebar ul li a:hover {
+    background: linear-gradient(45deg, #b0b0b0, #000000);
+    color: #FFFFFF;
 }
 
-.sidebar li.active {
-    border-left: 4px solid #000000;
+.sidebar ul li.active a {
+    background: linear-gradient(45deg, #000000, #000000);
+    color: #FFFFFF !important;
 }
 
 .nav-icon {
@@ -118,9 +128,8 @@ body {
     display: inline-block;
 }
 
-
 .main-content {
-    margin-left: 160px;
+    margin-left: 200px; 
     padding: 20px;
     padding-top: 80px; 
     transition: margin-left 0.3s;
@@ -157,13 +166,15 @@ h2 {
     margin-bottom: 15px;
 }
 
+/* TABLES */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
 
-table th, table td {
+table th, 
+table td {
     border: 1px solid #ddd;
     padding: 12px;
     text-align: left;
@@ -192,57 +203,7 @@ table td a:hover {
     background-color: #000000;
 }
 
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    .topbar {
-        width: 100%;
-        margin-left: 0;
-    }
-    .main-content {
-        margin-left: 0;
-        padding-top: 100px;
-    }
-    .content {
-        flex-direction: column;
-    }
-    .chart-container, 
-    .transaction-history, 
-    .low-stock-alerts, 
-    .new-updated-parts {
-        flex: 1 1 100%;
-    }
-    .topbar .logout-icon {
-        font-size: 1.5rem;
-        color: white;
-        margin-left: 10px;
-        cursor: pointer;
-    }
-}
-
-.sidebar .toggle-btn {
-    position: absolute;
-    top: 10px;
-    left: -30px;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.sidebar.collapsed {
-    width: 45px;
-    overflow: hidden;
-    visibility: hidden;
-}
-
-.main-content.collapsed {
-    margin-left: 0;
-}
-
+/* HEADER / SEARCH */
 .header {
     display: flex;
     align-items: center;
@@ -258,7 +219,6 @@ table td a:hover {
 .header a i { 
     margin-right: 5px; 
 }
-
 
 .search-container {
     text-align: center;
@@ -284,4 +244,47 @@ table td a:hover {
     right: 10px;
     top: 12px;
     color: #999;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-radius: 0;
+    }
+
+    .sidebar .toggle-btn {
+        display: block;
+        left: 10px; 
+    }
+
+    .topbar {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding-top: 100px;
+    }
+
+    .content {
+        flex-direction: column;
+    }
+
+    .chart-container, 
+    .transaction-history, 
+    .low-stock-alerts, 
+    .new-updated-parts {
+        flex: 1 1 100%;
+    }
+
+    .topbar .logout-icon {
+        font-size: 1.5rem;
+        color: white;
+        margin-left: 10px;
+        cursor: pointer;
+    }
 }

@@ -5,23 +5,55 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .form-group {
-        margin-bottom: 15px;
+    /* Import the Poppins font and replicate the styling from serviceedit.php */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+    
+    .center-container {
+        width: 50%; 
+        max-width: 1000px; 
+        margin: 0 auto; 
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .header img {
+        cursor: pointer;
+    }
+
+    .header h1 {
+        margin: 0;
     }
 
     label {
         display: block;
         margin-bottom: 5px;
+        font-weight: bold;
     }
 
-    input, select {
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    input, select, textarea {
         width: 100%;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 3px;
+        font-size: 14px;
+        font-weight: 400; 
     }
 
     .btn {
+        font-weight: bold;
         background-color: #272727;
         color: white;
         padding: 10px 20px;
@@ -29,16 +61,30 @@
         border-radius: 3px;
         cursor: pointer;
     }
+
+    .btn:hover {
+        background-color: #444;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
 </style>
 
 <div class="main-content">
-        <div class="header">
-            <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-                <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-            </a>
-            <h1>Add Supplier</h1>
-        </div>
+    <div class="header">
+        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back"
+                 style="width: 35px; height: 35px; margin-right: 20px;">
+        </a>
+        <h1>Add Supplier</h1>
+    </div>
 
+    <!-- Centered container for the form -->
+    <div class="center-container">
         <form id="entryForm">
             <div class="form-group">
                 <label for="email">Email:</label>
@@ -59,18 +105,21 @@
                 <label for="phone">Phone Number:</label>
                 <input type="tel" id="phone" name="phone" required>
             </div>
-            
-            <button type="submit" class="btn">Add</button>
+
+            <!-- Actions container for the buttons -->
+            <div class="actions">
+                <button type="submit" class="btn">Add</button>
+                <button type="reset" class="btn" style="background-color: red;">Reset</button>
+            </div>
         </form>
     </div>
+</div>
 
-    <script>
-            function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
-    </script>
-
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+}
+</script>

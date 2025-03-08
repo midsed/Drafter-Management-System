@@ -4,7 +4,7 @@ session_start();
 require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: \Drafter-Management-System/login.php");
     exit();
 }
 
@@ -33,13 +33,39 @@ $username = $user['Username'];
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .form-group {
-        margin-bottom: 15px;
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+    .center-container {
+        width: 50%; 
+        max-width: 1000px; 
+        margin: 0 auto; 
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .header img {
+        cursor: pointer;
+    }
+    .header h1 {
+        margin: 0;
     }
 
     label {
         display: block;
         margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
     }
 
     input, select {
@@ -47,9 +73,12 @@ $username = $user['Username'];
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 3px;
+        font-size: 14px;
+        font-weight: 400;
     }
 
     .btn {
+        font-weight: bold;
         background-color: #272727;
         color: white;
         padding: 10px 20px;
@@ -57,60 +86,79 @@ $username = $user['Username'];
         border-radius: 3px;
         cursor: pointer;
     }
+
+    .btn:hover {
+        background-color: #444;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
 </style>
 
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Add User</h1>
     </div>
 
-    <form id="userForm" method="POST" onsubmit="return validateForm()">
-        <div class="form-group">
-            <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname" required maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
-        </div>
+    <!-- Centered container for the form -->
+    <div class="center-container">
+        <form id="userForm" method="POST" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="firstname">First Name:</label>
+                <input type="text" id="firstname" name="firstname" required maxlength="40" 
+                       pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+            </div>
 
-        <div class="form-group">
-            <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname" required maxlength="40" pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
-        </div>
+            <div class="form-group">
+                <label for="lastname">Last Name:</label>
+                <input type="text" id="lastname" name="lastname" required maxlength="40" 
+                       pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+            </div>
 
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required maxlength="64">
-        </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required maxlength="64">
+            </div>
 
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
 
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-        </div>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
 
-        <div class="form-group">
-            <label for="user_role">User Role:</label>
-            <select id="user_role" name="user_role" required>
-                <option value="admin">Admin</option>
-                <option value="staff">Staff</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="user_role">User Role:</label>
+                <select id="user_role" name="user_role" required>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                </select>
+            </div>
 
-        <button type="submit" class="btn">Register</button>
-    </form>
+            <!-- Actions container for buttons -->
+            <div class="actions">
+                <button type="submit" class="btn">Register</button>
+                <button type="reset" class="btn" style="background-color: red;">Reset</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
 function validateForm() {
     let password = document.getElementById("password").value;
     let email = document.getElementById("email").value;
-    let firstname = document.getElementById("firstname").value;
-    let lastname = document.getElementById("lastname").value;
     
     let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -137,13 +185,13 @@ function validateForm() {
 
     return true;
 }
-function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+}
 </script>
 
 <?php
@@ -156,6 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = trim($_POST['password'] ?? ''); 
     $date_created = date('Y-m-d H:i:s');
 
+    // Check password again on the server side
     if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/', $password)) {
         echo "<script>
             Swal.fire({
@@ -168,6 +217,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
+    // Check if email or username is already taken
     $check = $conn->prepare("SELECT COUNT(*) FROM user WHERE Email = ? OR Username = ?");
     $check->bind_param("ss", $email, $username);
     $check->execute();
@@ -189,13 +239,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $add = $conn->prepare(
             "INSERT INTO user (DateCreated, Email, FName, LName, Username, RoleType, Password) 
-            VALUES (NOW(), ?, ?, ?, ?, ?, ?)"
+             VALUES (NOW(), ?, ?, ?, ?, ?, ?)"
         );
         $add->bind_param("ssssss", $email, $firstname, $lastname, $username, $user_role, $hashedPassword);
 
         if ($add->execute()) {
             $timestamp = date("Y-m-d H:i:s");
-             $adminId = $_SESSION['UserID'];
+            $adminId = $_SESSION['UserID'];
 
             $actionBy = $_SESSION['Username'];
             $actionType = "Added new user";

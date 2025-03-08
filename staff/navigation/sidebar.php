@@ -30,3 +30,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
     </ul>
 </div>
+<style>
+.sidebar li.active a span {
+    color:rgb(255, 255, 255);
+    font-weight: 700;
+}
+
+.sidebar li.active {
+    border-left: 4px solid #E10F0F
+}
+</style>
