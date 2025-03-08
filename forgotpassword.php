@@ -6,8 +6,10 @@
     <title>Forgot Password</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/granim/dist/granim.min.js"></script>
 </head>
 <body>
+    <canvas id="canvas-basic"></canvas>
     <div class="container">
         <div class="form-container">
             <h1>Forgot Your Password?</h1>
@@ -36,151 +38,172 @@
             <img src="images/Drafter Logo Cropped.png" alt="Drafter AutoTech Logo">
         </div>
     </div>
-</body>
-</html>
-<script>
-    let attemptCount = 0;
-    let isBlocked = false;
-    let countdownTimer;
 
-    function sendOTP(isResend = false) {
-        let email = document.getElementById("email").value;
-        let sendOtpLink = document.querySelector(".send-otp-link");
-        let resendCodeLink = document.querySelector(".resend-code");
+    <script>
+        // Initialize Granim.js for gradient background
+        var granimInstance = new Granim({
+            element: '#canvas-basic',
+            direction: 'top-bottom',
+            isPausedWhenNotInView: true,
+            image: {
+                source: './images/Drafter BG2.png',
+                blendingMode: 'soft-light'
+            },
+            states: {
+                "default-state": {
+                    gradients: [
+                        ['#29323c', '#485563'],
+                        ['#FF6B6B', '#FFF5E1'],
+                        ['#80d3fe', '#7ea0c4']
+                    ],
+                    transitionSpeed: 13000
+                }
+            }
+        });
 
-        if (!email) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Email!',
-                text: 'Please enter your email first.',
-            });
-            return;
-        }
+        // JavaScript functions for OTP handling
+        let attemptCount = 0;
+        let isBlocked = false;
+        let countdownTimer;
 
-        fetch("send_otp.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "email=" + encodeURIComponent(email)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "blocked") {
-                isBlocked = true;
+        function sendOTP(isResend = false) {
+            let email = document.getElementById("email").value;
+            let sendOtpLink = document.querySelector(".send-otp-link");
+            let resendCodeLink = document.querySelector(".resend-code");
+
+            if (!email) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Email!',
+                    text: 'Please enter your email first.',
+                });
+                return;
+            }
+
+            fetch("send_otp.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "email=" + encodeURIComponent(email)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "blocked") {
+                    isBlocked = true;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Too Many Attempts!',
+                        text: 'You have exceeded the maximum attempts. Try again in 24 hours.',
+                    });
+                    resendCodeLink.style.display = "none";
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'OTP Sent!',
+                        text: 'Check your email for the OTP.',
+                    });
+
+                    attemptCount = data.attempts;
+
+                    if (!isResend) {
+                        sendOtpLink.style.display = "none"; 
+                    }
+
+                    startCountdown(resendCodeLink);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Too Many Attempts!',
-                    text: 'You have exceeded the maximum attempts. Try again in 24 hours.',
+                    title: 'Error!',
+                    text: 'An error occurred. Please try again.',
                 });
-                resendCodeLink.style.display = "none";
+            });
+        }
+
+        function resendOTP() {
+            if (!isBlocked) {
+                sendOTP(true);
             } else {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'OTP Sent!',
-                    text: 'Check your email for the OTP.',
+                    icon: 'error',
+                    title: 'Blocked!',
+                    text: 'You have reached the maximum attempts. Try again later.',
                 });
-
-                attemptCount = data.attempts;
-
-                if (!isResend) {
-                    sendOtpLink.style.display = "none"; 
-                }
-
-                startCountdown(resendCodeLink);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'An error occurred. Please try again.',
-            });
-        });
-    }
-
-    function resendOTP() {
-        if (!isBlocked) {
-            sendOTP(true);
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Blocked!',
-                text: 'You have reached the maximum attempts. Try again later.',
-            });
-        }
-    }
-
-    function startCountdown(button) {
-        let countdown = 120; 
-        button.style.pointerEvents = "none";
-        button.style.color = "gray";
-
-        if (countdownTimer) {
-            clearInterval(countdownTimer);
         }
 
-        countdownTimer = setInterval(() => {
-            button.innerText = `Resend Code (${countdown}s)`;
-            countdown--;
+        function startCountdown(button) {
+            let countdown = 120; 
+            button.style.pointerEvents = "none";
+            button.style.color = "gray";
 
-            if (countdown < 0) {
+            if (countdownTimer) {
                 clearInterval(countdownTimer);
-                button.innerText = "Resend Code";
-                button.style.pointerEvents = "auto";
-                button.style.color = "";
             }
-        }, 1000);
-    }
 
-    document.getElementById("forgot-password-form").addEventListener("submit", function (event) {
-        event.preventDefault();
+            countdownTimer = setInterval(() => {
+                button.innerText = `Resend Code (${countdown}s)`;
+                countdown--;
 
-        let email = document.getElementById("email").value;
-        let otp = document.getElementById("otp").value;
-
-        if (!email || !otp) {
-            Swal.fire({
-                icon: "warning",
-                title: "Missing Fields!",
-                text: "Please enter your email and OTP.",
-            });
-            return;
+                if (countdown < 0) {
+                    clearInterval(countdownTimer);
+                    button.innerText = "Resend Code";
+                    button.style.pointerEvents = "auto";
+                    button.style.color = "";
+                }
+            }, 1000);
         }
 
-        fetch("verifyotp.php", { //validation
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
+        document.getElementById("forgot-password-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            let email = document.getElementById("email").value;
+            let otp = document.getElementById("otp").value;
+
+            if (!email || !otp) {
                 Swal.fire({
-                    icon: "success",
-                    title: "OTP Verified!",
-                    text: "Redirecting to reset password page...",
-                    showConfirmButton: false,
-                    timer: 2000
-                }).then(() => {
-                    window.location.href = "resetpassword.php";
+                    icon: "warning",
+                    title: "Missing Fields!",
+                    text: "Please enter your email and OTP.",
                 });
-            } else {
+                return;
+            }
+
+            fetch("verifyotp.php", { // Validation
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({
+                        icon: "success",
+                        title: "OTP Verified!",
+                        text: "Redirecting to reset password page...",
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = "resetpassword.php";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid OTP!",
+                        text: "Please try again.",
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
                 Swal.fire({
                     icon: "error",
-                    title: "Invalid OTP!",
-                    text: "Please try again.",
+                    title: "Server Error!",
+                    text: "Something went wrong. Try again later.",
                 });
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Server Error!",
-                text: "Something went wrong. Try again later.",
             });
         });
-    });
-</script>
-
-
+    </script>
+</body>
+</html>

@@ -7,15 +7,12 @@ if (!isset($_SESSION['UserID'])) {
     exit();
 }
 
-// Fetch low stock parts
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
 $lowStockResult = mysqli_query($conn, $lowStockQuery);
 
-// Fetch recent parts
 $recentPartsQuery = "SELECT * FROM part ORDER BY LastUpdated DESC LIMIT 5";
 $recentPartsResult = mysqli_query($conn, $recentPartsQuery);
 
-// Fetch stock levels for chart
 $stockLevelsQuery = "SELECT Name, Quantity FROM part";
 $stockLevelsResult = mysqli_query($conn, $stockLevelsQuery);
 $stockLevels = [];
@@ -23,7 +20,6 @@ while ($row = mysqli_fetch_assoc($stockLevelsResult)) {
     $stockLevels[$row['Name']] = $row['Quantity'];
 }
 
-// Fetch parts added for the line chart
 $partsAddedQuery = "SELECT DATE(DateAdded) as date, COUNT(*) as count FROM part GROUP BY DATE(DateAdded)";
 $partsAddedResult = mysqli_query($conn, $partsAddedQuery);
 $partsAddedData = [];
@@ -67,7 +63,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
                     <th>Timestamp</th>
                     <th>Print Receipt</th>
                 </tr>
-                <!-- Example static data; replace with dynamic data as needed -->
                 <tr>
                     <td>#7676</td>
                     <td>Admin - Jade</td>
@@ -120,7 +115,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
                 </tr>
                 <?php while ($row = mysqli_fetch_assoc($recentPartsResult)) { ?>
                     <tr>
-                        <td>#<?php echo $row['PartID']; ?></td>
+                    <td>#<?php echo $row['PartID']; ?></td>
                         <td><?php echo $row['Name']; ?></td>
                         <td><?php echo $row['Category']; ?></td>
                         <td><?php echo $row['PartCondition']; ?></td>
@@ -138,7 +133,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
     let partsAddedData = <?php echo json_encode($partsAddedData); ?>;
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Stock Level Chart
         const stockCanvas = document.getElementById('stockLevelChart');
         const stockData = {
             labels: <?php echo json_encode(array_keys($stockLevels)); ?>,
@@ -162,7 +156,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
             }
         });
 
-        // Initial load of the recent updates chart
         updateLineChart();
     });
 
@@ -171,7 +164,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         const labels = Object.keys(partsAddedData);
         const data = Object.values(partsAddedData);
 
-        // Update the chart based on the selected time period
         const selectedPeriod = document.getElementById('timePeriod').value;
         let filteredData = [];
         let filteredLabels = [];
@@ -182,7 +174,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         } else if (selectedPeriod === 'monthly') {
             const monthlyData = {};
             labels.forEach(date => {
-                const month = date.substring(0, 7); // YYYY-MM
+                const month = date.substring(0, 7);
                 monthlyData[month] = (monthlyData[month] || 0) + partsAddedData[date];
             });
             filteredLabels = Object.keys(monthlyData);
@@ -190,7 +182,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         } else if (selectedPeriod === 'yearly') {
             const yearlyData = {};
             labels.forEach(date => {
-                const year = date.substring(0, 4); // YYYY
+                const year = date.substring(0, 4);
                 yearlyData[year] = (yearlyData[year] || 0) + partsAddedData[date];
             });
             filteredLabels = Object.keys(yearlyData);
@@ -217,6 +209,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
             }
         });
     }
+
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
@@ -229,6 +222,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
 <style>
     body {
         font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
     }
 
     .main-content {
@@ -282,22 +276,25 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         border-collapse: collapse;
         margin-top: 10px;
     }
+
     th, td {
         padding: 10px;
         border-bottom: 1px solid #ddd;
     }
+
     th {
         background-color: #f4f4f4;
     }
+
     tr:hover {
         background-color: #f1f1f1;
     }
-
 
     .transaction-history table th:nth-child(4),
     .transaction-history table td:nth-child(4) {
         text-align: center;
     }
+
     .low-stock-alerts table th:nth-child(6),
     .low-stock-alerts table td:nth-child(6),
     .new-updated-parts table th:nth-child(6),
@@ -313,6 +310,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         border-radius: 4px;
         cursor: pointer;
     }
+
     button:hover {
         background-color: darkred;
     }
@@ -321,6 +319,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         color: #007bff;
         text-decoration: none;
     }
+
     a:hover {
         text-decoration: underline;
     }

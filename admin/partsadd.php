@@ -222,22 +222,22 @@ $username = $user['Username'];
             <h2>Supplier Details</h2>
             <div class="form-group">
                 <label for="supplier_name">Supplier Name:</label>
-                <input type="text" id="supplier_name" name="supplier_name" required>
+                <input type="text" id="supplier_name" name="supplier_name">
             </div>
 
             <div class="form-group">
                 <label for="supplier_email">Supplier Email:</label>
-                <input type="email" id="supplier_email" name="supplier_email" required>
+                <input type="email" id="supplier_email" name="supplier_email">
             </div>
 
             <div class="form-group">
                 <label for="supplier_phone">Supplier Phone Number:</label>
-                <input type="text" id="supplier_phone" name="supplier_phone" required>
+                <input type="text" id="supplier_phone" name="supplier_phone">
             </div>
 
             <div class="form-group">
                 <label for="supplier_address">Supplier Address:</label>
-                <textarea id="supplier_address" name="supplier_address" required></textarea>
+                <textarea id="supplier_address" name="supplier_address"></textarea>
             </div>
 
             <div class="actions">

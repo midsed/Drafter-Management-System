@@ -4,46 +4,56 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif; 
-    background: linear-gradient(to bottom, #232221 50%, #9b0000);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    overflow: hidden;
+}
+
+#canvas-basic {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: url('./images/Drafter BG2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .container {
     display: flex;
     flex-direction: column;
     max-width: 100%;
-    width: 100%;
+    width: 80%;
     max-width: 1300px;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 100px 0;
-    min-height: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    min-height: 400px;
 }
 
 .form-container {
     padding: 20px;
-    width: 40%;
-    box-sizing: border-box;
+    width: 100%;
+    margin-right: 20px;
 }
 
 h1 {
     margin-bottom: 20px;
-    color: #000;
+    color: #333;
+    text-align: center;
 }
 
 label {
     display: block;
     margin: 10px 0 5px;
-}
-
-.input-wrapper {
-    position: relative;
-    width: 100%;
+    color: #555;
 }
 
 input[type="text"],
@@ -52,33 +62,42 @@ input[type="email"],
 input[type="number"] {
     width: 100%;
     padding: 15px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
     background-color: #f5f5f5;
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: #9b0000;
+    outline: none;
 }
 
 button {
     width: 100%;
-    padding: 20px;
-    background: #000;
+    padding: 15px;
+    background: #202020;
     color: #fff;
     border: none;
-    border-radius: 15px;
+    border-radius: 5px;
     cursor: pointer;
     margin-top: 10px;
+    font-size: 16px;
+    transition: background 0.3s;
 }
 
 button:hover {
-    background: #333;
+    background: #5f5f5f;
 }
 
 a {
     display: block;
     margin-top: 10px;
     text-decoration: none;
-    color: #09acf4;
+    color: #9b0000;
+    text-align: center;
 }
 
 a:hover {
@@ -86,47 +105,28 @@ a:hover {
 }
 
 .right-section {
-    display: none;
-    width: 50%;
-    background: #232221;
+    display: flex;
+    width: 30%; /* Adjusted width to hug the right side */
     justify-content: center;
     align-items: center;
     color: #fff;
     font-size: 24px;
     font-weight: bold;
     border-radius: 15px;
-    background: linear-gradient(to bottom, #232221 50%, #9b0000);
-}
-.right-section img {
-    max-width: 50%;
-    max-height: 80%;
-    object-fit: contain;
+    padding: 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(-380deg, #000000, #9c0b0b);
 }
 
-p span, p a {
-    display: inline;
+.right-section img {
+    max-width: 50%;
+    margin-top: 20px;
+    border-radius: 10px;
 }
 
 .center-text {
     text-align: center;
-}
-
-.resend-code {
-    color: red;
-}
-
-.send-otp-link {
-    color: red;
-    cursor: pointer;
-    text-decoration: none;
-    position: absolute;
-    right: 10px;
-    top: 25%;
-    transform: translateY(-50%);
-}
-
-.send-otp-link:hover {
-    text-decoration: underline;
 }
 
 @media (min-width: 768px) {
@@ -135,11 +135,23 @@ p span, p a {
     }
 
     .form-container {
-        width: 40%;
+        width: 70%; /* Increased width for the form container */
     }
 
     .right-section {
         display: flex;
-        width: 59%;
+        width: 65%; /* Adjusted width to hug the right side */
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        width: 100%;
+    }
+
+    .right-section {
+        display: none;
     }
 }
