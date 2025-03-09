@@ -76,14 +76,25 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-        function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+    .swal2-popup { font-family: "Inter", sans-serif !important; }
+    .swal2-title { font-weight: 700 !important; }
+    .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #28a745 !important; color: white !important; }
+    .swal2-cancel { background-color: #d33 !important; color: white !important; }
+</style>
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+}
+
 function relistService(serviceID) {
     Swal.fire({
         title: "Are you sure?",
@@ -92,7 +103,8 @@ function relistService(serviceID) {
         showCancelButton: true,
         confirmButtonColor: "#28a745",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, relist it!"
+        confirmButtonText: "Yes, relist it!",
+        cancelButtonText: "Cancel"
     }).then((result) => {
         if (result.isConfirmed) {
             fetch('relist_service.php', {
@@ -105,19 +117,28 @@ function relistService(serviceID) {
                 Swal.fire({
                     title: "Success!",
                     text: data,
-                    icon: "success"
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#28a745"
                 }).then(() => {
                     location.reload();
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire("Error", "Something went wrong!", "error");
+                Swal.fire({
+                    title: "Error!",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#d33"
+                });
             });
         }
     });
 }
 </script>
+
 
 <style>
     .btn-relist {

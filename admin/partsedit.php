@@ -130,7 +130,7 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="part_price">Part Price:</label>
-                <input type="number" id="part_price" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" required>
+                <input type="number" id="part_price" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" step="0.01" min="0" required>
             </div>
 
             <div class="form-group">
@@ -228,18 +228,30 @@ if (!$part) {
 
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
-                <button type="reset" class="red-button btn">Reset</button>
+                <button type="button" class="red-button btn" onclick="clearForm();">Reset</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
+    }
+
+    function clearForm() {
+        document.querySelectorAll("input, select, textarea").forEach(element => {
+            if (element.type === "file") {
+                element.value = ""; // Clear file input
+            } else if (element.tagName === "SELECT") {
+                element.selectedIndex = 0; // Reset select to first option
+            } else {
+                element.value = ""; // Clear all other fields
+            }
+        });
     }
 </script>

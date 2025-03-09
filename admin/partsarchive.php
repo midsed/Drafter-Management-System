@@ -52,6 +52,16 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+    .swal2-popup { font-family: "Inter", sans-serif !important; }
+    .swal2-title { font-weight: 700 !important; }
+    .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
+</style>
+
 <script>
 function relistPart(partID) {
     Swal.fire({
@@ -59,9 +69,10 @@ function relistPart(partID) {
         text: "Do you want to re-list this part?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, re-list it!"
+        confirmButtonColor: "#6c5ce7",
+        cancelButtonColor: "#d63031",
+        confirmButtonText: "Yes, re-list it!",
+        cancelButtonText: "Cancel"
     }).then((result) => {
         if (result.isConfirmed) {
             fetch('relist_part.php', {
@@ -74,26 +85,34 @@ function relistPart(partID) {
                 Swal.fire({
                     title: "Success!",
                     text: data,
-                    icon: "success"
+                    icon: "success",
+                    confirmButtonColor: "#6c5ce7"
                 }).then(() => {
                     location.reload();
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire("Error", "Something went wrong!", "error");
+                Swal.fire({
+                    title: "Error",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonColor: "#d63031"
+                });
             });
         }
     });
 }
-function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+}
 </script>
+
 
 
 <style>

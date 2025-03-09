@@ -258,7 +258,7 @@ include('dbconnect.php');
 
         // If password is provided, validate its pattern
         if (password.length > 0) {
-            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
             if (!passwordPattern.test(password)) {
                 Swal.fire(
                     "Error", 
