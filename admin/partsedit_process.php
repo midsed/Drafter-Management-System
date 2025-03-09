@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     
         $imageFileType = strtolower(pathinfo($_FILES["part_image"]["name"], PATHINFO_EXTENSION));
-        $imageName = time() . "_" . basename($_FILES["part_image"]["name"]);
+        $imageName = basename($_FILES["part_image"]["name"]);
         $target_file = $target_dir . $imageName;
     
         $allowedTypes = ["jpg", "jpeg", "png"];
