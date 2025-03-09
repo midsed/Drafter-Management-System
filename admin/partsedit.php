@@ -214,35 +214,32 @@ if (!$part) {
             </div>
     
             <div class="form-group">
-    <label for="part_image">Current Image(s):</label>
-    <div class="image-preview">
-        <?php 
-        // Decode JSON if multiple images exist
-        $media = json_decode($part['Media'], true);
+                <label for="part_image">Current Image(s):</label>
+                    <div class="image-preview">
+                        <?php 
+                            $media = json_decode($part['Media'], true);
 
-        // If it's an array (multiple images)
-        if (is_array($media) && count($media) > 0): 
-            foreach ($media as $image): 
-                $filePath = $uploadDir . $image;
-                if (file_exists($filePath)): ?>
-                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
-                <?php else: ?>
-                    <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-                <?php endif; 
-            endforeach;
-        // If it's a single image (not JSON)
-        elseif (!empty($part["Media"])): 
-            $filePath = $part["Media"];
-            if (file_exists($filePath)): ?>
-                <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
-            <?php else: ?>
-                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-            <?php endif; 
-        else: ?>
-            <p class="no-image">No image available</p>
-        <?php endif; ?>
-    </div>
-</div>
+                            if (is_array($media) && count($media) > 0): 
+                                foreach ($media as $image): 
+                                    $filePath = $uploadDir . $image;
+                                if (file_exists($filePath)): ?>
+                                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                        <?php else: ?>
+                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                        <?php endif; 
+                                endforeach;
+
+                        elseif (!empty($part["Media"])): 
+                            $filePath = $part["Media"];
+                            if (file_exists($filePath)): ?>
+                                <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                        <?php else: ?>
+                            <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                        <?php endif; else: ?>
+                            <p class="no-image">No image available</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
 
 
