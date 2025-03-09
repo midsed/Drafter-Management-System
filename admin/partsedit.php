@@ -214,17 +214,42 @@ if (!$part) {
             </div>
     
             <div class="form-group">
+    <label for="part_image">Current Image(s):</label>
+    <div class="image-preview">
+        <?php 
+        // Decode JSON if multiple images exist
+        $media = json_decode($part['Media'], true);
+
+        // If it's an array (multiple images)
+        if (is_array($media) && count($media) > 0): 
+            foreach ($media as $image): 
+                $filePath = $uploadDir . $image;
+                if (file_exists($filePath)): ?>
+                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                <?php else: ?>
+                    <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                <?php endif; 
+            endforeach;
+        // If it's a single image (not JSON)
+        elseif (!empty($part["Media"])): 
+            $filePath = $part["Media"];
+            if (file_exists($filePath)): ?>
+                <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+            <?php else: ?>
+                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+            <?php endif; 
+        else: ?>
+            <p class="no-image">No image available</p>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+            <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
-                <div class="image-preview">
-                    <?php if (!empty($existingImage)): ?>
-                        <img id="previewImage" src="<?php echo $existingImage; ?>" alt="Current Part Image">
-                    <?php else: ?>
-                        <p class="no-image">No image available</p>
-                    <?php endif; ?>
-                </div>
                 <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
-
 
             <!-- Supplier Details -->
             <h2>Supplier Details</h2>
@@ -278,19 +303,27 @@ if (!$part) {
     }
 
     function previewFile(event) {
-        const preview = document.getElementById('previewImage');
+        const previewContainer = document.querySelector('.image-preview');
+        previewContainer.innerHTML = "";
+        
         const fileInput = event.target;
-        const file = fileInput.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                preview.src = reader.result;
-            };
-            reader.readAsDataURL(file);
+        const files = fileInput.files;
+        
+        if (files.length > 0) {
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.alt = "New Image Preview";
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
         } else {
-            preview.src = "images/no-image.png";
+            previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
         }
     }
+
 
 </script>
