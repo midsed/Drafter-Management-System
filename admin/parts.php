@@ -158,6 +158,16 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+    .swal2-popup { font-family: "Inter", sans-serif !important; }
+    .swal2-title { font-weight: 700 !important; }
+    .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
+</style>
+
 <script>
 function archivePart(partID) {
     Swal.fire({
@@ -165,9 +175,10 @@ function archivePart(partID) {
         text: "Do you want to archive this part?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, archive it!"
+        confirmButtonColor: "#6c5ce7",
+        cancelButtonColor: "#d63031",
+        confirmButtonText: "Yes, archive it!",
+        cancelButtonText: "Cancel"
     }).then((result) => {
         if (result.isConfirmed) {
             fetch('archive_part.php', {
@@ -180,14 +191,20 @@ function archivePart(partID) {
                 Swal.fire({
                     title: "Archived!",
                     text: data,
-                    icon: "success"
+                    icon: "success",
+                    confirmButtonColor: "#6c5ce7"
                 }).then(() => {
                     location.reload();
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire("Error", "Something went wrong!", "error");
+                Swal.fire({
+                    title: "Error",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonColor: "#d63031"
+                });
             });
         }
     });
@@ -215,14 +232,20 @@ function addToCart(partID, name, make, model, price, image, location) {
         Swal.fire({
             title: "Added to Cart!",
             text: data,
-            icon: "success"
+            icon: "success",
+            confirmButtonColor: "#6c5ce7"
         }).then(() => {
             location.reload();
         });
     })
     .catch(error => {
         console.error('Error:', error);
-        Swal.fire("Error", "Something went wrong!", "error");
+        Swal.fire({
+            title: "Error",
+            text: "Something went wrong!",
+            icon: "error",
+            confirmButtonColor: "#d63031"
+        });
     });
 }
 

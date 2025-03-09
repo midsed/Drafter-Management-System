@@ -48,31 +48,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conn->commit(); // Commit changes if both operations succeed
 
         echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+        echo '<style>
+            @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+            .swal2-popup { font-family: "Inter", sans-serif !important; }
+            .swal2-title { font-weight: 700 !important; }
+            .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+        </style>';
+        
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
                     title: "Success!",
                     text: "User updated successfully!",
                     icon: "success",
-                    confirmButtonText: "OK"
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#6c5ce7"
                 }).then(() => {
                     window.location = "users.php";
                 });
             });
         </script>';
-    } catch (Exception $e) {
-        $conn->rollback(); // Rollback in case of failure
-        echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
-        echo '<script>
-            document.addEventListener("DOMContentLoaded", function() {
-                Swal.fire({
-                    title: "Error!",
-                    text: "Error updating user: ' . addslashes($e->getMessage()) . '",
-                    icon: "error",
-                    confirmButtonText: "OK"
+        } catch (Exception $e) {
+            $conn->rollback(); // Rollback in case of failure
+        
+            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Error updating user: ' . addslashes($e->getMessage()) . '",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#d63031"
+                    });
                 });
-            });
-        </script>';
+            </script>';
     }
 
     $conn->close();
