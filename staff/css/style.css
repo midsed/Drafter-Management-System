@@ -99,9 +99,10 @@ body {
 }
 
 .topbar-logo img {
-    height: 40px; 
-    width: auto;
+    height: 145px; 
+    width:145px;
     margin-left: 200px;
+    margin-top: 7px;
 }
 
 .topbar .toggle-btn {
