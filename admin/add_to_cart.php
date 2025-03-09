@@ -1,39 +1,45 @@
 <?php
 session_start();
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
     echo "Unauthorized";
     exit();
 }
 
-if (isset($_POST['id'], $_POST['name'], $_POST['make'], $_POST['model'], $_POST['price'], $_POST['media'], $_POST['location'])) {
-    $partID = $_POST['id'];
-    $name = $_POST['name'];
-    $make = $_POST['make'];
-    $model = $_POST['model'];
-    $price = $_POST['price'];
-    $media = $_POST['media'];
-    $location = $_POST['location'];
+if (isset($_POST['id'])) {
+    $partID = intval($_POST['id']);
 
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart'] = [];
-    }
+    $stmt = $conn->prepare("SELECT Name, Make, Model, Price, Media, Location FROM part WHERE PartID = ? AND archived = 0");
+    $stmt->bind_param("i", $partID);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if (isset($_SESSION['cart'][$partID])) {
-        $_SESSION['cart'][$partID]['Quantity'] += 1;
+    if ($part = $result->fetch_assoc()) {
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+
+        if (isset($_SESSION['cart'][$partID])) {
+            $_SESSION['cart'][$partID]['Quantity'] += 1;
+        } else {
+            $_SESSION['cart'][$partID] = [
+                'Name' => $part['Name'],
+                'Make' => $part['Make'],
+                'Model' => $part['Model'],
+                'Price' => $part['Price'],
+                'Media' => $part['Media'],
+                'Location' => $part['Location'],
+                'Quantity' => 1
+            ];
+        }
+
+        echo "Item added to cart";
     } else {
-        $_SESSION['cart'][$partID] = [
-            'Name' => $name,
-            'Make' => $make,
-            'Model' => $model,
-            'Price' => $price,
-            'Media' => $media,
-            'Location' => $location,
-            'Quantity' => 1
-        ];
+        echo "Part not found or archived";
     }
 
-    echo "Item added to cart";
+    $stmt->close();
 } else {
     echo "Invalid request";
 }

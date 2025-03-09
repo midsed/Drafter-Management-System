@@ -1,18 +1,26 @@
 <?php
 session_start();
 
+// Redirect if the user is not logged in
 if (!isset($_SESSION['UserID'])) {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_POST['change'])) {
+// Initialize cart if not already set
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+// Handle quantity update request (AJAX call)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['change'])) {
     $partID = $_POST['partID'];
     $change = intval($_POST['change']);
 
     if (isset($_SESSION['cart'][$partID])) {
         $_SESSION['cart'][$partID]['Quantity'] += $change;
 
+        // Prevent quantity from going below 1
         if ($_SESSION['cart'][$partID]['Quantity'] < 1) {
             $_SESSION['cart'][$partID]['Quantity'] = 1;
         }
@@ -44,11 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     <div class="content">
         <div class="parts-container" id="partsList">
             <?php
-            if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+            if (!empty($_SESSION['cart'])) {
                 foreach ($_SESSION['cart'] as $partID => $part) {
-                    // Assuming part details are stored in the session
                     $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
-                    $totalPrice = (isset($part['Price']) ? floatval($part['Price']) : 0) * (isset($part['Quantity']) ? intval($part['Quantity']) : 0);
+                    $totalPrice = floatval($part['Price']) * intval($part['Quantity']);
                     echo "
                     <div class='part-card'>
                         <a href='partdetail.php?id=$partID'><img src='$imageSrc' alt='Part Image'></a>
@@ -56,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
-                        <p><strong>Price:</strong> Php " . number_format(floatval($part['Price'] ?? 0), 2) . "</p>
+                        <p><strong>Price:</strong> Php " . number_format(floatval($part['Price']), 2) . "</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
-                        <p><strong>Total:</strong> Php " . number_format(floatval($totalPrice), 2) . "</p>
+                        <p><strong>Total:</strong> Php " . number_format($totalPrice, 2) . "</p>
                         <div class='actions'>
                             <button class='qty-btn' onclick='updateQuantity(\"$partID\", -1)'>-</button>
                             <input type='text' value='{$part['Quantity']}' readonly class='quantity-input'>
@@ -76,10 +83,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
 
         <div class="summary">
             <h2 style="font-family: 'Poppins', sans-serif;">Selected List Summary</h2>
-            <p style="font-family: 'Poppins', sans-serif;">No. of Items: <strong><?php echo count($_SESSION['cart']); ?></strong></p>
-            <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php <?php echo number_format(array_sum(array_map(function($part) { return (isset($part['Price']) ? floatval($part['Price']) : 0) * (isset($part['Quantity']) ? intval($part['Quantity']) : 0); }, $_SESSION['cart'])), 2); ?></strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">No. of Items: <strong><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php <?php
+            echo number_format(array_sum(array_map(function ($part) {
+                return floatval($part['Price']) * intval($part['Quantity']);
+            }, $_SESSION['cart'])), 2);
+            ?></strong></p>
 
-            <button class="confirm-btn">Print Receipt</button>
+                <button class="confirm-btn" onclick="printReceipt()">Print Receipt</button>
         </div>
     </div>
 </div>
@@ -92,6 +103,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
+    function printReceipt() {
+        const printContent = document.querySelector('.content').innerHTML;
+        const originalContent = document.body.innerHTML;
+
+        document.body.innerHTML = printContent;
+        window.print();
+        document.body.innerHTML = originalContent;
+
+        fetch('log_receipt.php', {method: 'POST'}).then(() => location.reload());
+    }
+
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
             method: 'POST',
@@ -108,22 +131,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     }
 
     function updateQuantity(partID, change) {
-        fetch('', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'partID=' + partID + '&change=' + change
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
+    fetch('cart.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'partID=' + encodeURIComponent(partID) + '&change=' + encodeURIComponent(change)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
     function searchCart() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const parts = document.querySelectorAll(".part-card");
