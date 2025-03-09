@@ -121,6 +121,14 @@ $username = $user['Username'];
         text-align: center;
         width: 60px;
     }
+
+    .image-preview {
+        display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+    }
+    .image-preview img {
+        max-width: 300px; height: auto; border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
 </style>
 
 <div class="main-content">
@@ -215,7 +223,10 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="part_image">Upload Image:</label>
-                <input type="file" id="part_image" name="part_image">
+                <div class="image-preview">
+                    <img id="previewImage" src="images/no-image.png" alt="No Image Available">
+                </div>
+                <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
 
             <!-- Supplier Details -->
@@ -266,6 +277,22 @@ $username = $user['Username'];
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
+    }
+
+    function previewFile(event) {
+        const preview = document.getElementById('previewImage');
+        const fileInput = event.target;
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "images/no-image.png";
+        }
     }
 </script>
 
