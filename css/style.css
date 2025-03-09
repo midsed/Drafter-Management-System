@@ -9,6 +9,7 @@ body {
     align-items: center;
     min-height: 100vh;
     overflow: hidden;
+    background-color: #141414;
 }
 
 #canvas-basic {
@@ -22,38 +23,71 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    animation: fadeInBg 3s ease-in-out;
+}
+
+@keyframes fadeInBg {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .container {
     display: flex;
-    flex-direction: column;
-    max-width: 100%;
-    width: 80%;
+    width: 85%;
     max-width: 1300px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    min-height: 400px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(25px);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+    animation: scaleUp 1s ease;
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.container:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
 }
 
 .form-container {
-    padding: 20px;
-    width: 100%;
-    margin-right: 20px;
-}
+    padding: 40px;
+    width: 65%;
+        color: #ffffff;
+        margin-bottom: 20px;
+        margin-right: 30px;
+        animation: fadeSlide 1s ease;
+    }
+    
 
 h1 {
-    margin-bottom: 20px;
-    color: #333;
+    margin-bottom: 25px;
+    color: #ffffff;
     text-align: center;
+    font-weight: 600;
+    animation: fadeSlide 1s ease;
+}
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 label {
-    display: block;
-    margin: 10px 0 5px;
-    color: #555;
+    color: #ccc;
+    font-weight: 400;
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateX(-15px);
+    animation: labelFadeIn 1s ease forwards;
+}
+
+@keyframes labelFadeIn {
+    to { opacity: 1; transform: translateX(0); }
 }
 
 input[type="text"],
@@ -62,96 +96,137 @@ input[type="email"],
 input[type="number"] {
     width: 100%;
     padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-    background-color: #f5f5f5;
-    transition: border-color 0.3s;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 input:focus {
-    border-color: #9b0000;
+    background-color: rgba(255, 255, 255, 0.712);
     outline: none;
+    transform: scale(1.03);
 }
 
 button {
     width: 100%;
     padding: 15px;
-    background: #202020;
+    background: linear-gradient(135deg, #9c0b0b, #202020);
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 10px;
+    font-weight: 600;
     font-size: 16px;
-    transition: background 0.3s;
+    transition: background-position 0.5s, transform 0.3s;
+    background-size: 200% 200%;
+    background-position: left bottom;
 }
 
 button:hover {
-    background: #5f5f5f;
+    background-position: right top;
+    transform: scale(1.05);
 }
 
 a {
-    display: block;
-    margin-top: 10px;
-    text-decoration: none;
-    color: #9b0000;
+    margin-top: 15px;
+    color: #ff4d4d;
     text-align: center;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: #fff;
+    text-shadow: 0 0 5px #ff4d4d;
 }
 
 .right-section {
-    display: flex;
-    width: 30%; /* Adjusted width to hug the right side */
-    justify-content: center;
-    align-items: center;
+    width: 35%;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(156,11,11,0.8), rgba(32,32,32,0.8));
     color: #fff;
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 15px;
-    padding: 20px;
     text-align: center;
-    background: rgba(0, 0, 0, 0.7);
-    background: linear-gradient(140deg, #000000, #9c210b);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.6s ease, transform 0.4s ease;
 }
 
-.right-section img {
-    max-width: 50%;
-    margin-top: 20px;
-    border-radius: 10px;
+.right-section:hover {
+    background: linear-gradient(135deg, rgba(156,11,11,1), rgba(32,32,32,1));
+    transform: scale(1.01);
 }
 
 .center-text {
     text-align: center;
 }
 
-@media (min-width: 768px) {
-    .container {
-        flex-direction: row;
-    }
+.floating-logo {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    width: 120px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    animation: floatRotate 4s ease-in-out infinite, pulseGlow 2.5s infinite alternate, fadeInLogo 2s ease;
+    transition: transform 0.3s ease;
+    z-index: 10;
+}
 
-    .form-container {
-        width: 70%; /* Increased width for the form container */
-    }
+.floating-logo:hover {
+    transform: scale(1.1);
+}
+.eye-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px; 
+    height: 30px; 
+}
+.input-container {
+    position: relative;
+}
 
-    .right-section {
-        display: flex;
-        width: 65%; /* Adjusted width to hug the right side */
-        padding: 20px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
+@keyframes floatRotate {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes pulseGlow {
+    from { box-shadow: 0 0 15px rgba(255,77,77,0.5); }
+    to { box-shadow: 0 0 30px rgba(255,77,77,1); }
+}
+
+@keyframes fadeInLogo {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 @media (max-width: 768px) {
-    .form-container {
+    .container {
+        flex-direction: column;
+        width: 90%;
+        padding: 20px;
+    }
+
+    .form-container, .right-section {
         width: 100%;
+        padding: 20px;
     }
 
     .right-section {
         display: none;
+    }
+
+    .floating-logo {
+        width: 80px;
+        top: 3%;
+        right: 3%;
     }
 }

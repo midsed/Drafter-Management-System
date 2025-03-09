@@ -83,7 +83,7 @@ include('navigation/topbar.php');
                 <span>Sort By</span>
                 <div class="dropdown">
                     <button id="sortButton" class="sort-icon" title="Sort">
-                        <i class="fas fa-sort"></i>
+                        <i class="fas fa-sort-alpha-down"></i>
                     </button>
                     <div id="sortDropdown" class="dropdown-content">
                         <button class="sort-option red-button" data-sort="asc">Ascending</button>
@@ -233,7 +233,7 @@ function addToCart(partID, name, make, model, price, image, location) {
             icon: "success",
             confirmButtonColor: "#6c5ce7"
         }).then(() => {
-            location.reload(); // Reload the page to see the updated cart
+            location.reload();
         });
     })
     .catch(error => {
@@ -324,17 +324,15 @@ document.addEventListener("DOMContentLoaded", function () {
 function filterParts(selectedMakes, selectedModels) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1].trim().toLowerCase(); // Convert to lowercase
-        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1].trim().toLowerCase(); // Convert to lowercase
+        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1].trim().toLowerCase();
+        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1].trim().toLowerCase();
 
-        // Convert selected makes and models to lowercase for comparison
         const lowerSelectedMakes = selectedMakes.map(make => make.toLowerCase());
         const lowerSelectedModels = selectedModels.map(model => model.toLowerCase());
 
         const matchesMake = lowerSelectedMakes.length === 0 || lowerSelectedMakes.includes(make);
         const matchesModel = lowerSelectedModels.length === 0 || lowerSelectedModels.includes(model);
 
-        // Show part if it matches both the selected makes and models
         part.style.display = matchesMake && matchesModel ? "" : "none";
     });
 }
@@ -382,13 +380,9 @@ function updateModelFilter() {
         Isuzu: ["D-Max", "MU-X", "Traviz", "N-Series", "F-Series", "Rodeo", "Alterra", "Crosswind"]
     };
 
-    // Get all selected makes
     const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked')).map(cb => cb.value);
-
-    // Create a set to avoid duplicate models
     const modelSet = new Set();
 
-    // Loop through selected makes and add their models to the set
     selectedMakes.forEach(make => {
         if (models[make]) {
             models[make].forEach(model => {
@@ -397,18 +391,17 @@ function updateModelFilter() {
         }
     });
 
-    // Populate the model filter with unique models
     modelSet.forEach(model => {
         modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
     });
 }
 function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+}
 </script>
 
 <style>
@@ -447,7 +440,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    position: relative; /* Added for positioning the cart count */
+    position: relative;
 }
 
 .red-button {
@@ -479,11 +472,10 @@ body {
     color: darkred;
 }
 
-/* Cart Count Style */
 .cart-count {
     position: relative;
-    top: -13px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed */
+    top: -13px;
+    right: 10px;
     background-color: green;
     color: white;
     border-radius: 50%;
@@ -593,13 +585,12 @@ body {
     font-weight: bold;
 }
 
-/* Dropdown Menu */
 .dropdown-content {
     display: none;
     position: absolute;
     background-color: #fff;
-    min-width: 500px; /* Increased width */
-    max-height: 500px; /* Increased height */
+    min-width: 500px;
+    max-height: 500px;
     overflow-y: auto;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -675,14 +666,13 @@ body {
     background-color: #bbb;
 }
 
-/* Sort Buttons */
 .sort-option.red-button {
     display: block;
     width: 100%;
     text-align: left;
     margin: 5px 0;
-    background-color: white; /* Changed to white */
-    color: #E10F0F; /* Changed text color */
-    border: 1px solid #E10F0F; /* Added border */
+    background-color: white;
+    color: #E10F0F;
+    border: 1px solid #E10F0F;
 }
 </style>
