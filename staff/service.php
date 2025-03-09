@@ -100,79 +100,79 @@ include('dbconnect.php');
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+    .swal2-popup { font-family: "Inter", sans-serif !important; }
+    .swal2-title { font-weight: 700 !important; }
+    .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
+</style>
+
 <script>
-    // Search functionality: Filter table rows based on the search input.
-    function searchTable() {
-        const searchInput = document.getElementById("searchInput").value.toLowerCase();
-        const table = document.querySelector(".supplier-table");
-        const rows = table.getElementsByTagName("tr");
+// 🟢 Improved Sidebar Toggle Function
+function toggleSidebar() {
+    document.querySelector('.sidebar')?.classList.toggle('collapsed');
+    document.querySelector('.main-content')?.classList.toggle('collapsed');
+}
 
-        // Start from index 1 to skip the header row
-        for (let i = 1; i < rows.length; i++) { 
-            let cells = rows[i].getElementsByTagName("td");
-            let match = false;
-
-            for (let j = 0; j < cells.length; j++) {
-                if (cells[j] && cells[j].textContent.toLowerCase().includes(searchInput)) {
-                    match = true;
-                    break;
-                }
-            }
-
-            rows[i].style.display = match ? "" : "none";
-        }
-    }
-
-    document.getElementById("searchInput").addEventListener("keyup", searchTable);
-
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+// 🔎 Search Functionality (More Optimized)
+function searchTable() {
+    const searchInput = document.getElementById("searchInput")?.value.toLowerCase();
+    if (!searchInput) return;
     
-    // Archive service functionality with SweetAlert
-    function archiveService(serviceID) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you want to archive this service?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, archive it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('archive_service.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'service_id=' + serviceID
-                })
-                .then(response => response.text())
-                .then(data => {
-                    Swal.fire({
-                        title: "Success!",
-                        text: data,
-                        icon: "success"
-                    }).then(() => {
-                        location.reload();
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire("Error", "Something went wrong!", "error");
-                });
-            }
-        });
-    }
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+    document.querySelectorAll(".supplier-table tr:not(:first-child)").forEach(row => {
+        row.style.display = [...row.cells].some(cell => 
+            cell.textContent.toLowerCase().includes(searchInput)
+        ) ? "" : "none";
+    });
+}
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
+// Attach search event listener (Prevents duplicate event listeners)
+document.getElementById("searchInput")?.addEventListener("keyup", searchTable);
+
+// 🗂️ Archive Service with SweetAlert2
+function archiveService(serviceID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to archive this service?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, archive it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('archive_service.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `service_id=${serviceID}`
+            })
+            .then(response => response.text())
+            .then(data => {
+                Swal.fire({
+                    title: "Archived!",
+                    text: data,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#28a745"
+                }).then(() => location.reload());
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#d33"
+                });
+            });
+        }
+    });
+}
 </script>
 
 <style>

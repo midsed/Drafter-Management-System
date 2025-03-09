@@ -51,7 +51,7 @@ document.getElementById("reset-password-form").addEventListener("submit", functi
     let newPassword = document.getElementById("new_password").value;
     let confirmPassword = document.getElementById("confirm_password").value;
 
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
 
     if (!newPassword || !confirmPassword) {
         Swal.fire({

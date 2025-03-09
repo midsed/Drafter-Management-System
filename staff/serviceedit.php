@@ -187,7 +187,7 @@ if (!$service) {
 
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
-                <button type="reset" class="red-button btn">Reset</button>
+                <button type="button" class="red-button btn" onclick="resetForm()">Reset</button>
             </div>
         </form>
     </div>
@@ -213,5 +213,9 @@ if (!$service) {
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
+    }
+    function resetForm() {
+        document.querySelector("form").reset();
+        document.querySelectorAll("input").forEach(input => input.value = "");
     }
 </script>

@@ -106,8 +106,8 @@ include('dbconnect.php');
     .swal2-popup { font-family: "Inter", sans-serif !important; }
     .swal2-title { font-weight: 700 !important; }
     .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-    .swal2-confirm { font-weight: bold !important; background-color: #d33 !important; color: white !important; }
-    .swal2-cancel { background-color: #3085d6 !important; color: white !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
 </style>
 
 <script>

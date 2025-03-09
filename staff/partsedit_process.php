@@ -136,10 +136,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($partUpdated || $supplierUpdated) {
-        echo "<script>alert('Update successful!'); window.location.href='parts.php';</script>";
-    } else {
-        echo "<script>alert('No changes detected. Nothing updated.'); window.history.back();</script>";
+        echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+        echo '<style>
+            @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+            .swal2-popup { font-family: "Inter", sans-serif !important; }
+            .swal2-title { font-weight: 700 !important; }
+            .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+        </style>';
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Part details updated successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#6c5ce7"
+                }).then(() => {
+                    window.location = "parts.php";
+                });
+            });
+        </script>';
     }
+    exit();
 }
 
 $conn->close();

@@ -73,9 +73,6 @@ include('navigation/topbar.php');
     <?php } ?>
 </div>
 
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
@@ -83,7 +80,7 @@ include('navigation/topbar.php');
     .swal2-title { font-weight: 700 !important; }
     .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
     .swal2-confirm { font-weight: bold !important; background-color: #28a745 !important; color: white !important; }
-    .swal2-cancel { background-color: #d33 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
 </style>
 
 <script>

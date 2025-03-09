@@ -228,7 +228,7 @@ if (!$part) {
 
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
-                <button type="reset" class="red-button btn">Reset</button>
+                <button type="button" class="red-button btn" onclick="clearForm();">Reset</button>
             </div>
         </form>
     </div>
@@ -241,5 +241,17 @@ if (!$part) {
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
+    }
+
+    function clearForm() {
+        document.querySelectorAll("input, select, textarea").forEach(element => {
+            if (element.type === "file") {
+                element.value = ""; // Clear file input
+            } else if (element.tagName === "SELECT") {
+                element.selectedIndex = 0; // Reset select to first option
+            } else {
+                element.value = ""; // Clear all other fields
+            }
+        });
     }
 </script>
