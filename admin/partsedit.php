@@ -109,6 +109,20 @@ if (!$part) {
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
+    .image-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 </style>
 
 <div class="main-content">
@@ -198,11 +212,19 @@ if (!$part) {
                 <label for="description">Description:</label>
                 <textarea id="description" name="description"><?php echo htmlspecialchars($part['Description']); ?></textarea>
             </div>
-
+    
             <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
-                <input type="file" id="part_image" name="part_image">
+                <div class="image-preview">
+                    <?php if (!empty($existingImage)): ?>
+                        <img id="previewImage" src="<?php echo $existingImage; ?>" alt="Current Part Image">
+                    <?php else: ?>
+                        <p class="no-image">No image available</p>
+                    <?php endif; ?>
+                </div>
+                <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
+
 
             <!-- Supplier Details -->
             <h2>Supplier Details</h2>
@@ -254,4 +276,21 @@ if (!$part) {
             }
         });
     }
+
+    function previewFile(event) {
+        const preview = document.getElementById('previewImage');
+        const fileInput = event.target;
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "images/no-image.png";
+        }
+    }
+
 </script>
