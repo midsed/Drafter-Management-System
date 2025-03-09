@@ -130,7 +130,7 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="part_price">Part Price:</label>
-                <input type="number" id="part_price" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" step="0.01" min="0" required>
+                <input type="number" id="part_price" placeholder="0.00" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" step="0.01" min="0" required>
             </div>
 
             <div class="form-group">
