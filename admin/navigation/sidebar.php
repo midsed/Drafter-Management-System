@@ -56,6 +56,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
 }
 
 .sidebar li.active {
-    border-left: 4px solid #ff0000;
+    border-left: 4px solidrgb(255, 255, 255);
 }
 </style>

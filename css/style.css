@@ -116,7 +116,7 @@ a:hover {
     padding: 20px;
     text-align: center;
     background: rgba(0, 0, 0, 0.7);
-    background: linear-gradient(-380deg, #000000, #9c0b0b);
+    background: linear-gradient(140deg, #000000, #9c210b);
 }
 
 .right-section img {
