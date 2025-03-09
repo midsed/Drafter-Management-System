@@ -47,11 +47,11 @@
     
         var granimInstance = new Granim({
     element: '#canvas-basic',
-    direction: 'top-bottom',
+    direction: 'diagonal',
     isPausedWhenNotInView: true,
     image: {
-        source: './images/Drafter BG2.png', // Ensure this path is correct
-        blendingMode: 'multiply' // Change blending mode if needed
+        source: './images/Drafter BG2.png', 
+        blendingMode: 'darken' 
     },
     states: {
         "default-state": {
@@ -60,7 +60,7 @@
                 ['#FF6B6B', '#FFF5E1'],
                 ['#80d3fe', '#7ea0c4']
             ],
-            transitionSpeed: 11000
+            transitionSpeed: 5000
         }
     }
 });
