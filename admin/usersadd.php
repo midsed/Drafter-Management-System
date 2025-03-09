@@ -160,7 +160,7 @@ function validateForm() {
     let password = document.getElementById("password").value;
     let email = document.getElementById("email").value;
     
-    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!passwordRegex.test(password)) {
@@ -205,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $date_created = date('Y-m-d H:i:s');
 
     // Check password again on the server side
-    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/', $password)) {
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/', $password)) {
         echo "<script>
             Swal.fire({
                 title: 'Invalid Password!',
