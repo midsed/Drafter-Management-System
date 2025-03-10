@@ -12,15 +12,17 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-// Handle quantity update request (AJAX call)
+$sql = "SELECT r.ReceiptID, u.FName, u.LName
+        FROM receipt r
+        JOIN user u ON r.UserID = u.UserID
+        WHERE r.ReceiptID = ?";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['change'])) {
     $partID = $_POST['partID'];
     $change = intval($_POST['change']);
 
     if (isset($_SESSION['cart'][$partID])) {
         $_SESSION['cart'][$partID]['Quantity'] += $change;
-
-        // Prevent quantity from going below 1
         if ($_SESSION['cart'][$partID]['Quantity'] < 1) {
             $_SESSION['cart'][$partID]['Quantity'] = 1;
         }
@@ -109,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     let receiptHTML = `
         <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
             <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin-top:-20px; margin-bottom: -70px;">
-            <p style="color: #555; font-weight:"bold"; font-size: 18px; margin-bottom: 100px;">Inventory Management System</p>
+            <p style="color: #555; font-weight: bold; font-size: 18px; margin-bottom: 50px;">Inventory Management System</p>
             <p><strong>Receipt ID:</strong> ${receiptID}</p>
             <p><strong>Retrieved By:</strong> ${userFullName}</p>
             <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
@@ -117,11 +119,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
             <h3 style="color: #333;">Parts Retrieved</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <tr style="background: #f5f5f5;">
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Part Name</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Model</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Location</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Qty.</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Total Price</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Part Name</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Model</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Location</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty.</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Total Price</th>
                 </tr>`;
 
     let totalCost = 0;
@@ -138,13 +140,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 
         receiptHTML += `
             <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partName}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partModel}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partLocation}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partQuantity}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">Php ${totalPrice.toFixed(2)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partModel}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partLocation}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partQuantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">Php ${totalPrice.toFixed(2)}</td>
             </tr>`;
     });
+
 
     receiptHTML += `
             </table>
@@ -157,9 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     printWindow.document.close();
     printWindow.print();
 }
-
-
-
 
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
@@ -344,8 +344,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     body {
         -webkit-print-color-adjust: exact;
     }
-
-
     h2, h3 {
         margin: 0;
     }
