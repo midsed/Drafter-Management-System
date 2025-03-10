@@ -343,12 +343,20 @@ function sortParts(order) {
     const partsArray = Array.from(partsContainer.children);
 
     partsArray.sort((a, b) => {
-        const nameA = a.querySelector("p").textContent.toLowerCase();
-        const nameB = b.querySelector("p").textContent.toLowerCase();
-        return order === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+        const nameA = a.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
+        const nameB = b.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
+
+        if (order === "asc") {
+            return nameA.localeCompare(nameB); // Sort in ascending order
+        } else if (order === "desc") {
+            return nameB.localeCompare(nameA); // Sort in descending order
+        }
     });
 
+    // Clear the current parts list
     partsContainer.innerHTML = "";
+
+    // Append the sorted parts back to the container
     partsArray.forEach(part => partsContainer.appendChild(part));
 }
 
