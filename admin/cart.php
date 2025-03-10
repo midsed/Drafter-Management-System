@@ -108,9 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     const parts = document.querySelectorAll('.part-card');
     let receiptHTML = `
         <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <img src="images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 120px; margin-bottom: 10px;">
-            <h2 style="color: #333; margin-bottom: 5px;">Drafter Autotech</h2>
-            <p style="color: #555; font-size: 14px; margin-bottom: 20px;">Inventory Management System</p>
+            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin-top:-20px; margin-bottom: -70px;">
+            <p style="color: #555; font-weight:"bold"; font-size: 18px; margin-bottom: 100px;">Inventory Management System</p>
             <p><strong>Receipt ID:</strong> ${receiptID}</p>
             <p><strong>Retrieved By:</strong> ${userFullName}</p>
             <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
