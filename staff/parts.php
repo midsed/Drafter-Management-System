@@ -109,7 +109,7 @@ include('navigation/topbar.php');
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
-                        <p><strong>Category:</strong> {$part['Category']}</p> <!-- Add this line -->
+                        <p><strong>Category:</strong> {$part['Category']}</p> <!-- This is the 4th <p> tag -->
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
@@ -269,16 +269,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Apply filter
-applyFilterButton.addEventListener("click", function () {
+    applyFilterButton.addEventListener("click", function () {
     const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
+    console.log("Selected Categories:", selectedCategories); // Debugging line
     filterParts(selectedCategories);
-});
+    });
 
-// Clear filter
-clearFilterButton.addEventListener("click", function () {
-    document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-    filterParts([]);
-});
+    // Clear filter
+    clearFilterButton.addEventListener("click", function () {
+        document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
+        filterParts([]);
+    });
 
     // Sort functionality
     document.querySelectorAll(".sort-option").forEach(option => {
@@ -294,7 +295,14 @@ clearFilterButton.addEventListener("click", function () {
 function filterParts(selectedCategories) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const category = part.querySelector("p:nth-child(4)").textContent.split(": ")[1].trim().toLowerCase(); // Adjust the index if needed
+        const categoryElement = part.querySelector("p:nth-child(4)"); // Adjust the index if needed
+        if (!categoryElement) {
+            console.error("Category element not found in part card:", part);
+            return;
+        }
+        const category = categoryElement.textContent.split(": ")[1].trim().toLowerCase();
+        console.log("Category:", category); // Debugging line
+
         const lowerSelectedCategories = selectedCategories.map(cat => cat.toLowerCase());
 
         const matchesCategory = lowerSelectedCategories.length === 0 || lowerSelectedCategories.includes(category);
@@ -302,6 +310,19 @@ function filterParts(selectedCategories) {
         part.style.display = matchesCategory ? "" : "none";
     });
 }
+
+// Apply filter
+applyFilterButton.addEventListener("click", function () {
+    const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
+    console.log("Selected Categories:", selectedCategories); // Debugging line
+    filterParts(selectedCategories);
+});
+
+// Clear filter
+clearFilterButton.addEventListener("click", function () {
+    document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
+    filterParts([]);
+});
 
 // Sort parts by name (ascending or descending)
 function sortParts(order) {
