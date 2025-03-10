@@ -240,8 +240,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortButton = document.getElementById("sortButton");
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
-    const makeFilter = document.getElementById("makeFilter");
-    const modelFilter = document.getElementById("modelFilter");
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -290,18 +288,6 @@ clearFilterButton.addEventListener("click", function () {
         });
     });
 
-    // Dynamic model filtering
-    makeFilter.addEventListener("change", function (event) {
-        const selectedMake = event.target.value;
-        if (event.target.checked) {
-            updateModelFilter(selectedMake);
-        } else {
-            updateModelFilter();
-        }
-    });
-
-    // Initial model filter update
-    updateModelFilter();
 });
 
 // Filter parts based on selected categories
