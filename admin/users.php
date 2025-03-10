@@ -100,22 +100,25 @@ if (!isset($_SESSION['Username'])) {
 </div>
 
 <style>
-  .search-container {
-    display: flex;
-    justify-content: flex-start; 
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+ .search-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-  #searchInput {
-    width: 250px; 
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: center;
-  }
+    .search-container input[type="text"] {
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .search-container input[type="text"]:focus {
+        outline: none;
+        border-color: #007bff;
+    }
 
   .red-button {
     background: #E10F0F;

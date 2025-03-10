@@ -207,20 +207,24 @@ function archiveService(serviceID) {
         margin-left: 10px;
     }
 
-    /* Mimic quick search and search button styling like parts.php */
     .search-container {
         display: flex;
-        justify-content: flex-start;
         align-items: center;
         gap: 10px;
-        margin-bottom: 10px;
     }
+
     .search-container input[type="text"] {
-        width: 250px;
-        padding: 8px;
-        font-size: 14px;
+        width: 300px;
+        padding: 10px;
         border: 1px solid #ccc;
-        border-radius: 4px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .search-container input[type="text"]:focus {
+        outline: none;
+        border-color: #007bff;
     }
     .red-button {
         background: #E10F0F;
