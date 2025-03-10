@@ -206,16 +206,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .parts-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 20px;
     }
 
     .part-card {
-        background: white;
-        padding: 15px;
+        width: 250px; /* Adjust as needed */
+        background: #fff;
         border-radius: 8px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 15px;
         text-align: center;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -282,7 +284,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .summary {
-        margin-top: 30px;
+        margin-top: 120px;
+        margin-left: 60px;
         text-align: center;
     }
 
@@ -342,9 +345,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         -webkit-print-color-adjust: exact;
     }
 
-    .part-card {
-        display: none; /* Hide regular cart items during print */
-    }
 
     h2, h3 {
         margin: 0;
