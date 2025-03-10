@@ -36,36 +36,21 @@ include('navigation/topbar.php');
                     <div id="filterDropdown" class="dropdown-content">
                         <!-- Make Filter -->
                         <div class="filter-section">
-                            <h4>Make</h4>
-                            <div class="filter-options" id="makeFilter">
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Toyota"> Toyota</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Honda"> Honda</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Ford"> Ford</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Chevrolet"> Chevrolet</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Nissan"> Nissan</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="BMW"> BMW</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mercedes-Benz"> Mercedes-Benz</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Audi"> Audi</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Hyundai"> Hyundai</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Kia"> Kia</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Volkswagen"> Volkswagen</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Subaru"> Subaru</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mazda"> Mazda</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Lexus"> Lexus</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Jeep"> Jeep</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Tesla"> Tesla</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="BYD"> BYD</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Suzuki"> Suzuki</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Mitsubishi"> Mitsubishi</label>
-                                <label><input type="checkbox" class="filter-option" data-filter="make" value="Isuzu"> Isuzu</label>
-                            </div>
-                        </div>
+                            <h4>Category</h4>
+                            <div class="filter-options" id="categoryFilter">
+                                <?php
+                                // Fetch unique categories from the database
+                                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
+                                $categoryResult = $conn->query($categoryQuery);
 
-                        <!-- Model Filter -->
-                        <div class="filter-section">
-                            <h4>Model</h4>
-                            <div class="filter-options" id="modelFilter">
-                                <!-- Models will be dynamically populated here -->
+                                if ($categoryResult->num_rows > 0) {
+                                    while ($category = $categoryResult->fetch_assoc()) {
+                                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
+                                    }
+                                } else {
+                                    echo "<p>No categories found.</p>";
+                                }
+                                ?>
                             </div>
                         </div>
 
@@ -113,7 +98,7 @@ include('navigation/topbar.php');
         $totalRow = $totalResult->fetch_assoc();
         $totalPages = ceil($totalRow['total'] / $limit);
 
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -125,6 +110,7 @@ include('navigation/topbar.php');
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
+                        <p><strong>Category:</strong> {$part['Category']}</p> <!-- Add this line -->
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
@@ -255,8 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortButton = document.getElementById("sortButton");
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
-    const makeFilter = document.getElementById("makeFilter");
-    const modelFilter = document.getElementById("modelFilter");
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -287,15 +271,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Apply filter
     applyFilterButton.addEventListener("click", function () {
-        const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked')).map(checkbox => checkbox.value);
-        const selectedModels = Array.from(document.querySelectorAll('.filter-option[data-filter="model"]:checked')).map(checkbox => checkbox.value);
-        filterParts(selectedMakes, selectedModels);
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
+        filterParts(selectedCategories);
     });
 
     // Clear filter
     clearFilterButton.addEventListener("click", function () {
         document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-        filterParts([], []);
+        filterParts([]);
     });
 
     // Sort functionality
@@ -306,34 +289,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Dynamic model filtering
-    makeFilter.addEventListener("change", function (event) {
-        const selectedMake = event.target.value;
-        if (event.target.checked) {
-            updateModelFilter(selectedMake);
-        } else {
-            updateModelFilter();
-        }
-    });
 
     // Initial model filter update
-    updateModelFilter();
 });
 
-// Filter parts based on selected makes and models
-function filterParts(selectedMakes, selectedModels) {
+// Filter parts based on selected categories
+function filterParts(selectedCategories) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const make = part.querySelector("p:nth-child(2)").textContent.split(": ")[1].trim().toLowerCase();
-        const model = part.querySelector("p:nth-child(3)").textContent.split(": ")[1].trim().toLowerCase();
+        const category = part.querySelector("p:nth-child(4)").textContent.split(": ")[1].trim().toLowerCase(); // Adjust the index if needed
+        const lowerSelectedCategories = selectedCategories.map(cat => cat.toLowerCase());
 
-        const lowerSelectedMakes = selectedMakes.map(make => make.toLowerCase());
-        const lowerSelectedModels = selectedModels.map(model => model.toLowerCase());
+        const matchesCategory = lowerSelectedCategories.length === 0 || lowerSelectedCategories.includes(category);
 
-        const matchesMake = lowerSelectedMakes.length === 0 || lowerSelectedMakes.includes(make);
-        const matchesModel = lowerSelectedModels.length === 0 || lowerSelectedModels.includes(model);
-
-        part.style.display = matchesMake && matchesModel ? "" : "none";
+        part.style.display = matchesCategory ? "" : "none";
     });
 }
 
@@ -360,49 +329,6 @@ function sortParts(order) {
     partsArray.forEach(part => partsContainer.appendChild(part));
 }
 
-// Update model filter based on selected makes
-function updateModelFilter() {
-    const modelFilter = document.getElementById("modelFilter");
-    modelFilter.innerHTML = "";
-
-    const models = {
-        Toyota: ["Camry", "Corolla", "Vios", "Fortuner", "Innova", "Hilux", "RAV4", "Land Cruiser"],
-        Honda: ["Civic", "Accord", "CR-V", "City", "BR-V", "HR-V", "Jazz", "Brio"],
-        Ford: ["Mustang", "Ranger", "Everest", "EcoSport", "Explorer", "Fiesta", "Focus", "Territory"],
-        Chevrolet: ["Trailblazer", "Colorado", "Spark", "Cruze", "Trax", "Captiva", "Malibu", "Tahoe"],
-        Nissan: ["Altima", "Navara", "Terra", "Sentra", "Juke", "Patrol", "Kicks", "Almera"],
-        BMW: ["3 Series", "5 Series", "X1", "X3", "X5", "X7", "7 Series", "M3"],
-        MercedesBenz: ["C-Class", "E-Class", "S-Class", "GLC", "GLE", "GLA", "A-Class", "G-Class"],
-        Audi: ["A4", "A6", "Q3", "Q5", "Q7", "A3", "A5", "Q2"],
-        Hyundai: ["Elantra", "Tucson", "Santa Fe", "Accent", "Creta", "Kona", "Staria", "Venue"],
-        Kia: ["Seltos", "Sorento", "Sportage", "Stonic", "Picanto", "Carnival", "Rio", "Forte"],
-        Volkswagen: ["Golf", "Tiguan", "Santana", "Lavida", "Passat", "Touareg", "Polo", "Teramont"],
-        Subaru: ["Outback", "Forester", "XV", "Impreza", "BRZ", "Legacy", "Crosstrek", "WRX"],
-        Mazda: ["CX-5", "CX-9", "Mazda3", "Mazda6", "CX-30", "MX-5", "BT-50", "CX-8"],
-        Lexus: ["RX", "NX", "ES", "LS", "UX", "GX", "LX", "IS"],
-        Jeep: ["Wrangler", "Cherokee", "Compass", "Renegade", "Gladiator", "Grand Cherokee", "Commander", "Patriot"],
-        Tesla: ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck", "Roadster"],
-        BYD: ["Han", "Tang", "Song", "Qin", "Yuan", "Dolphin", "Seal", "Atto 3"],
-        Suzuki: ["Ertiga", "Swift", "Vitara", "Jimny", "Ciaz", "APV", "Carry", "XL7"],
-        Mitsubishi: ["Montero Sport", "Mirage", "Strada", "Xpander", "Outlander", "Eclipse Cross", "L300", "Pajero"],
-        Isuzu: ["D-Max", "MU-X", "Traviz", "N-Series", "F-Series", "Rodeo", "Alterra", "Crosswind"]
-    };
-
-    const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked')).map(cb => cb.value);
-    const modelSet = new Set();
-
-    selectedMakes.forEach(make => {
-        if (models[make]) {
-            models[make].forEach(model => {
-                modelSet.add(model);
-            });
-        }
-    });
-
-    modelSet.forEach(model => {
-        modelFilter.innerHTML += `<label><input type="checkbox" class="filter-option" data-filter="model" value="${model}"> ${model}</label>`;
-    });
-}
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
