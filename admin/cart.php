@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 
         <div class="summary">
             <h2 style="font-family: 'Poppins', sans-serif;">Selected List Summary</h2>
-            <p style="font-family: 'Poppins', sans-serif;">No. of Items: <strong><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">No. of Parts: <strong><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></strong></p>
             <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php <?php
             echo number_format(array_sum(array_map(function ($part) {
                 return floatval($part['Price']) * intval($part['Quantity']);
@@ -104,16 +104,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         mainContent.classList.toggle('collapsed');
     }
 
-    function printReceipt() {
-        const printContent = document.querySelector('.content').innerHTML;
-        const originalContent = document.body.innerHTML;
+    function printReceipt(userFullName, receiptID) {
+    const parts = document.querySelectorAll('.part-card');
+    let receiptHTML = `
+        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <img src="images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 120px; margin-bottom: 10px;">
+            <h2 style="color: #333; margin-bottom: 5px;">Drafter Autotech</h2>
+            <p style="color: #555; font-size: 14px; margin-bottom: 20px;">Inventory Management System</p>
+            <p><strong>Receipt ID:</strong> ${receiptID}</p>
+            <p><strong>Retrieved By:</strong> ${userFullName}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <hr style="margin: 15px 0;">
+            <h3 style="color: #333;">Parts Retrieved</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr style="background: #f5f5f5;">
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Part Name</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Model</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Location</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Qty.</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd;">Total Price</th>
+                </tr>`;
 
-        document.body.innerHTML = printContent;
-        window.print();
-        document.body.innerHTML = originalContent;
+    let totalCost = 0;
 
-        fetch('log_receipt.php', {method: 'POST'}).then(() => location.reload());
-    }
+    parts.forEach(part => {
+        const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
+        const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
+        const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
+        const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: Php ', '').replace(',', ''));
+        const partQuantity = parseInt(part.querySelector('.quantity-input').value);
+        const totalPrice = partPrice * partQuantity;
+
+        totalCost += totalPrice;
+
+        receiptHTML += `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partModel}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partLocation}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${partQuantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">Php ${totalPrice.toFixed(2)}</td>
+            </tr>`;
+    });
+
+    receiptHTML += `
+            </table>
+            <h3 style="margin-top: 20px; color: #333;">Total Cost: Php ${totalCost.toFixed(2)}</h3>
+            <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>
+        </div>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+
+
 
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
@@ -291,4 +338,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         text-decoration: none;
         transition: background 0.3s ease;
     }
+    @media print {
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+
+    .part-card {
+        display: none; /* Hide regular cart items during print */
+    }
+
+    h2, h3 {
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+}
 </style>
