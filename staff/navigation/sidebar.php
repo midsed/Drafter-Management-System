@@ -16,6 +16,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <span>Parts</span> 
             </a>
         </li>
+        <li class="<?php echo ($current_page == 'receipts.php') ? 'active' : ''; ?>">
+            <a href="receipts.php">
+                <img src="images/receipts1.png" alt="Transactions Icon" class="nav-icon">
+                <span>Receipts</span>
+            </a>
+        </li>
         <li class="<?php echo ($current_page == 'service.php') ? 'active' : ''; ?>">
             <a href="service.php">
                 <img src="images/service.png" alt="Services Icon" class="nav-icon">

@@ -133,31 +133,37 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
     let partsAddedData = <?php echo json_encode($partsAddedData); ?>;
 
     document.addEventListener('DOMContentLoaded', function () {
-        const stockCanvas = document.getElementById('stockLevelChart');
-        const stockData = {
-            labels: <?php echo json_encode(array_keys($stockLevels)); ?>,
-            datasets: [{
-                label: 'Stock Levels',
-                data: <?php echo json_encode(array_values($stockLevels)); ?>,
-                backgroundColor: 'rgba(59, 59, 59, 0.6)',
-                borderColor: 'rgba(0, 0, 0, 1)',
-                borderWidth: 1
-            }]
-        };
+    const stockCanvas = document.getElementById('stockLevelChart');
+    const stockLabels = <?php echo json_encode(array_keys($stockLevels)); ?>;
+    const stockDataValues = <?php echo json_encode(array_values($stockLevels)); ?>;
 
-        new Chart(stockCanvas.getContext('2d'), {
-            type: 'bar',
-            data: stockData,
-            options: {
-                scales: { y: { beginAtZero: true } },
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: true, position: 'top' } }
-            }
-        });
+    const backgroundColors = stockDataValues.map(qty => qty < 2 ? '#EE5D5D' : '#90B0DF');
 
-        updateLineChart();
+    const stockData = {
+        labels: stockLabels,
+        datasets: [{
+            label: 'Stock Levels',
+            data: stockDataValues,
+            backgroundColor: backgroundColors,
+            borderColor: 'rgba(0, 0, 0, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    new Chart(stockCanvas.getContext('2d'), {
+        type: 'bar',
+        data: stockData,
+        options: {
+            scales: { y: { beginAtZero: true } },
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: true, position: 'top' } }
+        }
     });
+
+    updateLineChart();
+});
+
 
     function updateLineChart() {
         const updatesCanvas = document.getElementById('recentUpdatesChart');
@@ -196,8 +202,8 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
                 datasets: [{
                     label: 'Parts Added',
                     data: filteredData,
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                    borderColor: 'blue',
+                    backgroundColor: '#90B0DF',
+                    borderColor: '#90B0DF',
                     borderWidth: 1
                 }]
             },
