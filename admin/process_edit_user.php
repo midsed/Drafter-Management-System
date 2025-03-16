@@ -14,27 +14,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $username = $_POST['username'];
     $role = $_POST['user_role'];
+    $newPassword = trim($_POST['password']);
 
-    // Retrieve the user making the edit
-    $editedByUserID = $_SESSION['UserID']; // Who edited
-    $editedByUsername = $_SESSION['Username']; // Who edited
-    $editedByRole = $_SESSION['RoleType']; // Role of the editor
+    $editedByUserID = $_SESSION['UserID']; 
+    $editedByUsername = $_SESSION['Username']; 
+    $editedByRole = $_SESSION['RoleType'];
     $timestamp = date("Y-m-d H:i:s");
 
-    $conn->begin_transaction(); // Start transaction to ensure both update & logging
+    $conn->begin_transaction(); 
 
     try {
-        // Update user details
         $sql = "UPDATE user SET FName = ?, LName = ?, Email = ?, Username = ?, RoleType = ? WHERE UserID = ?";
         $updateUser = $conn->prepare($sql);
         $updateUser->bind_param("sssssi", $firstname, $lastname, $email, $username, $role, $userID);
-        
+
         if (!$updateUser->execute()) {
             throw new Exception("Failed to update user: " . $updateUser->error);
         }
         $updateUser->close();
 
-        // Log the action
+        if (!empty($newPassword)) {
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $newPassword)) {
+                throw new Exception("Password does not meet the required criteria.");
+            }
+
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT); 
+
+            $passwordSql = "UPDATE user SET Password = ? WHERE UserID = ?";
+            $updatePassword = $conn->prepare($passwordSql);
+            $updatePassword->bind_param("si", $hashedPassword, $userID);
+
+            if (!$updatePassword->execute()) {
+                throw new Exception("Failed to update password: " . $updatePassword->error);
+            }
+            $updatePassword->close();
+        }
+
         $logSql = "INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, ?, ?, NULL, ?)";
         $log = $conn->prepare($logSql);
         $actionType = "Update User";
@@ -45,17 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $log->close();
 
-        $conn->commit(); // Commit changes if both operations succeed
+        $conn->commit(); 
 
         echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
-        echo '<style>
-            @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-            .swal2-popup { font-family: "Inter", sans-serif !important; }
-            .swal2-title { font-weight: 700 !important; }
-            .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
-        </style>';
-        
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
@@ -69,21 +76,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 });
             });
         </script>';
-        } catch (Exception $e) {
-            $conn->rollback(); // Rollback in case of failure
-        
-            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
-            echo '<script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    Swal.fire({
-                        title: "Error!",
-                        text: "Error updating user: ' . addslashes($e->getMessage()) . '",
-                        icon: "error",
-                        confirmButtonText: "OK",
-                        confirmButtonColor: "#d63031"
-                    });
+
+    } catch (Exception $e) {
+        $conn->rollback();
+
+        echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Error updating user: ' . addslashes($e->getMessage()) . '",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#d63031"
                 });
-            </script>';
+            });
+        </script>';
     }
 
     $conn->close();

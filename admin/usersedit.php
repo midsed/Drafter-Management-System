@@ -223,13 +223,14 @@ include('dbconnect.php');
 </div>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
     document.getElementById("editUserForm").addEventListener("submit", function(event) {
         let firstname = document.getElementById("firstname").value.trim();
         let lastname  = document.getElementById("lastname").value.trim();
@@ -258,15 +259,17 @@ include('dbconnect.php');
 
         // If password is provided, validate its pattern
         if (password.length > 0) {
-            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passwordPattern.test(password)) {
-                Swal.fire(
-                    "Error", 
-                    "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number.", 
-                    "error"
-                );
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number.",
+                    showConfirmButton: true
+                });
                 event.preventDefault();
             }
         }
     });
 </script>
+
