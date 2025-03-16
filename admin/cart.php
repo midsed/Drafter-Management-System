@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-// Redirect if the user is not logged in
 if (!isset($_SESSION['UserID'])) {
     header("Location: /Drafter-Management-System/login.php");
     exit();
@@ -65,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
-                        <p><strong>Price:</strong> Php " . number_format(floatval($part['Price']), 2) . "</p>
+                        <p><strong>Price:</strong> ₱ " . number_format(floatval($part['Price']), 2) . "</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
-                        <p><strong>Total:</strong> Php " . number_format($totalPrice, 2) . "</p>
+                        <p><strong>Total:</strong> ₱ " . number_format($totalPrice, 2) . "</p>
                         <div class='actions'>
                             <button class='qty-btn' onclick='updateQuantity(\"$partID\", -1)'>-</button>
                             <input type='text' value='{$part['Quantity']}' readonly class='quantity-input'>
@@ -108,13 +106,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 
     function printReceipt(userFullName, receiptID) {
     const parts = document.querySelectorAll('.part-card');
+    const currentDateTime = new Date();
+    const formattedDate = currentDateTime.toLocaleDateString() + ' ' + currentDateTime.toLocaleTimeString();
+
     let receiptHTML = `
-        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin-top:-20px; margin-bottom: -70px;">
-            <p style="color: #555; font-weight: bold; font-size: 18px; margin-bottom: 50px;">Inventory Management System</p>
+        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin: 20px; margin-bottom: -90px; margin-top: -20px;">
+            <h2 style="color:rgb(70, 70, 70); margin: 10px 0;">Inventory System</h2>
+            <p style="margin: 5px 0; margin-bottom: 30px;">Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100</p>
             <p><strong>Receipt ID:</strong> ${receiptID}</p>
             <p><strong>Retrieved By:</strong> ${userFullName}</p>
-            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${formattedDate}</p>
             <hr style="margin: 15px 0;">
             <h3 style="color: #333;">Parts Retrieved</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
@@ -132,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
         const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
         const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
-        const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: Php ', '').replace(',', ''));
+        const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: ₱ ', '').replace(',', ''));
         const partQuantity = parseInt(part.querySelector('.quantity-input').value);
         const totalPrice = partPrice * partQuantity;
 
@@ -144,15 +146,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partModel}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partLocation}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partQuantity}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">Php ${totalPrice.toFixed(2)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">₱ ${totalPrice.toFixed(2)}</td>
             </tr>`;
     });
 
-
     receiptHTML += `
             </table>
-            <h3 style="margin-top: 20px; color: #333;">Total Cost: Php ${totalCost.toFixed(2)}</h3>
-            <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <div style="text-align: left; width: 45%;">
+                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
+                    <p style="margin: 0;">Permitted By:</p>
+                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
+                </div>
+                <div style="text-align: right; width: 45%;">
+                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
+                    <p style="margin: 0;">Retrieved By:</p>
+                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
+                </div>
+            </div>
+            <hr style="margin: 20px 0;">
+            <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>     
         </div>`;
 
     const printWindow = window.open('', '_blank');

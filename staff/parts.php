@@ -204,22 +204,31 @@ function searchParts() {
     });
 }
 
-function addToCart(partID, name, make, model, price, image, location) {
+function addToCart(partID) {
     fetch('add_to_cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${partID}&name=${encodeURIComponent(name)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}&price=${price}&image=${encodeURIComponent(image)}&location=${encodeURIComponent(location)}`
+        body: 'id=' + encodeURIComponent(partID)
     })
-    .then(response => response.text())
+    .then(response => response.json())
     .then(data => {
-        Swal.fire({
-            title: "Added to Cart!",
-            text: data,
-            icon: "success",
-            confirmButtonColor: "#6c5ce7"
-        }).then(() => {
-            location.reload();
-        });
+        if (data.success) {
+            Swal.fire({
+                title: "Added to Cart!",
+                text: data.message,
+                icon: "success",
+                confirmButtonColor: "#6c5ce7"
+            }).then(() => {
+                location.reload(); // Optionally reload the page or update the cart UI
+            });
+        } else {
+            Swal.fire({
+                title: "Error",
+                text: data.message,
+                icon: "error",
+                confirmButtonColor: "#d63031"
+            });
+        }
     })
     .catch(error => {
         console.error('Error:', error);

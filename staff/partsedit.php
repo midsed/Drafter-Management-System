@@ -109,6 +109,20 @@ if (!$part) {
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
+    .image-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 </style>
 
 <div class="main-content">
@@ -130,7 +144,7 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="part_price">Part Price:</label>
-                <input type="number" id="part_price" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" required>
+                <input type="number" id="part_price" placeholder="0.00" name="part_price" value="<?php echo htmlspecialchars($part['Price']); ?>" step="0.01" min="0" required>
             </div>
 
             <div class="form-group">
@@ -198,10 +212,40 @@ if (!$part) {
                 <label for="description">Description:</label>
                 <textarea id="description" name="description"><?php echo htmlspecialchars($part['Description']); ?></textarea>
             </div>
+    
+            <div class="form-group">
+                <label for="part_image">Current Image(s):</label>
+                    <div class="image-preview">
+                        <?php 
+                            $media = json_decode($part['Media'], true);
+
+                            if (is_array($media) && count($media) > 0): 
+                                foreach ($media as $image): 
+                                    $filePath = $uploadDir . $image;
+                                if (file_exists($filePath)): ?>
+                                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                        <?php else: ?>
+                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                        <?php endif; 
+                                endforeach;
+
+                        elseif (!empty($part["Media"])): 
+                            $filePath = $part["Media"];
+                            if (file_exists($filePath)): ?>
+                                <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                        <?php else: ?>
+                            <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                        <?php endif; else: ?>
+                            <p class="no-image">No image available</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+
 
             <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
-                <input type="file" id="part_image" name="part_image">
+                <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
 
             <!-- Supplier Details -->
@@ -235,7 +279,7 @@ if (!$part) {
 </div>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 
@@ -254,4 +298,29 @@ if (!$part) {
             }
         });
     }
+
+    function previewFile(event) {
+        const previewContainer = document.querySelector('.image-preview');
+        previewContainer.innerHTML = "";
+        
+        const fileInput = event.target;
+        const files = fileInput.files;
+        
+        if (files.length > 0) {
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.alt = "New Image Preview";
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
+        }
+    }
+
+
 </script>

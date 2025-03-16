@@ -1,18 +1,28 @@
 <?php
 session_start();
 
+// Redirect if the user is not logged in
 if (!isset($_SESSION['UserID'])) {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_POST['change'])) {
+// Initialize cart if not already set
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+$sql = "SELECT r.ReceiptID, u.FName, u.LName
+        FROM receipt r
+        JOIN user u ON r.UserID = u.UserID
+        WHERE r.ReceiptID = ?";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['change'])) {
     $partID = $_POST['partID'];
     $change = intval($_POST['change']);
 
     if (isset($_SESSION['cart'][$partID])) {
         $_SESSION['cart'][$partID]['Quantity'] += $change;
-
         if ($_SESSION['cart'][$partID]['Quantity'] < 1) {
             $_SESSION['cart'][$partID]['Quantity'] = 1;
         }
@@ -44,11 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     <div class="content">
         <div class="parts-container" id="partsList">
             <?php
-            if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+            if (!empty($_SESSION['cart'])) {
                 foreach ($_SESSION['cart'] as $partID => $part) {
-                    // Assuming part details are stored in the session
                     $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
-                    $totalPrice = (isset($part['Price']) ? floatval($part['Price']) : 0) * (isset($part['Quantity']) ? intval($part['Quantity']) : 0);
+                    $totalPrice = floatval($part['Price']) * intval($part['Quantity']);
                     echo "
                     <div class='part-card'>
                         <a href='partdetail.php?id=$partID'><img src='$imageSrc' alt='Part Image'></a>
@@ -56,9 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
-                        <p><strong>Price:</strong> Php " . number_format(floatval($part['Price'] ?? 0), 2) . "</p>
+                        <p><strong>Price:</strong> Php " . number_format(floatval($part['Price']), 2) . "</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
-                        <p><strong>Total:</strong> Php " . number_format(floatval($totalPrice), 2) . "</p>
+                        <p><strong>Total:</strong> Php " . number_format($totalPrice, 2) . "</p>
                         <div class='actions'>
                             <button class='qty-btn' onclick='updateQuantity(\"$partID\", -1)'>-</button>
                             <input type='text' value='{$part['Quantity']}' readonly class='quantity-input'>
@@ -76,10 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
 
         <div class="summary">
             <h2 style="font-family: 'Poppins', sans-serif;">Selected List Summary</h2>
-            <p style="font-family: 'Poppins', sans-serif;">No. of Items: <strong><?php echo count($_SESSION['cart']); ?></strong></p>
-            <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php <?php echo number_format(array_sum(array_map(function($part) { return (isset($part['Price']) ? floatval($part['Price']) : 0) * (isset($part['Quantity']) ? intval($part['Quantity']) : 0); }, $_SESSION['cart'])), 2); ?></strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">No. of Parts: <strong><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></strong></p>
+            <p style="font-family: 'Poppins', sans-serif;">Total Cost: <strong>Php <?php
+            echo number_format(array_sum(array_map(function ($part) {
+                return floatval($part['Price']) * intval($part['Quantity']);
+            }, $_SESSION['cart'])), 2);
+            ?></strong></p>
 
-            <button class="confirm-btn">Print Receipt</button>
+                <button class="confirm-btn" onclick="printReceipt()">Print Receipt</button>
         </div>
     </div>
 </div>
@@ -92,6 +105,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
+    function printReceipt(userFullName, receiptID) {
+    const parts = document.querySelectorAll('.part-card');
+    let receiptHTML = `
+        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin-top:-20px; margin-bottom: -70px;">
+            <p style="color: #555; font-weight: bold; font-size: 18px; margin-bottom: 50px;">Inventory Management System</p>
+            <p><strong>Receipt ID:</strong> ${receiptID}</p>
+            <p><strong>Retrieved By:</strong> ${userFullName}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <hr style="margin: 15px 0;">
+            <h3 style="color: #333;">Parts Retrieved</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr style="background: #f5f5f5;">
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Part Name</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Model</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Location</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty.</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Total Price</th>
+                </tr>`;
+
+    let totalCost = 0;
+
+    parts.forEach(part => {
+        const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
+        const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
+        const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
+        const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: Php ', '').replace(',', ''));
+        const partQuantity = parseInt(part.querySelector('.quantity-input').value);
+        const totalPrice = partPrice * partQuantity;
+
+        totalCost += totalPrice;
+
+        receiptHTML += `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partModel}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partLocation}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partQuantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">Php ${totalPrice.toFixed(2)}</td>
+            </tr>`;
+    });
+
+
+    receiptHTML += `
+            </table>
+            <h3 style="margin-top: 20px; color: #333;">Total Cost: Php ${totalCost.toFixed(2)}</h3>
+            <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>
+        </div>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+    printWindow.print();
+}
+
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
             method: 'POST',
@@ -108,22 +177,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     }
 
     function updateQuantity(partID, change) {
-        fetch('', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'partID=' + partID + '&change=' + change
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
+    fetch('cart.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'partID=' + encodeURIComponent(partID) + '&change=' + encodeURIComponent(change)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
     function searchCart() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const parts = document.querySelectorAll(".part-card");
@@ -141,16 +206,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     }
 
     .parts-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 20px;
     }
 
     .part-card {
-        background: white;
-        padding: 15px;
+        width: 250px; /* Adjust as needed */
+        background: #fff;
         border-radius: 8px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 15px;
         text-align: center;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -217,7 +284,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
     }
 
     .summary {
-        margin-top: 30px;
+        margin-top: 120px;
+        margin-left: 60px;
         text-align: center;
     }
 
@@ -272,4 +340,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID']) && isset($_
         text-decoration: none;
         transition: background 0.3s ease;
     }
+    @media print {
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+    h2, h3 {
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+}
 </style>
