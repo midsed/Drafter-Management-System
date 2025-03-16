@@ -104,75 +104,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         mainContent.classList.toggle('collapsed');
     }
 
-    function printReceipt(userFullName, receiptID) {
-    const parts = document.querySelectorAll('.part-card');
-    const currentDateTime = new Date();
-    const formattedDate = currentDateTime.toLocaleDateString() + ' ' + currentDateTime.toLocaleTimeString();
+    function printReceipt() {
+    fetch('save_receipt.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Server response:", data); // Debugging output
+        if (data.success) {
+            // Generate and print the receipt only if storing is successful
+            const parts = document.querySelectorAll('.part-card');
+            const currentDateTime = new Date();
+            const formattedDate = currentDateTime.toLocaleDateString() + ' ' + currentDateTime.toLocaleTimeString();
 
-    let receiptHTML = `
-        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin: 20px; margin-bottom: -90px; margin-top: -20px;">
-            <h2 style="color:rgb(70, 70, 70); margin: 10px 0;">Inventory System</h2>
-            <p style="margin: 5px 0; margin-bottom: 30px;">Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100</p>
-            <p><strong>Receipt ID:</strong> ${receiptID}</p>
-            <p><strong>Retrieved By:</strong> ${userFullName}</p>
-            <p><strong>Date:</strong> ${formattedDate}</p>
-            <hr style="margin: 15px 0;">
-            <h3 style="color: #333;">Parts Retrieved</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <tr style="background: #f5f5f5;">
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Part Name</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Model</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Location</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty.</th>
-                    <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Total Price</th>
-                </tr>`;
+            let receiptHTML = `
+                <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin: 20px; margin-bottom: -90px; margin-top: -20px;">
+                    <h2 style="color:rgb(70, 70, 70); margin: 10px 0;">Inventory System</h2>
+                    <p style="margin: 5px 0; margin-bottom: 30px;">Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100</p>
+                    <p><strong>Receipt ID:</strong> ${data.receiptID}</p>
+                    <p><strong>Retrieved By:</strong> ${data.userFullName}</p>
+                    <p><strong>Date:</strong> ${formattedDate}</p>
+                    <hr style="margin: 15px 0;">
+                    <h3 style="color: #333;">Parts Retrieved</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Part Name</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Model</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Location</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty.</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Total Price</th>
+                        </tr>`;
 
-    let totalCost = 0;
+            parts.forEach(part => {
+                const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
+                const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
+                const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
+                const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: ₱ ', '').replace(',', ''));
+                const partQuantity = parseInt(part.querySelector('.quantity-input').value);
+                const totalPrice = partPrice * partQuantity;
 
-    parts.forEach(part => {
-        const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
-        const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
-        const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
-        const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: ₱ ', '').replace(',', ''));
-        const partQuantity = parseInt(part.querySelector('.quantity-input').value);
-        const totalPrice = partPrice * partQuantity;
+                receiptHTML += `
+                    <tr>
+                        <td>${partName}</td>
+                        <td>${partModel}</td>
+                        <td>${partLocation}</td>
+                        <td>${partQuantity}</td>
+                        <td>₱ ${totalPrice.toFixed(2)}</td>
+                    </tr>`;
+            });
 
-        totalCost += totalPrice;
+            receiptHTML += `</table>
+                <hr style="margin: 20px 0;">
+                <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>     
+            </div>`;
 
-        receiptHTML += `
-            <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partName}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partModel}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partLocation}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${partQuantity}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">₱ ${totalPrice.toFixed(2)}</td>
-            </tr>`;
-    });
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            printWindow.print();
 
-    receiptHTML += `
-            </table>
-            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                <div style="text-align: left; width: 45%;">
-                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
-                    <p style="margin: 0;">Permitted By:</p>
-                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
-                </div>
-                <div style="text-align: right; width: 45%;">
-                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
-                    <p style="margin: 0;">Retrieved By:</p>
-                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
-                </div>
-            </div>
-            <hr style="margin: 20px 0;">
-            <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>     
-        </div>`;
-
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(receiptHTML);
-    printWindow.document.close();
-    printWindow.print();
+        } else {
+            alert('Failed to store receipt: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
+
 
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
