@@ -259,17 +259,23 @@ include('dbconnect.php');
 
         // If password is provided, validate its pattern
         if (password.length > 0) {
+            // Count only alphabetical letters (a-z, A-Z)
+            let letterCount = (password.match(/[a-zA-Z]/g) || []).length;
+
+            // Password must contain at least 8 alphabetical characters (A-Z, a-z), one uppercase, one lowercase, and one number
             let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-            if (!passwordPattern.test(password)) {
+
+            if (letterCount < 8 || !passwordPattern.test(password)) {
                 Swal.fire({
                     icon: "error",
-                    title: "Error",
-                    text: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number.",
+                    title: "Invalid Password!",
+                    text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
                     showConfirmButton: true
                 });
-                event.preventDefault();
+                event.preventDefault(); // Prevent form submission
             }
         }
     });
 </script>
+
 

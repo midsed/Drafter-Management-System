@@ -248,7 +248,6 @@ if (!$part) {
                 <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
 
-            <!-- Supplier Details -->
             <h2>Supplier Details</h2>
             <div class="form-group">
                 <label for="supplier_name">Supplier Name:</label>
@@ -290,11 +289,11 @@ if (!$part) {
     function clearForm() {
         document.querySelectorAll("input, select, textarea").forEach(element => {
             if (element.type === "file") {
-                element.value = ""; // Clear file input
+                element.value = ""; 
             } else if (element.tagName === "SELECT") {
-                element.selectedIndex = 0; // Reset select to first option
+                element.selectedIndex = 0; 
             } else {
-                element.value = ""; // Clear all other fields
+                element.value = ""; 
             }
         });
     }
