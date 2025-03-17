@@ -385,12 +385,16 @@ function toggleSidebar() {
         }
 
         .view-receipt-button {
-            padding: 5px 10px;
-            border-radius: 3px;
-            background-color: #E10F0F;
-            color: white;
-            border: none;
-            cursor: pointer;
+            background: #E10F0F;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        text-decoration: none;
+        transition: background 0.3s ease;
         }
 
         .search-actions {
