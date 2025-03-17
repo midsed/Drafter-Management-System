@@ -296,9 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $transaction_date = date('Y-m-d H:i:s');
 
     // Handle Image Upload
-    $upload_dir = 'uploads/';
+    $upload_dir = '../uploads/'; // Shared uploads directory
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
+        mkdir($upload_dir, 0777, true); // Create the directory if it doesn't exist
     }
 
     if (!empty($_FILES['part_image']['name'])) {
@@ -306,9 +306,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; 
+            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = $target_file;
+                $media = 'uploads/' . time() . "_" . $file_name; // Store the relative path
             }
         } else {
             die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
