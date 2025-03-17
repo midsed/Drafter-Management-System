@@ -55,7 +55,7 @@ if (empty($receiptDetails)) {
                 <strong>Date:</strong> <?= date('F d, Y h:i A', strtotime($receiptDetails[0]['RetrievedDate'])) ?>
             </div>
         </div>
-
+        <h3 style="color: #e40000;">Parts Retrieved</h3>
         <table>
             <thead>
                 <tr>
