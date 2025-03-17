@@ -18,7 +18,10 @@ $offset = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filterCategory = isset($_GET['category']) ? $_GET['category'] : '';
 $sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'desc';
-$sortField = isset($_GET['sort_field']) ? $_GET['sort_field'] : 'RetrievedDate';
+$allowedSortFields = ['ReceiptID', 'RetrievedBy', 'PartName', 'RetrievedDate'];
+$sortField = (isset($_GET['sort_field']) && in_array($_GET['sort_field'], $allowedSortFields)) 
+                ? $_GET['sort_field'] 
+                : 'RetrievedDate';
 
 $totalQuery = "SELECT COUNT(*) AS total FROM receipt r JOIN part p ON r.PartID = p.PartID WHERE r.UserID = ?";
 if ($search) {
@@ -136,6 +139,13 @@ $categories = $resultCategory->fetch_all(MYSQLI_ASSOC);
                         <i class="fas fa-sort-alpha-down"></i>
                     </button>
                     <div id="sortDropdown" class="dropdown-content">
+                        <h4>Sort By:</h4>
+                        <select id="sortField">
+                            <option value="ReceiptID">Receipt ID</option>
+                            <option value="RetrievedBy">Retrieved By</option>
+                            <option value="PartName">Part Name</option>
+                            <option value="RetrievedDate">Retrieved Date</option>
+                        </select>
                         <button class="sort-option red-button" data-sort="asc">Ascending</button>
                         <button class="sort-option red-button" data-sort="desc">Descending</button>
                     </div>
@@ -651,5 +661,66 @@ function toggleSidebar() {
         border: 1px solid #E10F0F;
     }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sortButtons = document.querySelectorAll('.sort-option');
+        const sortFieldSelect = document.getElementById('sortField');
+
+        sortButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const sortOrder = button.getAttribute('data-sort');
+                const sortField = sortFieldSelect.value;
+
+                // Reload page with sorting parameters
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort', sortOrder);
+                url.searchParams.set('sort_field', sortField);
+                window.location.href = url.href;
+            });
+        });
+
+        // Preserve selected sort field after reload
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedSortField = urlParams.get('sort_field');
+        if (selectedSortField) {
+            sortFieldSelect.value = selectedSortField;
+        }
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sortButtons = document.querySelectorAll('.sort-option');
+        const sortFieldSelect = document.getElementById('sortField');
+        const sortDropdown = document.getElementById('sortDropdown');
+
+        // Prevent dropdown from closing when selecting an option
+        sortFieldSelect.addEventListener('click', (event) => {
+            event.stopPropagation(); // Stop the click from bubbling up to the parent
+        });
+
+        sortButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const sortOrder = button.getAttribute('data-sort');
+                const sortField = sortFieldSelect.value;
+
+                // Reload page with sorting parameters
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort', sortOrder);
+                url.searchParams.set('sort_field', sortField);
+                window.location.href = url.href;
+            });
+        });
+
+        // Preserve selected sort field after reload
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedSortField = urlParams.get('sort_field');
+        if (selectedSortField) {
+            sortFieldSelect.value = selectedSortField;
+        }
+    });
+    </script>
+
 </body>
 </html>
