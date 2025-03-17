@@ -323,9 +323,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $transaction_date = date('Y-m-d H:i:s');
 
     // Handle Image Upload
-    $upload_dir = '../uploads/'; // Shared uploads directory
+    $upload_dir = '../partimages/'; 
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true); // Create the directory if it doesn't exist
+        mkdir($upload_dir, 0777, true); 
     }
 
     if (!empty($_FILES['part_image']['name'])) {
@@ -335,12 +335,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $file_name = basename($_FILES['part_image']['name']);
             $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = 'uploads/' . time() . "_" . $file_name; // Store the relative path
+                $media = 'partimages/' . time() . "_" . $file_name; 
             }
         } else {
             die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
         }
     }
+
     // Check if the supplier already exists
     $supplier_sql = "SELECT SupplierID FROM supplier WHERE Email = ?";
     $supplier_stmt = $conn->prepare($supplier_sql);
