@@ -50,35 +50,35 @@ $conn->close();
     </div>
 
     <div class="part-media-container">
-        <?php 
+        <?php
+        // Check if Media is a JSON array or a single path
         $media = json_decode($part["Media"], true);
         if (is_array($media) && count($media) > 0): 
             foreach ($media as $image): ?>
-                <img src="<?php echo htmlspecialchars($image); ?>" alt="Part Image">
+                <img src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Part Image">
             <?php endforeach; 
         elseif (!empty($part["Media"])): ?>
-            <img src="<?php echo htmlspecialchars($part["Media"]); ?>" alt="Part Image">
+            <img src="uploads/<?php echo htmlspecialchars($part["Media"]); ?>" alt="Part Image">
         <?php else: ?>
             <p class="no-image">No image available</p>
         <?php endif; ?>
     </div>
 
-        <table class="details-table">
-            <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>
-            <tr><td>Category</td><td><?php echo htmlspecialchars($part["Category"]); ?></td></tr>
-            <tr><td>Condition</td><td><?php echo htmlspecialchars($part["PartCondition"]); ?></td></tr>
-            <tr><td>Location</td><td><?php echo htmlspecialchars($part["Location"]); ?></td></tr>
-            <tr><td>Quantity</td><td><?php echo $part["Quantity"]; ?></td></tr>
-            <tr><td>Authenticity</td><td><?php echo htmlspecialchars($part["Authenticity"]); ?></td></tr>
-            <tr><td>Make</td><td><?php echo htmlspecialchars($part["Make"]); ?></td></tr>
-            <tr><td>Model</td><td><?php echo htmlspecialchars($part["Model"]); ?></td></tr>
-            <tr><td>Year Model</td><td><?php echo htmlspecialchars($part["YearModel"]); ?></td></tr>
-            <tr><td>Part Price</td><td>₱ <?php echo number_format($part["Price"], 2); ?></td></tr>
-            <tr><td>Date Added</td><td><?php echo htmlspecialchars($part["DateAdded"]); ?></td></tr>
-            <tr><td>Last Updated</td><td><?php echo htmlspecialchars($part["LastUpdated"]); ?></td></tr>
-            <tr><td>Description</td><td><?php echo nl2br(htmlspecialchars($part["Description"])); ?></td></tr>
-        </table>
-    </div>
+    <table class="details-table">
+        <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>
+        <tr><td>Category</td><td><?php echo htmlspecialchars($part["Category"]); ?></td></tr>
+        <tr><td>Condition</td><td><?php echo htmlspecialchars($part["PartCondition"]); ?></td></tr>
+        <tr><td>Location</td><td><?php echo htmlspecialchars($part["Location"]); ?></td></tr>
+        <tr><td>Quantity</td><td><?php echo $part["Quantity"]; ?></td></tr>
+        <tr><td>Authenticity</td><td><?php echo htmlspecialchars($part["Authenticity"]); ?></td></tr>
+        <tr><td>Make</td><td><?php echo htmlspecialchars($part["Make"]); ?></td></tr>
+        <tr><td>Model</td><td><?php echo htmlspecialchars($part["Model"]); ?></td></tr>
+        <tr><td>Year Model</td><td><?php echo htmlspecialchars($part["YearModel"]); ?></td></tr>
+        <tr><td>Part Price</td><td>₱ <?php echo number_format($part["Price"], 2); ?></td></tr>
+        <tr><td>Date Added</td><td><?php echo htmlspecialchars($part["DateAdded"]); ?></td></tr>
+        <tr><td>Last Updated</td><td><?php echo htmlspecialchars($part["LastUpdated"]); ?></td></tr>
+        <tr><td>Description</td><td><?php echo nl2br(htmlspecialchars($part["Description"])); ?></td></tr>
+    </table>
 </div>
 
 <script>
@@ -148,5 +148,4 @@ $conn->close();
     color: #888;
     font-style: italic;
 }
-
 </style>

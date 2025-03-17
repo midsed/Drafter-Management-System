@@ -103,7 +103,7 @@ include('navigation/topbar.php');
 
         if ($result->num_rows > 0) {
             while ($part = $result->fetch_assoc()) {
-                $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
+                $imageSrc = !empty($part['Media']) ? 'uploads/' . $part['Media'] : 'images/no-image.png';
                 echo "
                     <div class='part-card'>
                         <a href='partdetail.php?id={$part['PartID']}'><img src='$imageSrc' alt='Part Image'></a>
