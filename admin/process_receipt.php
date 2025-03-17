@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
             <div class="signatures">
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <p>Permitted By</p>
+                    <p>Permitted By:</p>
                     <p>Signature Over Printed Name</p>
                 </div>
                 <div class="signature-box">
