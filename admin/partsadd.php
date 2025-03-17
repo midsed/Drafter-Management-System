@@ -414,7 +414,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Success!',
-                text: 'Part and supplier added successfully!',
+                text: 'Part added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: '#6c5ce7'
