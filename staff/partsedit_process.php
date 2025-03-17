@@ -65,14 +65,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $imageName = $existingPart['Media'];
 
     if (!empty($_FILES["part_image"]["name"])) {
-        $target_dir = "uploads/";
+        $target_dir = "../partimages/"; // Updated to navigate out of the admin folder
         if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
+            mkdir($target_dir, 0777, true); // Create the directory if it doesn't exist
         }
     
         $imageFileType = strtolower(pathinfo($_FILES["part_image"]["name"], PATHINFO_EXTENSION));
         $imageName = basename($_FILES["part_image"]["name"]);
-        $target_file = $target_dir . $imageName;
+        $target_file = $target_dir . time() . "_" . $imageName; // Unique filename
     
         $allowedTypes = ["jpg", "jpeg", "png"];
         if (!in_array($imageFileType, $allowedTypes)) {
@@ -84,12 +84,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     
         if (move_uploaded_file($_FILES["part_image"]["tmp_name"], $target_file)) {
-            $imageName = $target_file;
+            $imageName = "partimages/" . basename($target_file); // Store the correct relative path for display
         } else {
             die("Error: Failed to move uploaded file.");
         }
     }
-    
 
     $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
     $updatePartQuery->bind_param("sdissssssssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);

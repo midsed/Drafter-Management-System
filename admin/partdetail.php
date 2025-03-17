@@ -50,18 +50,19 @@ $conn->close();
     </div>
 
     <div class="part-media-container">
-        <?php 
+    <?php
+        // Check if Media is a JSON array or a single path
         $media = json_decode($part["Media"], true);
         if (is_array($media) && count($media) > 0): 
             foreach ($media as $image): ?>
-                <img src="<?php echo htmlspecialchars($image); ?>" alt="Part Image">
+                <img src="<?php echo '../' . htmlspecialchars($image); ?>" alt="Part Image">
             <?php endforeach; 
         elseif (!empty($part["Media"])): ?>
-            <img src="<?php echo htmlspecialchars($part["Media"]); ?>" alt="Part Image">
+            <img src="<?php echo '../' . htmlspecialchars($part["Media"]); ?>" alt="Part Image">
         <?php else: ?>
             <p class="no-image">No image available</p>
         <?php endif; ?>
-    </div>
+
 
         <table class="details-table">
             <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>

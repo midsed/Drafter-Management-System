@@ -47,6 +47,12 @@ $query->close();
 if (!$part) {
     die("Error: Part not found.");
 }
+
+// Define the upload directory
+$uploadDir = 'partimages/'; // Updated to 'partimages'
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -110,19 +116,17 @@ if (!$part) {
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
     .image-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.image-preview img {
-    max-width: 300px;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-}
-
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .image-preview img {
+        max-width: 300px;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
 </style>
 
 <div class="main-content">
@@ -215,33 +219,31 @@ if (!$part) {
     
             <div class="form-group">
                 <label for="part_image">Current Image(s):</label>
-                    <div class="image-preview">
-                        <?php 
-                            $media = json_decode($part['Media'], true);
-
-                            if (is_array($media) && count($media) > 0): 
-                                foreach ($media as $image): 
-                                    $filePath = $uploadDir . $image;
-                                if (file_exists($filePath)): ?>
-                                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
-                        <?php else: ?>
-                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-                        <?php endif; 
-                                endforeach;
-
-                        elseif (!empty($part["Media"])): 
-                            $filePath = $part["Media"];
+                <div class="image-preview">
+                    <?php
+                    // Check if Media is a JSON array or a single path
+                    $media = json_decode($part['Media'], true);
+                    if (is_array($media) && count($media) > 0): 
+                        foreach ($media as $image): 
+                            $filePath = "../" . $image; // Navigate out of the admin folder
                             if (file_exists($filePath)): ?>
                                 <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                            <?php else: ?>
+                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                            <?php endif; 
+                        endforeach;
+                    elseif (!empty($part['Media'])): 
+                        $filePath = "../" . $part['Media']; // Navigate out of the admin folder
+                        if (file_exists($filePath)): ?>
+                            <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
                         <?php else: ?>
                             <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-                        <?php endif; else: ?>
-                            <p class="no-image">No image available</p>
-                        <?php endif; ?>
-                    </div>
+                        <?php endif; 
+                    else: ?>
+                        <p class="no-image">No image available</p>
+                    <?php endif; ?>
                 </div>
-
-
+            </div>
 
             <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
@@ -321,6 +323,4 @@ if (!$part) {
             previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
         }
     }
-
-
 </script>

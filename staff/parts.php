@@ -102,14 +102,15 @@ include('navigation/topbar.php');
 
         if ($result->num_rows > 0) {
             while ($part = $result->fetch_assoc()) {
-                $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
+                // Construct the image source path
+                $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
                 echo "
                     <div class='part-card'>
                         <a href='partdetail.php?id={$part['PartID']}'><img src='$imageSrc' alt='Part Image'></a>
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
-                        <p><strong>Category:</strong> {$part['Category']}</p> <!-- This is the 4th <p> tag -->
+                        <p><strong>Category:</strong> {$part['Category']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
@@ -124,6 +125,7 @@ include('navigation/topbar.php');
             echo "<p>No parts found.</p>";
         }
         ?>
+    </div>
     </div>
 
     <div class="pagination">
