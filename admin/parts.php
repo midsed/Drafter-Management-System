@@ -517,15 +517,14 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 40px; 
+    position: relative; 
+    width: 100%; 
+    padding-bottom: 40px; 
 }
 
 .pagination-button {
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 4px;
     background: white;
     border: 1px solid black;
@@ -540,8 +539,6 @@ body {
 }
 
 .active-page {
-    padding: 6px 12px;
-    border-radius: 4px;
     background: black;
     color: white;
     font-weight: bold;
