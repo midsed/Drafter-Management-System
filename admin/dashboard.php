@@ -31,6 +31,8 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
 <?php include('navigation/sidebar.php'); ?>
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
+<link rel="icon" type="image/x-icon" href="images/New Drafter Logo Cropped.png">
+
 
 <div class="main-content">
     <div class="header">
