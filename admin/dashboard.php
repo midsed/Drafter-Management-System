@@ -26,6 +26,30 @@ $partsAddedData = [];
 while ($row = mysqli_fetch_assoc($partsAddedResult)) {
     $partsAddedData[$row['date']] = $row['count'];
 }
+
+$recentReceiptsQuery = "SELECT r.ReceiptID, 
+                               CONCAT(r.RetrievedBy, ' (', u.RoleType, ')') AS RetrievedByRole,
+                               r.RetrievedDate, 
+                               r.PartID, 
+                               r.Location, 
+                               r.Quantity, 
+                               r.DateAdded, 
+                               p.Name AS PartName, 
+                               p.Price AS PartPrice, 
+                               s.ServiceID, 
+                               s.Type AS ServiceType, 
+                               s.Price AS ServicePrice
+                        FROM receipt r
+                        LEFT JOIN part p ON r.PartID = p.PartID
+                        LEFT JOIN user u ON r.UserID = u.UserID
+                        LEFT JOIN service s ON s.PartID = p.PartID 
+                        ORDER BY r.RetrievedDate DESC LIMIT 5";
+
+$recentReceiptsResult = mysqli_query($conn, $recentReceiptsQuery);
+
+if (!$recentReceiptsResult) {
+    die("SQL Error: " . mysqli_error($conn));
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -55,28 +79,47 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         </div>
 
         <div class="transaction-history">
-            <h2>Recent Checkout History</h2>
-            <table>
+    <h2>Recent Checkout History</h2>
+    <table>
+        <tr>
+            <th>Receipt ID</th>
+            <th>Retrieved By</th>
+            <th>Part Name</th>
+            <th>Quantity</th>
+            <th>Part Price</th>
+            <th>Service Type</th>
+            <th>Service Price</th>
+            <th>Total Price</th>
+            <th>Print Receipt</th>
+        </tr>
+
+        <?php if (mysqli_num_rows($recentReceiptsResult) > 0): ?>
+            <?php while ($row = mysqli_fetch_assoc($recentReceiptsResult)) { 
+                $totalPrice = 0;
+                if ($row['PartPrice']) $totalPrice += $row['PartPrice'];
+                if ($row['ServicePrice']) $totalPrice += $row['ServicePrice'];
+            ?>
                 <tr>
-                    <th>Receipt ID</th>
-                    <th>Action By</th>
-                    <th>Timestamp</th>
-                    <th>Print Receipt</th>
+                    <td>#<?php echo $row['ReceiptID']; ?></td>
+                    <td><?php echo htmlspecialchars($row['RetrievedByRole']); ?></td>
+                    <td><?php echo ($row['PartID'] !== NULL) ? $row['PartName'] : '<i>Unknown</i>'; ?></td>
+                    <td><?php echo $row['Quantity']; ?></td>
+                    <td>₱<?php echo number_format($row['PartPrice'], 2); ?></td>
+                    <td><?php echo ($row['ServiceType']) ? $row['ServiceType'] : '<i>No Service</i>'; ?></td>
+                    <td>₱<?php echo ($row['ServicePrice']) ? number_format($row['ServicePrice'], 2) : '0.00'; ?></td>
+                    <td>₱<?php echo number_format($totalPrice, 2); ?></td>
+                    <td>
+                        <a href="print_receipt.php?id=<?php echo $row['ReceiptID']; ?>" target="_blank" class="print-receipt-button">Print</a>
+                    </td>
                 </tr>
-                <tr>
-                    <td>#7676</td>
-                    <td>Admin - Jade</td>
-                    <td>2024-11-15 10:00:00</td>
-                    <td><button>Print</button></td>
-                </tr>
-                <tr>
-                    <td>#7677</td>
-                    <td>Staff - Name N.</td>
-                    <td>2024-11-03 10:00:00</td>
-                    <td><button>Print</button></td>
-                </tr>
-            </table>
-        </div>
+            <?php } ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="11" style="text-align:center;">No recent transactions found.</td>
+            </tr>
+        <?php endif; ?>
+    </table>
+</div>
 
         <div class="low-stock-alerts">
             <h2>Low Stock Alerts</h2>
@@ -163,7 +206,6 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
 
     updateLineChart();
 });
-
 
     function updateLineChart() {
         const updatesCanvas = document.getElementById('recentUpdatesChart');
