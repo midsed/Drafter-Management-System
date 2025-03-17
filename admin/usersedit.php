@@ -134,7 +134,7 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['FName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="No special characters allowed." 
+                    title="Please match the requested format, No special character and Number allowed." 
                     required
                 >
             </div>
@@ -148,7 +148,7 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['LName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="No special characters allowed." 
+                    title="Please match the requested format, No special character and Number allowed." 
                     required
                 >
             </div>

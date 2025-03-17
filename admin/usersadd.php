@@ -114,13 +114,13 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="firstname">First Name:</label>
                 <input type="text" id="firstname" name="firstname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed." >
             </div>
 
             <div class="form-group">
                 <label for="lastname">Last Name:</label>
                 <input type="text" id="lastname" name="lastname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="No special characters allowed.">
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed." >
             </div>
 
             <div class="form-group">

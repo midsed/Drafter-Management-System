@@ -333,7 +333,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
+            $target_file = $file_name; 
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
                 $media = 'partimages/' . time() . "_" . $file_name; 
             }
@@ -415,7 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Success!',
-                text: 'Part and supplier added successfully!',
+                text: 'Part added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: '#6c5ce7'

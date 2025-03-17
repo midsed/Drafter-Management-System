@@ -40,7 +40,6 @@
     </div>
 
     <script>
-        // Initialize Granim.js for gradient background
         var granimInstance = new Granim({
             element: '#canvas-basic',
             direction: 'top-bottom',
@@ -61,65 +60,67 @@
             }
         });
 
-        // JavaScript functions for OTP handling
         let attemptCount = 0;
         let isBlocked = false;
         let countdownTimer;
 
-        function sendOTP(isResend = false) {
-            let email = document.getElementById("email").value;
-            let sendOtpLink = document.querySelector(".send-otp-link");
-            let resendCodeLink = document.querySelector(".resend-code");
+       function sendOTP(isResend = false) {
+    let email = document.getElementById("email").value;
+    let sendOtpLink = document.querySelector(".send-otp-link");
+    let resendCodeLink = document.querySelector(".resend-code");
 
-            if (!email) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Missing Email!',
-                    text: 'Please enter your email first.',
-                });
-                return;
+    if (!email) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Email!',
+            text: 'Please enter your email first.',
+        });
+        return;
+    }
+
+    fetch("send_otp.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "email=" + encodeURIComponent(email)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "error") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+            });
+        } else if (data.status === "blocked") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Too Many Attempts!',
+                text: 'You have exceeded the maximum attempts. Try again in 24 hours.',
+            });
+            resendCodeLink.style.display = "none";
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP Sent!',
+                text: 'Check your email for the OTP.',
+            });
+
+            if (!isResend) {
+                sendOtpLink.style.display = "none"; 
             }
 
-            fetch("send_otp.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "email=" + encodeURIComponent(email)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "blocked") {
-                    isBlocked = true;
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Too Many Attempts!',
-                        text: 'You have exceeded the maximum attempts. Try again in 24 hours.',
-                    });
-                    resendCodeLink.style.display = "none";
-                } else {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'OTP Sent!',
-                        text: 'Check your email for the OTP.',
-                    });
-
-                    attemptCount = data.attempts;
-
-                    if (!isResend) {
-                        sendOtpLink.style.display = "none"; 
-                    }
-
-                    startCountdown(resendCodeLink);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'An error occurred. Please try again.',
-                });
-            });
+            startCountdown(resendCodeLink);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'An error occurred. Please try again.',
+        });
+    });
+}
 
         function resendOTP() {
             if (!isBlocked) {

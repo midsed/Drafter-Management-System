@@ -64,21 +64,22 @@ $conn->close();
         <?php endif; ?>
 
 
-    <table class="details-table">
-        <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>
-        <tr><td>Category</td><td><?php echo htmlspecialchars($part["Category"]); ?></td></tr>
-        <tr><td>Condition</td><td><?php echo htmlspecialchars($part["PartCondition"]); ?></td></tr>
-        <tr><td>Location</td><td><?php echo htmlspecialchars($part["Location"]); ?></td></tr>
-        <tr><td>Quantity</td><td><?php echo $part["Quantity"]; ?></td></tr>
-        <tr><td>Authenticity</td><td><?php echo htmlspecialchars($part["Authenticity"]); ?></td></tr>
-        <tr><td>Make</td><td><?php echo htmlspecialchars($part["Make"]); ?></td></tr>
-        <tr><td>Model</td><td><?php echo htmlspecialchars($part["Model"]); ?></td></tr>
-        <tr><td>Year Model</td><td><?php echo htmlspecialchars($part["YearModel"]); ?></td></tr>
-        <tr><td>Part Price</td><td>₱ <?php echo number_format($part["Price"], 2); ?></td></tr>
-        <tr><td>Date Added</td><td><?php echo htmlspecialchars($part["DateAdded"]); ?></td></tr>
-        <tr><td>Last Updated</td><td><?php echo htmlspecialchars($part["LastUpdated"]); ?></td></tr>
-        <tr><td>Description</td><td><?php echo nl2br(htmlspecialchars($part["Description"])); ?></td></tr>
-    </table>
+        <table class="details-table">
+            <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>
+            <tr><td>Category</td><td><?php echo htmlspecialchars($part["Category"]); ?></td></tr>
+            <tr><td>Condition</td><td><?php echo htmlspecialchars($part["PartCondition"]); ?></td></tr>
+            <tr><td>Location</td><td><?php echo htmlspecialchars($part["Location"]); ?></td></tr>
+            <tr><td>Quantity</td><td><?php echo $part["Quantity"]; ?></td></tr>
+            <tr><td>Authenticity</td><td><?php echo htmlspecialchars($part["Authenticity"]); ?></td></tr>
+            <tr><td>Make</td><td><?php echo htmlspecialchars($part["Make"]); ?></td></tr>
+            <tr><td>Model</td><td><?php echo htmlspecialchars($part["Model"]); ?></td></tr>
+            <tr><td>Year Model</td><td><?php echo htmlspecialchars($part["YearModel"]); ?></td></tr>
+            <tr><td>Part Price</td><td>₱ <?php echo number_format($part["Price"], 2); ?></td></tr>
+            <tr><td>Date Added</td><td><?php echo htmlspecialchars($part["DateAdded"]); ?></td></tr>
+            <tr><td>Last Updated</td><td><?php echo htmlspecialchars($part["LastUpdated"]); ?></td></tr>
+            <tr><td>Description</td><td><?php echo nl2br(htmlspecialchars($part["Description"])); ?></td></tr>
+        </table>
+    </div>
 </div>
 
 <script>
