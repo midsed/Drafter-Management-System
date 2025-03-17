@@ -1,191 +1,189 @@
+<?php
+session_start();
+if (!isset($_SESSION['UserID'])) {
+    header("Location: login.php");
+    exit();
+}
+
+include('dbconnect.php');
+
+$receiptID = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+$queryReceipt = "SELECT r.ReceiptID, r.RetrievedBy, r.RetrievedDate, r.PartID, r.Location, r.Quantity, 
+                        p.Name AS PartName, p.Price AS PartPrice, 
+                        (r.Quantity * p.Price) AS TotalPrice 
+                 FROM receipt r
+                 JOIN part p ON r.PartID = p.PartID
+                 WHERE r.ReceiptID = ?";
+
+$stmtReceipt = $conn->prepare($queryReceipt);
+$stmtReceipt->bind_param("i", $receiptID);
+$stmtReceipt->execute();
+$resultReceipt = $stmtReceipt->get_result();
+$receiptDetails = $resultReceipt->fetch_all(MYSQLI_ASSOC);
+
+if (empty($receiptDetails)) {
+    echo "No receipt found.";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt - Drafter Autotech</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" class="company-logo" style="width: 240px; margin: 20px; margin-bottom: -90px; margin-top: -20px;">
+            <div class="company-name">Inventory System</div>
+            <div class="company-address">Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100</div>
+        </div>
 
+        <div class="receipt-info">
+            <div>
+                <strong>Receipt ID:</strong> <?= $receiptID ?>
+            </div>
+            <div>
+                <strong>Retrieved By:</strong> <?= htmlspecialchars($receiptDetails[0]['RetrievedBy']) ?>
+            </div>
+            <div>
+                <strong>Date:</strong> <?= date('F d, Y h:i A', strtotime($receiptDetails[0]['RetrievedDate'])) ?>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Part Name</th>
+                    <th>Location</th>
+                    <th>Quantity</th>
+                    <th>Part Price</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $totalAmount = 0;
+                foreach ($receiptDetails as $detail): 
+                    $totalForPart = $detail['TotalPrice'];
+                    $totalAmount += $totalForPart;
+                ?>
+                <tr>
+                    <td><?= htmlspecialchars($detail['PartName']) ?></td>
+                    <td><?= htmlspecialchars($detail['Location']) ?></td>
+                    <td><?= htmlspecialchars($detail['Quantity']) ?></td>
+                    <td>₱<?= number_format($detail['PartPrice'], 2) ?></td>
+                    <td>₱<?= number_format($totalForPart, 2) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="4" style="text-align: right;"><strong>Total:</strong></td>
+                    <td><strong>₱<?= number_format($totalAmount, 2) ?></strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="signature-section">
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <div style="text-align: left; width: 45%;">
+                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
+                    <p style="margin: 0;">Permitted By:</p>
+                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
+                </div>
+                <div style="text-align: right; width: 45%;">
+                    <div style="border-top: 1px solid #000; width: 100%; margin: 5px 0; margin-top:30px;"></div>
+                    <p style="margin: 0;">Retrieved By: <?= htmlspecialchars($receiptDetails[0]['RetrievedBy']) ?></p>
+                    <p style="font-size: 12px; margin: 0;">Signature Over Printed Name</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="window.print();" class="button">Print Receipt</button>
+            <a href="receipts.php" class="button">Back to Receipts</a>
+        </div>
+    </div>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding-top: 80px;
-            padding-left: 220px;
-            background: #f0f0f0;
-        }
-
-        .back-button-container {
-            position: fixed;
-            top: 90px;
-            left: 240px;
-            z-index: 999;
-        }
-
-        .back-button-container img {
-            width: 35px;
-            height: 35px;
-            cursor: pointer;
-        }
-
-        .receipt-container {
-            width: 21cm;
-            height: 29.7cm;
-            margin: 100px auto;
             padding: 20px;
-            border: 1px solid #000;
-            background: #fff;
-            text-align: center;
+            background-color: #f5f5f5;
         }
-
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
         .receipt-header {
             text-align: center;
+            border-bottom: 2px solid #E10F0F;
+            padding-bottom: 20px;
             margin-bottom: 20px;
         }
-
-        .receipt-header h2 {
-            margin: 0;
+        .company-logo {
+            max-width: 240px;
+            margin: 20px;
+        }
+        .company-name {
             font-size: 24px;
-        }
-
-        .receipt-details {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .receipt-details p {
+            font-weight: 600;
+            color: #E10F0F;
             margin: 5px 0;
         }
-
-        .receipt-table {
+        .receipt-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin: 20px 0;
         }
-
-        .receipt-table th, 
-        .receipt-table td {
-            border: 1px solid #000;
-            padding: 8px;
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+            color: #333;
+        }
+        .total-row {
+            font-weight: 600;
+            background-color: #e9e9e9;
+        }
+        .button-container {
             text-align: center;
+            margin-top: 30px;
         }
-
-        .total-amount {
-            font-size: 18px;
-            font-weight: bold;
-            text-align: right;
-            margin-top: 10px;
+        .button {
+            background: #E10F0F;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        text-decoration: none;
+        transition: background 0.3s ease;
         }
-
-        .print-button {
-            display: block;
-            width: 200px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #E10F0F;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-
-        @media print {
-            .sidebar, .topbar, .back-button-container, .print-button {
-                display: none !important;
-            }
-
-            body, html {
-                width: 21cm;
-                height: 29.7cm;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-            }
-
-            .receipt-container {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 20px;
-                border: none;
-            }
+        .button:hover {
+            background-color: #c20d0d;
         }
     </style>
-</head>
-<body>
-<?php
-session_start();
-include('navigation/sidebar.php');
-include('navigation/topbar.php');
-include('dbconnect.php');
-
-if (!isset($_GET['id'])) {
-    die("Invalid Request");
-}
-
-$serviceID = $_GET['id'];
-$queryReceipt = "SELECT s.ServiceID, s.Type AS ServiceType, s.Price AS ServicePrice, 
-                        p.PartID, p.Name AS PartName, p.Price AS PartPrice, 
-                        p.Quantity, p.Location,
-                        (p.Price + s.Price) AS TotalPrice, 
-                        DATE_FORMAT(s.Date, '%M %d, %Y %h:%i %p') AS FormattedDate, 
-                        CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy
-                 FROM service s
-                 JOIN part p ON s.PartID = p.PartID
-                 JOIN user u ON s.StaffName = u.Username
-                 WHERE s.ServiceID = ? AND p.archived = 0 AND s.archived = 0";
-
-$stmt = $conn->prepare($queryReceipt);
-$stmt->bind_param("i", $serviceID);
-$stmt->execute();
-$result = $stmt->get_result();
-$receipt = $result->fetch_assoc();
-
-if (!$receipt) {
-    die("Receipt not found.");
-}
-?>
-
-<div class="receipt-container">
-    <div class="receipt-header">
-        <h2>Drafter Autotech Inventory System</h2>
-        <p>Official Receipt</p>
-    </div>
-
-    <div class="receipt-details">
-        <p><strong>Transaction ID:</strong> #<?= $receipt['ServiceID'] ?></p>
-        <p><strong>Retrieved By:</strong> <?= $receipt['ActionBy'] ?></p>
-        <p><strong>Date:</strong> <?= $receipt['FormattedDate'] ?></p>
-    </div>
-
-    <h3>Item Details</h3>
-    <table class="receipt-table">
-        <thead>
-            <tr>
-                <th>Item Name</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><?= $receipt['PartName'] ?></td>
-                <td>₱<?= number_format($receipt['PartPrice'], 2) ?></td>
-            </tr>
-            <tr>
-                <td><?= $receipt['ServiceType'] ?></td>
-                <td>₱<?= number_format($receipt['ServicePrice'], 2) ?></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <p class="total-amount">Total Amount: ₱<?= number_format($receipt['TotalPrice'], 2) ?></p>
-
-    <p><strong>Reason for Retrieval:</strong> To be used for service</p>
-
-    <button class="print-button" onclick="window.print()">Print</button>
-</div>
-
 </body>
 </html>
