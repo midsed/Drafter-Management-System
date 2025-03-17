@@ -87,22 +87,52 @@ include('navigation/topbar.php');
     </div>
 
     <div class="parts-container" id="partsList">
-        <?php
-        $limit = 8;
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $offset = ($page - 1) * $limit;
+    <?php
+$limit = 8;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-        $totalQuery = "SELECT COUNT(*) AS total FROM part";
-        $totalResult = $conn->query($totalQuery);
-        $totalRow = $totalResult->fetch_assoc();
-        $totalPages = ceil($totalRow['total'] / $limit);
+$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+$categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
+$sort = isset($_GET['sort']) ? $_GET['sort'] : ''; // Get sort parameter
 
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
-        $result = $conn->query($sql);
+// Base query
+$sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
+$countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0"; // Query for pagination count
+
+// Apply category filter
+if (!empty($categories)) {
+    $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+    $categoryList = "'" . implode("','", $escapedCategories) . "'";
+    $sql .= " AND Category IN ($categoryList)";
+    $countSql .= " AND Category IN ($categoryList)"; // Apply same filter to count query
+}
+
+// Apply search filter
+if (!empty($search)) {
+    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+    $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+}
+
+// Apply sorting
+if ($sort === 'asc') {
+    $sql .= " ORDER BY Name ASC";
+} elseif ($sort === 'desc') {
+    $sql .= " ORDER BY Name DESC";
+}
+
+// Pagination
+$sql .= " LIMIT $limit OFFSET $offset";
+
+// Fetch total count for pagination
+$totalResult = $conn->query($countSql);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $limit);
+
+$result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             while ($part = $result->fetch_assoc()) {
-                // Construct the image source path
                 $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
                 echo "
                     <div class='part-card'>
@@ -125,7 +155,6 @@ include('navigation/topbar.php');
             echo "<p>No parts found.</p>";
         }
         ?>
-    </div>
     </div>
 
     <div class="pagination">
@@ -197,14 +226,23 @@ function archivePart(partID) {
 
 // Search functionality
 function searchParts() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
+    const input = document.getElementById("searchInput").value.trim().toLowerCase();
     const parts = document.querySelectorAll(".part-card");
+
+    if (input === "") {
+        window.location.href = window.location.pathname;
+        return;
+    }
 
     parts.forEach(part => {
         const text = part.textContent.toLowerCase();
         part.style.display = text.includes(input) ? "" : "none";
     });
 }
+
+document.getElementById("searchInput").addEventListener("input", function () {
+    searchParts();
+});
 
 function addToCart(partID) {
     fetch('add_to_cart.php', {
@@ -221,7 +259,7 @@ function addToCart(partID) {
                 icon: "success",
                 confirmButtonColor: "#6c5ce7"
             }).then(() => {
-                location.reload(); // Optionally reload the page or update the cart UI
+                location.reload(); 
             });
         } else {
             Swal.fire({
@@ -251,6 +289,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortButton = document.getElementById("sortButton");
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
+    const searchInput = document.getElementById("searchInput");
+
+    // Restore selected checkboxes from URL parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
+    
+    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
+        if (selectedCategories.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -266,53 +315,75 @@ document.addEventListener("DOMContentLoaded", function () {
         filterDropdown.classList.remove("show");
     });
 
+    // Prevent dropdown from closing when clicking inside
+    filterDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+    
+    sortDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
     // Close dropdowns when clicking outside
     window.addEventListener("click", function (event) {
-        if (!event.target.matches('.filter-icon') && !event.target.matches('.sort-icon')) {
+        if (!event.target.closest(".dropdown-content") && 
+            !event.target.closest(".filter-icon") && 
+            !event.target.closest(".sort-icon")) {
             filterDropdown.classList.remove("show");
             sortDropdown.classList.remove("show");
         }
     });
 
-    // Prevent dropdown from closing when clicking checkboxes
-    filterDropdown.addEventListener("click", function (event) {
-        event.stopPropagation();
-    });
-
-    // Apply filter
     applyFilterButton.addEventListener("click", function () {
-    const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-    console.log("Selected Categories:", selectedCategories); // Debugging line
-    filterParts(selectedCategories);
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        const searchQuery = searchInput.value.trim();
+        const queryParams = new URLSearchParams(window.location.search);
+
+        if (selectedCategories.length > 0) {
+            queryParams.set("category", selectedCategories.join(",")); 
+        } else {
+            queryParams.delete("category");
+        }
+
+        if (searchQuery) {
+            queryParams.set("search", searchQuery);
+        } else {
+            queryParams.delete("search");
+        }
+
+        window.location.search = queryParams.toString(); 
     });
 
-    // Clear filter
+    // Clear filters
     clearFilterButton.addEventListener("click", function () {
-        document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-        filterParts([]);
+        window.location.href = window.location.pathname; 
     });
 
-    // Sort functionality
+    // Sorting functionality
     document.querySelectorAll(".sort-option").forEach(option => {
         option.addEventListener("click", function () {
-            sortParts(option.dataset.sort);
-            sortDropdown.classList.remove("show");
+            const selectedSort = this.dataset.sort;
+            const queryParams = new URLSearchParams(window.location.search);
+
+            queryParams.set("sort", selectedSort);
+            window.location.search = queryParams.toString(); 
         });
     });
-
 });
+
 
 // Filter parts based on selected categories
 function filterParts(selectedCategories) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const categoryElement = part.querySelector("p:nth-child(4)"); // Adjust the index if needed
+        const categoryElement = part.querySelector("p:nth-child(4)");
         if (!categoryElement) {
             console.error("Category element not found in part card:", part);
             return;
         }
         const category = categoryElement.textContent.split(": ")[1].trim().toLowerCase();
-        console.log("Category:", category); // Debugging line
 
         const lowerSelectedCategories = selectedCategories.map(cat => cat.toLowerCase());
 
@@ -325,7 +396,6 @@ function filterParts(selectedCategories) {
 // Apply filter
 applyFilterButton.addEventListener("click", function () {
     const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-    console.log("Selected Categories:", selectedCategories); // Debugging line
     filterParts(selectedCategories);
 });
 
@@ -518,15 +588,14 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 40px;
+    position: relative;
+    width: 100%; 
+    padding-bottom: 40px; 
 }
 
 .pagination-button {
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 4px;
     background: white;
     border: 1px solid black;
@@ -541,8 +610,6 @@ body {
 }
 
 .active-page {
-    padding: 6px 12px;
-    border-radius: 4px;
     background: black;
     color: white;
     font-weight: bold;
