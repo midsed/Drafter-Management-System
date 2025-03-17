@@ -222,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .remove-btn {
-        background-color: gray;
+        background-color: red;
         color: white;
         border: none;
         padding: 8px 12px;
@@ -233,23 +233,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .remove-btn:hover {
-        background-color: darkgray;
+        background-color: gray;
     }
 
     .qty-btn {
-        background-color: red;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
+    background-color: #d8dcde;
+    border: 1px;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 900;
     }
-
     .quantity-input {
-        width: 40px;
+        width: 50px;
         text-align: center;
         font-family: 'Poppins', sans-serif;
-        border: 1px solid #ccc;
+        border: 2px solid #ccc;
         border-radius: 5px;
         margin: 0 5px;
     }
