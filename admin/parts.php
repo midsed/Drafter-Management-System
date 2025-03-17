@@ -523,19 +523,34 @@ body {
     padding-bottom: 40px; 
 }
 
+.pagination {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    width: 100%; 
+    text-align: center;
+    position: relative; 
+    padding-bottom: 40px; 
+}
+
 .pagination-button {
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 15px; 
+    border-radius: 5px;
     background: white;
-    border: 1px solid black;
+    border: 2px solid black; 
     color: black;
     text-decoration: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px; 
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .pagination-button:hover {
     background: #f0f0f0;
+    transform: scale(1.05);
 }
 
 .active-page {
