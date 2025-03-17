@@ -178,10 +178,19 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
-                    <option value="Engine">Engine</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Body Panel">Body Panel</option>
-                    <option value="Interior">Interior</option>
+                <option value="Alternator">Alternator</option>
+                <option value="Battery">Battery</option>
+                <option value="Body Panel">Body Panel</option>
+                <option value="Brakes">Brakes</option>
+                <option value="Clutch">Clutch</option>
+                <option value="Differential">Differential</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Engine">Engine</option>
+                <option value="Exhaust">Exhaust</option>
+                <option value="Interior">Interior</option>
+                <option value="Mags">Mags</option>
+                <option value="Suspension">Suspension</option>
+                <option value="Tire">Tire</option>
                 </select>
             </div>
 
