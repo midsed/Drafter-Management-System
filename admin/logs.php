@@ -169,17 +169,24 @@ if (isset($_SESSION['UserID'])) {
 
         <!-- Pagination -->
         <div class="pagination">
-            <?php if ($page > 1): ?>
-                <a href="?page=1" class="red-button">First</a>
-                <a href="?page=<?= $page - 1 ?>" class="red-button">Previous</a>
-            <?php endif; ?>
-            <span>Page <?= $page ?> of <?= $totalPages ?></span>
-            <?php if ($page < $totalPages): ?>
-                <a href="?page=<?= $page + 1 ?>" class="red-button">Next</a>
-                <a href="?page=<?= $totalPages ?>" class="red-button">Last</a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    // Preserve existing query parameters except for 'page'
+    $queryParams = $_GET;
+    unset($queryParams['page']); // Remove the existing page number
+    $queryString = http_build_query($queryParams); // Build query string for filters
+    ?>
+
+<?php if ($page > 1): ?>
+        <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+        <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+    <?php endif; ?>
 </div>
 
 <script>
@@ -356,10 +363,6 @@ window.addEventListener("click", function (event) {
         text-align: left; 
     }
 
-    .pagination {
-        margin-top: 20px;
-    }
-
     .red-button {
         background: #E10F0F;
         color: white;
@@ -467,31 +470,36 @@ window.addEventListener("click", function (event) {
 
     /* Pagination Styles */
     .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-top: 20px;
-    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
 
-    .pagination-button {
-        padding: 6px 12px;
-        border-radius: 4px;
-        background: white;
-        border: 1px solid #ccc;
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-        font-size: 14px;
-    }
+.pagination-button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid black;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
 
-    .pagination-button:hover {
-        background: #f0f0f0;
-    }
+.pagination-button:hover {
+    background: #f0f0f0;
+}
 
-    .active-page {
-        background: #E10F0F;
-        color: white;
-        font-weight: bold;
-    }
+.active-page {
+    background: #000000;
+    color: white;
+    font-weight: bold;
+}
+
 </style>
