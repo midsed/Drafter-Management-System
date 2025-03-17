@@ -226,14 +226,23 @@ function archivePart(partID) {
 
 // Search functionality
 function searchParts() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
+    const input = document.getElementById("searchInput").value.trim().toLowerCase();
     const parts = document.querySelectorAll(".part-card");
+
+    if (input === "") {
+        window.location.href = window.location.pathname;
+        return;
+    }
 
     parts.forEach(part => {
         const text = part.textContent.toLowerCase();
         part.style.display = text.includes(input) ? "" : "none";
     });
 }
+
+document.getElementById("searchInput").addEventListener("input", function () {
+    searchParts();
+});
 
 function addToCart(partID) {
     fetch('add_to_cart.php', {
