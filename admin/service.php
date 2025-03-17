@@ -13,11 +13,10 @@ include('dbconnect.php');
 
 <?php
 $search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : ''; 
-$limit = 10; // Number of records per page
+$limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Fetch total service count
 $totalQuery = "SELECT COUNT(*) AS total FROM service WHERE Archived = 0";
 if (!empty($search)) {
     $totalQuery .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%')";
@@ -155,7 +154,7 @@ $result = $conn->query($sql);
 </style>
 
 <script>
-// 🟢 Improved Sidebar Toggle Function
+// Sidebar Toggle Function
 function toggleSidebar() {
     document.querySelector('.sidebar')?.classList.toggle('collapsed');
     document.querySelector('.main-content')?.classList.toggle('collapsed');
@@ -188,7 +187,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
 });
 
 
-// 🗂️ Archive Service with SweetAlert2
+// Archive Service 
 function archiveService(serviceID) {
     Swal.fire({
         title: "Are you sure?",

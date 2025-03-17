@@ -10,21 +10,39 @@ include('navigation/sidebar.php');
 include('navigation/topbar.php');
 include('dbconnect.php');
 
+// Handle search and role filter
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
+$roleFilter = isset($_GET['role']) ? $_GET['role'] : []; // Role filter array
 $limit = 10; // Number of users per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Fetch total user count
-$totalQuery = "SELECT COUNT(*) AS total FROM user";
+// Get total user count for pagination
+$totalQuery = "SELECT COUNT(*) AS total FROM user WHERE 1=1";
+if (!empty($search)) {
+    $totalQuery .= " AND (FName LIKE '%$search%' OR LName LIKE '%$search%' OR RoleType LIKE '%$search%' OR Email LIKE '%$search%')";
+}
+if (!empty($roleFilter)) {
+    $roleFilterSQL = implode("','", $roleFilter);
+    $totalQuery .= " AND RoleType IN ('$roleFilterSQL')";
+}
 $totalResult = $conn->query($totalQuery);
 $totalRow = $totalResult->fetch_assoc();
 $totalPages = ceil($totalRow['total'] / $limit);
 
-// Fetch users with pagination
+// Fetch users with pagination & filtering
 $sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status, LastLogin 
         FROM user 
-        LIMIT $limit OFFSET $offset";
+        WHERE 1=1";
 
+if (!empty($search)) {
+    $sql .= " AND (FName LIKE '%$search%' OR LName LIKE '%$search%' OR RoleType LIKE '%$search%' OR Email LIKE '%$search%')";
+}
+if (!empty($roleFilter)) {
+    $sql .= " AND RoleType IN ('$roleFilterSQL')";
+}
+
+$sql .= " ORDER BY UserID DESC LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 ?>
 
@@ -44,58 +62,118 @@ $result = $conn->query($sql);
     <input type="text" placeholder="Quick search" id="searchInput">
   </div>
 
+   <!-- Role Filter -->
+   <div class="filter-container">
+            <span>Filter by Role:</span>
+            <label><input type="checkbox" class="role-filter" value="Admin" <?= in_array("Admin", $roleFilter) ? "checked" : "" ?>> Admin</label>
+            <label><input type="checkbox" class="role-filter" value="Staff" <?= in_array("Staff", $roleFilter) ? "checked" : "" ?>> Staff</label>
+            <button id="applyFilter" class="btn btn-filter">Apply</button>
+        </div>
+
   <div class="table-container">
-    <table id="userTable">
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Email Address</th>
-          <th>Status</th>
-          <th>Last Login</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          echo "<tr>";
-          echo "<td>#{$row['UserID']}</td>";
-          echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['LastLogin'] ?? 'Never') . "</td>";
-          echo "<td><a href='usersedit.php?UserID={$row['UserID']}'><button>Edit</button></a></td>";
-          echo "</tr>";
-        }
-      } else {
-        echo "<tr><td colspan='7'>No users found.</td></tr>";
-      }
-      ?>
-      </tbody>
-    </table>
-  </div>
+        <table class="supplier-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email Address</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+            <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>#{$row['UserID']}</td>";
+                        echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['LastLogin'] ?? 'Never') . "</td>";
+                        echo '<td><a href="usersedit.php?UserID=' . $row['UserID'] . '" class="btn btn-edit">Edit</a></td>';
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='7'>No users found.</td></tr>";
+                }
+            ?>
+            </tbody>
+        </table>
+    </div>
 
-  <!-- Pagination -->
-  <div class="pagination">
-      <?php if ($page > 1): ?>
-          <a href="?page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
-      <?php endif; ?>
+    <!-- Pagination -->
+    <div class="pagination">
+        <?php 
+            $queryParams = $_GET;
+            unset($queryParams['page']);
+            $queryString = http_build_query($queryParams); 
 
-      <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-          <a href="?page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
-      <?php endfor; ?>
+            $visiblePages = 5; // Number of pages to display
+            $startPage = max(1, $page - 2);
+            $endPage = min($totalPages, $startPage + $visiblePages - 1);
 
-      <?php if ($page < $totalPages): ?>
-          <a href="?page=<?= $page + 1 ?>" class="pagination-button">Next</a>
-      <?php endif; ?>
-  </div>
-</div>
+            if ($endPage - $startPage < $visiblePages - 1) {
+                $startPage = max(1, $endPage - $visiblePages + 1);
+            }
+            ?>
+
+            <!-- First Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+            <?php endif; ?>
+
+            <!-- Previous Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <?php endif; ?>
+
+            <!-- Page Number Buttons -->
+            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <!-- Next Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <?php endif; ?>
+
+            <!-- Last Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+            <?php endif; ?>
+        </div>
+    </div>
 
 <script>
+  document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.trim();
+    const currentUrl = new URL(window.location.href);
+
+    if (searchValue) {
+        currentUrl.searchParams.set("search", searchValue);
+    } else {
+        currentUrl.searchParams.delete("search");
+    }
+
+    currentUrl.searchParams.set("page", "1");
+
+    window.history.replaceState({}, '', currentUrl.toString());
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+        })
+        .catch(error => console.error("Error updating search results:", error));
+});
   // 🔍 Real-time search function
   function searchTable() {
       const searchInput = document.getElementById("searchInput").value.toLowerCase();

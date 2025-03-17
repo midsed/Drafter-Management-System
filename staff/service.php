@@ -11,6 +11,44 @@ include('navigation/topbar.php');
 include('dbconnect.php');
 ?>
 
+<?php
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : ''; 
+$limit = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$totalQuery = "SELECT COUNT(*) AS total FROM service WHERE Archived = 0";
+if (!empty($search)) {
+    $totalQuery .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%')";
+}
+$totalResult = $conn->query($totalQuery);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $limit);
+
+$sql = "SELECT 
+            s.ServiceID, 
+            s.Type, 
+            s.Price, 
+            c.FName AS CustomerFName, 
+            c.LName AS CustomerLName, 
+            s.ClientEmail, 
+            c.PhoneNumber, 
+            s.StaffName, 
+            COALESCE(p.Name, 'N/A') AS PartName
+        FROM service s
+        LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+        LEFT JOIN part p ON s.PartID = p.PartID
+        WHERE s.Archived = 0";
+
+if (!empty($search)) {
+    $sql .= " AND (s.Type LIKE '%$search%' OR c.FName LIKE '%$search%' OR c.LName LIKE '%$search%' OR s.ClientEmail LIKE '%$search%')";
+}
+
+$sql .= " ORDER BY s.ServiceID DESC LIMIT $limit OFFSET $offset";
+
+$result = $conn->query($sql);
+?>
+
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -44,58 +82,64 @@ include('dbconnect.php');
                     <th>Customer Number</th>
                     <th>Staff Name</th>
                     <th>Part Name</th>
-                    <th>Edit Service</th>
+                    <th>Edit</th>
                     <th>Archive</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="logsTableBody">
             <?php
-                $sql = "SELECT 
-                            s.ServiceID, 
-                            s.Type, 
-                            s.Price, 
-                            c.FName AS CustomerFName, 
-                            c.LName AS CustomerLName, 
-                            s.ClientEmail, 
-                            c.PhoneNumber, 
-                            s.StaffName, 
-                            COALESCE(p.Name, 'N/A') AS PartName
-                        FROM service s
-                        LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
-                        LEFT JOIN part p ON s.PartID = p.PartID
-                        WHERE s.Archived = 0";
-
-                $result = $conn->query($sql);
-
-                if (!$result) {
-                    echo "<tr><td colspan='10'>SQL Error: " . $conn->error . "</td></tr>";
-                } elseif ($result->num_rows > 0) {
+                if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
-                ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($row['ServiceID']); ?></td>
-                    <td><?php echo htmlspecialchars($row['Type']); ?></td>
-                    <td><?php echo htmlspecialchars($row['Price']); ?></td>
-                    <td><?php echo htmlspecialchars($row['CustomerFName'] . ' ' . $row['CustomerLName']); ?></td>
-                    <td><?php echo htmlspecialchars($row['ClientEmail'] ?? 'N/A'); ?></td>
-                    <td><?php echo htmlspecialchars($row['PhoneNumber'] ?? 'N/A'); ?></td>
-                    <td><?php echo htmlspecialchars($row['StaffName'] ?? 'N/A'); ?></td>
-                    <td><?php echo htmlspecialchars($row['PartName']); ?></td>
-                    <td>
-                        <a href="serviceedit.php?id=<?php echo $row['ServiceID']; ?>" class="btn btn-edit">Edit</a>
-                    </td>
-                    <td>
-                        <button class="btn btn-archive" onclick="archiveService(<?php echo $row['ServiceID']; ?>)">Archive</button>
-                    </td>
-                </tr>
-                <?php
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['ServiceID']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Type']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Price']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['CustomerFName'] . ' ' . $row['CustomerLName']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['ClientEmail'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['PhoneNumber'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['StaffName'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['PartName']) . "</td>";
+                        echo '<td><a href="serviceedit.php?id=' . $row['ServiceID'] . '" class="btn btn-edit">Edit</a></td>';
+                        echo '<td><button class="btn btn-archive" onclick="archiveService(' . $row['ServiceID'] . ')">Archive</button></td>';
+                        echo "</tr>";
                     }
                 } else {
                     echo "<tr><td colspan='10'>No services found.</td></tr>";
                 }
-                ?>
+            ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <?php 
+            $queryParams = $_GET;
+            unset($queryParams['page']);
+            $queryString = http_build_query($queryParams); 
+
+            $visiblePages = 5;
+            $startPage = max(1, $page - 2);
+            $endPage = min($totalPages, $startPage + $visiblePages - 1);
+
+            if ($endPage - $startPage < $visiblePages - 1) {
+                $startPage = max(1, $endPage - $visiblePages + 1);
+            }
+        ?>
+
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+            <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+        <?php endif; ?>
+
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -110,27 +154,40 @@ include('dbconnect.php');
 </style>
 
 <script>
-// 🟢 Improved Sidebar Toggle Function
+// Sidebar Toggle Function
 function toggleSidebar() {
     document.querySelector('.sidebar')?.classList.toggle('collapsed');
     document.querySelector('.main-content')?.classList.toggle('collapsed');
 }
 
-// 🔎 Search Functionality (More Optimized)
-function searchTable() {
-    const searchInput = document.getElementById("searchInput").value.trim().toLowerCase();
-    const rows = document.querySelectorAll(".supplier-table tbody tr");
+document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.trim();
+    const currentUrl = new URL(window.location.href);
 
-    rows.forEach(row => {
-        const rowText = row.textContent.toLowerCase();
-        row.style.display = rowText.includes(searchInput) ? "" : "none";
-    });
-}
+    if (searchValue) {
+        currentUrl.searchParams.set("search", searchValue);
+    } else {
+        currentUrl.searchParams.delete("search");
+    }
 
-// Attach event listener to input field for real-time search (No button required)
-document.getElementById("searchInput").addEventListener("input", searchTable);
+    currentUrl.searchParams.set("page", "1");
 
-// 🗂️ Archive Service with SweetAlert2
+    window.history.replaceState({}, '', currentUrl.toString());
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+        })
+        .catch(error => console.error("Error updating search results:", error));
+});
+
+
+// Archive Service 
 function archiveService(serviceID) {
     Swal.fire({
         title: "Are you sure?",
@@ -260,5 +317,33 @@ function archiveService(serviceID) {
     }
     .supplier-table tr:hover {
         background-color: #f1f1f1;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .pagination-button {
+        padding: 6px 12px;
+        border-radius: 4px;
+        background: white;
+        border: 1px solid black;
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .pagination-button:hover {
+        background: #f0f0f0;
+    }
+
+    .active-page {
+        background: black;
+        color: white;
+        font-weight: bold;
     }
 </style>
