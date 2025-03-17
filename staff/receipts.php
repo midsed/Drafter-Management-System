@@ -232,11 +232,28 @@ document.querySelectorAll('.view-receipt-button').forEach(button => {
 });
 
 function searchReceipts() {
-    const searchInput = document.getElementById("searchInput").value;
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('search', searchInput);
-    window.location.href = currentUrl.toString();
+    const input = document.getElementById("searchInput").value.trim().toLowerCase();
+    const receipts = document.querySelectorAll("#receipt-table tbody tr");
+
+    if (input === "") {
+        window.location.href = window.location.pathname; // Reload page to reset results
+        return;
+    }
+
+    receipts.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
 }
+
+document.getElementById("searchInput").addEventListener("input", function () {
+    searchReceipts();
+});
+
 // DOMContentLoaded event listener
 document.addEventListener("DOMContentLoaded", function () {
     const filterDropdown = document.getElementById("filterDropdown");
@@ -245,6 +262,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortButton = document.getElementById("sortButton");
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
+    const sortOptions = document.querySelectorAll(".sort-option");
+
+    sortOptions.forEach(option => {
+        option.addEventListener("click", function () {
+            const sortOrder = this.dataset.sort;
+            const currentUrl = new URL(window.location.href);
+            
+            // Update URL parameters for sorting
+            currentUrl.searchParams.set("sort", sortOrder);
+            currentUrl.searchParams.set("sort_field", "RetrievedDate");
+            
+            window.location.href = currentUrl.toString(); 
+        });
+    });
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -296,26 +327,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-// Filter parts based on selected categories
-function filterParts(selectedCategories) {
-    const parts = document.querySelectorAll(".part-card");
-    parts.forEach(part => {
-        const categoryElement = part.querySelector("p:nth-child(4)"); // Adjust the index if needed
-        if (!categoryElement) {
-            console.error("Category element not found in part card:", part);
-            return;
-        }
-        const category = categoryElement.textContent.split(": ")[1].trim().toLowerCase();
-        console.log("Category:", category); // Debugging line
-
-        const lowerSelectedCategories = selectedCategories.map(cat => cat.toLowerCase());
-
-        const matchesCategory = lowerSelectedCategories.length === 0 || lowerSelectedCategories.includes(category);
-
-        part.style.display = matchesCategory ? "" : "none";
-    });
-}
-
 // Apply filter
 applyFilterButton.addEventListener("click", function () {
     const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
@@ -328,29 +339,6 @@ clearFilterButton.addEventListener("click", function () {
     document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
     filterParts([]);
 });
-
-// Sort parts by name (ascending or descending)
-function sortParts(order) {
-    const partsContainer = document.getElementById("partsList");
-    const partsArray = Array.from(partsContainer.children);
-
-    partsArray.sort((a, b) => {
-        const nameA = a.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-        const nameB = b.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-
-        if (order === "asc") {
-            return nameA.localeCompare(nameB); // Sort in ascending order
-        } else if (order === "desc") {
-            return nameB.localeCompare(nameA); // Sort in descending order
-        }
-    });
-
-    // Clear the current parts list
-    partsContainer.innerHTML = "";
-
-    // Append the sorted parts back to the container
-    partsArray.forEach(part => partsContainer.appendChild(part));
-}
 
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
