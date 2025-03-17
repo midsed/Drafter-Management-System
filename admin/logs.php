@@ -20,7 +20,33 @@ if (isset($_SESSION['UserID'])) {
     // logAction($conn, $userId, 'User  Logged In'); // Uncomment and use as needed
 }
 
-?> 
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : ''; 
+$limit = 10; // Results per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Build SQL query with search filtering
+$sql = "SELECT l.LogsID, u.Username AS ActionBy, l.ActionType, l.Timestamp 
+        FROM logs l
+        JOIN user u ON l.UserID = u.UserID
+        WHERE 1=1";
+
+// Apply search filter
+if (!empty($search)) {
+    $sql .= " AND (u.Username LIKE '%$search%' 
+                  OR l.ActionType LIKE '%$search%' 
+                  OR l.Timestamp LIKE '%$search%')";
+}
+
+// Get total logs count for pagination
+$totalResult = $conn->query($sql);
+$totalLogs = $totalResult->num_rows;
+$totalPages = ceil($totalLogs / $limit);
+
+// Apply sorting and pagination
+$sql .= " ORDER BY l.Timestamp DESC LIMIT $offset, $limit";
+$result = $conn->query($sql);
+?>
 
 <!DOCTYPE html> 
 <html lang="en"> 
@@ -43,8 +69,7 @@ if (isset($_SESSION['UserID'])) {
 
     <div class="search-actions">
         <div class="search-container">
-            <input type="text" placeholder="Quick search" id="searchInput">
-            <button onclick="searchLogs()" class="red-button">Search</button>
+            <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
             <div class="filter-container">
                 <span>Filter</span>
                 <div class="dropdown">
@@ -91,7 +116,6 @@ if (isset($_SESSION['UserID'])) {
     </div>
 
     <!-- Download Logs Button -->
-    <!-- Download Logs Button -->
 <div class="action-buttons">
     <a href="download_logs.php?<?= http_build_query(array_intersect_key($_GET, array_flip(['action_type', 'username', 'start_date', 'end_date']))) ?>" class="red-button">Download Logs (CSV)</a>
 </div>
@@ -109,55 +133,13 @@ if (isset($_SESSION['UserID'])) {
             </thead>
             <tbody id="logsTableBody">
                 <?php
-                // Build the SQL query based on filters
-                $sql = "SELECT l.LogsID, u.Username AS ActionBy, l.ActionType, l.Timestamp 
-                        FROM logs l
-                        JOIN user u ON l.UserID = u.UserID
-                        WHERE 1=1";
-
-                if (!empty($_GET['action_type'])) {
-                    $actionType = $conn->real_escape_string($_GET['action_type']);
-                    $sql .= " AND l.ActionType IN ('$actionType')";
-                }
-
-                if (!empty($_GET['username'])) {
-                    $username = $conn->real_escape_string($_GET['username']);
-                    $sql .= " AND u.Username LIKE '%$username%'";
-                }
-
-                if (!empty($_GET['start_date'])) {
-                    $startDate = $conn->real_escape_string($_GET['start_date']);
-                    $sql .= " AND l.Timestamp >= '$startDate'";
-                }
-
-                if (!empty($_GET['end_date'])) {
-                    $endDate = $conn->real_escape_string($_GET['end_date']);
-                    $sql .= " AND l.Timestamp <= '$endDate 23:59:59'";
-                }
-
-                $sql .= " ORDER BY l.Timestamp DESC";
-
-                // Pagination
-                $resultsPerPage = 10;
-                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                $offset = ($page - 1) * $resultsPerPage;
-
-                // Get total logs for pagination
-                $result = $conn->query($sql);
-                $totalLogs = $result->num_rows;
-                $totalPages = ceil($totalLogs / $resultsPerPage);
-
-                // Apply limit for pagination
-                $sql .= " LIMIT $offset, $resultsPerPage";
-                $result = $conn->query($sql);
-
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
                         echo "<td>#{$row['LogsID']}</td>";
                         echo "<td>" . htmlspecialchars($row['ActionBy']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ActionType']) . "</td>";
-                        echo "<td>" . date("F j, Y, g:i A", strtotime($row['Timestamp'])) . "</td>"; // Format the timestamp
+                        echo "<td>" . date("F j, Y, g:i A", strtotime($row['Timestamp'])) . "</td>"; 
                         echo "</tr>";
                     }
                 } else {
@@ -167,46 +149,89 @@ if (isset($_SESSION['UserID'])) {
             </tbody>
         </table>
 
-        <!-- Pagination -->
-        <div class="pagination">
-    <?php
-    // Preserve existing query parameters except for 'page'
-    $queryParams = $_GET;
-    unset($queryParams['page']); // Remove the existing page number
-    $queryString = http_build_query($queryParams); // Build query string for filters
-    ?>
+    <!-- Pagination -->
+    <div class="pagination">
+        <?php 
+            $queryParams = $_GET;
+            unset($queryParams['page']);
+            $queryString = http_build_query($queryParams); 
 
-<?php if ($page > 1): ?>
-        <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
-    <?php endif; ?>
+            $visiblePages = 5; // Number of pages to display
+            $startPage = max(1, $page - 2);
+            $endPage = min($totalPages, $startPage + $visiblePages - 1);
 
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-        <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
-    <?php endfor; ?>
+            if ($endPage - $startPage < $visiblePages - 1) {
+                $startPage = max(1, $endPage - $visiblePages + 1);
+            }
+            ?>
 
-    <?php if ($page < $totalPages): ?>
-        <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
-    <?php endif; ?>
+            <!-- First Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+            <?php endif; ?>
+
+            <!-- Previous Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <?php endif; ?>
+
+            <!-- Page Number Buttons -->
+            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <!-- Next Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <?php endif; ?>
+
+            <!-- Last Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
 <script>
-        function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+        // Sidebar Toggle Function
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
-// Search functionality
-function searchLogs() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#logsTableBody tr");
-
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(input) ? "" : "none";
-    });
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
 }
+
+// Search functionality
+document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.trim();
+    const currentUrl = new URL(window.location.href);
+
+    if (searchValue) {
+        currentUrl.searchParams.set("search", searchValue);
+    } else {
+        currentUrl.searchParams.delete("search");
+    }
+
+    currentUrl.searchParams.set("page", "1");
+
+    window.history.replaceState({}, '', currentUrl.toString());
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+
+            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+        })
+        .catch(error => console.error("Error updating search results:", error));
+});
+
+
 
 // Filter functionality
 document.getElementById("applyFilter").addEventListener("click", function () {
