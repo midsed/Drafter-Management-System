@@ -1,19 +1,33 @@
-<?php 
+<?php
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
-}
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
+include('dbconnect.php');
+
+$limit = 10; // Number of users per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Fetch total user count
+$totalQuery = "SELECT COUNT(*) AS total FROM user";
+$totalResult = $conn->query($totalQuery);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $limit);
+
+// Fetch users with pagination
+$sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status, LastLogin 
+        FROM user 
+        LIMIT $limit OFFSET $offset";
+
+$result = $conn->query($sql);
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
-<?php include('dbconnect.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
 <div class="main-content">
@@ -25,10 +39,9 @@ if (!isset($_SESSION['Username'])) {
     <a href="usersadd.php" class="add-user-btn">+ Add User</a>
   </div>
 
-  <!-- Search container: left aligned input and search button -->
+  <!-- Search container -->
   <div class="search-container">
     <input type="text" placeholder="Quick search" id="searchInput">
-    <button class="red-button" onclick="searchTable()">Search</button>
   </div>
 
   <div class="table-container">
@@ -46,9 +59,6 @@ if (!isset($_SESSION['Username'])) {
       </thead>
       <tbody>
       <?php
-      $sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status AS Status, LastLogin FROM user";
-      $result = $conn->query($sql);
-
       if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
           echo "<tr>";
@@ -69,99 +79,88 @@ if (!isset($_SESSION['Username'])) {
     </table>
   </div>
 
-  <script>
-    function searchTable() {
-      const searchInput = document.getElementById("searchInput").value.toLowerCase();
-      const table = document.getElementById("userTable");
-      const rows = table.getElementsByTagName("tr");
+  <!-- Pagination -->
+  <div class="pagination">
+      <?php if ($page > 1): ?>
+          <a href="?page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+      <?php endif; ?>
 
-      // Start from index 1 to skip the header row
-      for (let i = 1; i < rows.length; i++) {  
-        let cells = rows[i].getElementsByTagName("td");
-        let match = false;
+      <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+          <a href="?page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+      <?php endfor; ?>
 
-        for (let j = 0; j < cells.length; j++) {
-          if (cells[j] && cells[j].textContent.toLowerCase().indexOf(searchInput) > -1) {
-            match = true;
-            break;
-          }
-        }
-        rows[i].style.display = match ? "" : "none";
-      }
-    }
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
-  </script>
+      <?php if ($page < $totalPages): ?>
+          <a href="?page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+      <?php endif; ?>
+  </div>
 </div>
 
+<script>
+  // 🔍 Real-time search function
+  function searchTable() {
+      const searchInput = document.getElementById("searchInput").value.toLowerCase();
+      const rows = document.querySelectorAll("#userTable tbody tr");
+
+      rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          row.style.display = rowText.includes(searchInput) ? "" : "none";
+      });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", searchTable);
+</script>
+
 <style>
- .search-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .search-container input[type="text"] {
-        width: 300px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .search-container input[type="text"]:focus {
-        outline: none;
-        border-color: #007bff;
-    }
-
-  .red-button {
-    background: #E10F0F;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.3s ease;
-    text-decoration: none;
-  }
-  .red-button:hover {
-    background: darkred;
+  .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
   }
 
-  #userTable td:last-child {
-    text-align: center;
+  .search-container input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
   }
 
-  #userTable td a button {
-    display: block;
-    margin: 0 auto;
-    color: #fff;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
   }
 
-  button, .add-user-btn {
-    font-family: 'Poppins', sans-serif;
+  .pagination-button {
+      padding: 6px 12px;
+      border-radius: 4px;
+      background: white;
+      border: 1px solid black;
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
   }
 
-  .header .add-user-btn {
-    background-color: #E10F0F;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: auto;
-    align-self: center;
+  .pagination-button:hover {
+      background: #f0f0f0;
+  }
+
+  .active-page {
+      background: black;
+      color: white;
+      font-weight: bold;
+  }
+
+  .add-user-btn {
+      background-color: #E10F0F;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: auto;
   }
 </style>

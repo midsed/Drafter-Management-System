@@ -26,7 +26,6 @@ include('navigation/topbar.php');
     <div class="search-actions">
         <div class="search-container">
             <input type="text" placeholder="Quick search" id="searchInput">
-            <button onclick="searchParts()" class="red-button">Search</button>
             <div class="filter-container">
                 <span>Filter</span>
                 <div class="dropdown">
