@@ -26,7 +26,6 @@ include('navigation/topbar.php');
     <div class="search-actions">
         <div class="search-container">
             <input type="text" placeholder="Quick search" id="searchInput">
-            <button onclick="searchParts()" class="red-button">Search</button>
             <div class="filter-container">
                 <span>Filter</span>
                 <div class="dropdown">
@@ -34,25 +33,24 @@ include('navigation/topbar.php');
                         <i class="fas fa-filter"></i>
                     </button>
                     <div id="filterDropdown" class="dropdown-content">
-                        <!-- Make Filter -->
-                        <div class="filter-section">
-                            <h4>Category</h4>
-                            <div class="filter-options" id="categoryFilter">
-                                <?php
-                                // Fetch unique categories from the database
-                                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
-                                $categoryResult = $conn->query($categoryQuery);
+                    <div class="filter-section">
+                        <h4>Category</h4>
+                        <div class="filter-options" id="categoryFilter">
+                            <?php
+                            // Fetch unique categories from the database
+                            $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
+                            $categoryResult = $conn->query($categoryQuery);
 
-                                if ($categoryResult->num_rows > 0) {
-                                    while ($category = $categoryResult->fetch_assoc()) {
-                                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
-                                    }
-                                } else {
-                                    echo "<p>No categories found.</p>";
+                            if ($categoryResult->num_rows > 0) {
+                                while ($category = $categoryResult->fetch_assoc()) {
+                                    echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
                                 }
-                                ?>
-                            </div>
+                            } else {
+                                echo "<p>No categories found.</p>";
+                            }
+                            ?>
                         </div>
+                    </div>
 
                         <!-- Actions -->
                         <div class="filter-actions">
@@ -88,29 +86,65 @@ include('navigation/topbar.php');
     </div>
 
     <div class="parts-container" id="partsList">
-        <?php
-        $limit = 8;
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $offset = ($page - 1) * $limit;
+    <?php
+$limit = 10; // Changed from 8 to 10 parts per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-        $totalQuery = "SELECT COUNT(*) AS total FROM part";
-        $totalResult = $conn->query($totalQuery);
-        $totalRow = $totalResult->fetch_assoc();
-        $totalPages = ceil($totalRow['total'] / $limit);
+$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+$categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
+$sort = isset($_GET['sort']) ? $_GET['sort'] : ''; // Get sort parameter
 
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0 LIMIT $limit OFFSET $offset";
-        $result = $conn->query($sql);
+// Base query
+$sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
+$countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0"; // Query for pagination count
+
+// Apply category filter
+if (!empty($categories)) {
+    $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+    $categoryList = "'" . implode("','", $escapedCategories) . "'";
+    $sql .= " AND Category IN ($categoryList)";
+    $countSql .= " AND Category IN ($categoryList)"; // Apply same filter to count query
+}
+
+// Apply search filter
+if (!empty($search)) {
+    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+    $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+}
+
+// Default sorting for first page is by DateAdded DESC (most recent first)
+// On other pages or when specific sort is selected, use that sorting
+if ($page == 1 && empty($sort)) {
+    $sql .= " ORDER BY DateAdded DESC"; // Show most recent first on first page
+} elseif ($sort === 'asc') {
+    $sql .= " ORDER BY Name ASC";
+} elseif ($sort === 'desc') {
+    $sql .= " ORDER BY Name DESC";
+} else {
+    $sql .= " ORDER BY DateAdded DESC"; // Default to most recent for other pages too
+}
+
+// Pagination
+$sql .= " LIMIT $limit OFFSET $offset";
+
+// Fetch total count for pagination
+$totalResult = $conn->query($countSql);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $limit);
+
+$result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             while ($part = $result->fetch_assoc()) {
-                $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
+                $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
                 echo "
                     <div class='part-card'>
                         <a href='partdetail.php?id={$part['PartID']}'><img src='$imageSrc' alt='Part Image'></a>
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
-                        <p><strong>Category:</strong> {$part['Category']}</p> <!-- Add this line -->
+                        <p><strong>Category:</strong> {$part['Category']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions'>
@@ -129,15 +163,15 @@ include('navigation/topbar.php');
 
     <div class="pagination">
         <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
         <?php endif; ?>
 
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <a href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Next</a>
         <?php endif; ?>
     </div>
 </div>
@@ -196,14 +230,35 @@ function archivePart(partID) {
 
 // Search functionality
 function searchParts() {
-    const input = document.getElementById("searchInput").value.toLowerCase();
-    const parts = document.querySelectorAll(".part-card");
-
-    parts.forEach(part => {
-        const text = part.textContent.toLowerCase();
-        part.style.display = text.includes(input) ? "" : "none";
-    });
+    const input = document.getElementById("searchInput").value.trim().toLowerCase();
+    const currentUrl = new URL(window.location.href);
+    
+    if (input === "") {
+        currentUrl.searchParams.delete("search");
+    } else {
+        currentUrl.searchParams.set("search", input);
+    }
+    
+    // Preserve other parameters
+    currentUrl.searchParams.set("page", "1"); // Reset to first page when searching
+    
+    window.location.href = currentUrl.toString();
 }
+
+document.getElementById("searchInput").addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+        searchParts();
+    }
+});
+
+// Add current search term to input field on page load
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchTerm = urlParams.get("search");
+    if (searchTerm) {
+        document.getElementById("searchInput").value = searchTerm;
+    }
+});
 
 function addToCart(partID) {
     fetch('add_to_cart.php', {
@@ -220,7 +275,7 @@ function addToCart(partID) {
                 icon: "success",
                 confirmButtonColor: "#6c5ce7"
             }).then(() => {
-                location.reload(); // Optionally reload the page or update the cart UI
+                location.reload(); 
             });
         } else {
             Swal.fire({
@@ -250,6 +305,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortButton = document.getElementById("sortButton");
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
+    const searchInput = document.getElementById("searchInput");
+
+    // Restore selected checkboxes from URL parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
+    
+    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
+        if (selectedCategories.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -265,77 +331,98 @@ document.addEventListener("DOMContentLoaded", function () {
         filterDropdown.classList.remove("show");
     });
 
+    // Prevent dropdown from closing when clicking inside
+    filterDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+    
+    sortDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
     // Close dropdowns when clicking outside
     window.addEventListener("click", function (event) {
-        if (!event.target.matches('.filter-icon') && !event.target.matches('.sort-icon')) {
+        if (!event.target.closest(".dropdown-content") && 
+            !event.target.closest(".filter-icon") && 
+            !event.target.closest(".sort-icon")) {
             filterDropdown.classList.remove("show");
             sortDropdown.classList.remove("show");
         }
     });
 
-    // Prevent dropdown from closing when clicking checkboxes
-    filterDropdown.addEventListener("click", function (event) {
-        event.stopPropagation();
-    });
-
-    // Apply filter
     applyFilterButton.addEventListener("click", function () {
-        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-        filterParts(selectedCategories);
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        const searchQuery = searchInput.value.trim();
+        const queryParams = new URLSearchParams(window.location.search);
+
+        // Reset to first page when applying filters
+        queryParams.set("page", "1");
+
+        if (selectedCategories.length > 0) {
+            queryParams.set("category", selectedCategories.join(",")); 
+        } else {
+            queryParams.delete("category");
+        }
+
+        if (searchQuery) {
+            queryParams.set("search", searchQuery);
+        } else {
+            queryParams.delete("search");
+        }
+
+        // Preserve sort parameter if exists
+        const sortParam = queryParams.get("sort");
+        if (!sortParam) {
+            queryParams.delete("sort");
+        }
+
+        window.location.search = queryParams.toString(); 
     });
 
-    // Clear filter
+    // Clear filters
     clearFilterButton.addEventListener("click", function () {
-        document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-        filterParts([]);
+        window.location.href = window.location.pathname; 
     });
 
-    // Sort functionality
+    // Sorting functionality
     document.querySelectorAll(".sort-option").forEach(option => {
         option.addEventListener("click", function () {
-            sortParts(option.dataset.sort);
-            sortDropdown.classList.remove("show");
+            const selectedSort = this.dataset.sort;
+            const queryParams = new URLSearchParams(window.location.search);
+
+            queryParams.set("sort", selectedSort);
+            
+            // Preserve other parameters
+            const searchQuery = queryParams.get("search");
+            const categoryParam = queryParams.get("category");
+            
+            // Reset to page 1 when sorting changes
+            queryParams.set("page", "1");
+            
+            window.location.search = queryParams.toString(); 
         });
     });
-
-
-    // Initial model filter update
 });
 
 // Filter parts based on selected categories
 function filterParts(selectedCategories) {
     const parts = document.querySelectorAll(".part-card");
     parts.forEach(part => {
-        const category = part.querySelector("p:nth-child(4)").textContent.split(": ")[1].trim().toLowerCase(); // Adjust the index if needed
+        const categoryElement = part.querySelector("p:nth-child(4)");
+        if (!categoryElement) {
+            console.error("Category element not found in part card:", part);
+            return;
+        }
+        const category = categoryElement.textContent.split(": ")[1].trim().toLowerCase();
+
         const lowerSelectedCategories = selectedCategories.map(cat => cat.toLowerCase());
 
         const matchesCategory = lowerSelectedCategories.length === 0 || lowerSelectedCategories.includes(category);
 
         part.style.display = matchesCategory ? "" : "none";
     });
-}
-
-// Sort parts by name (ascending or descending)
-function sortParts(order) {
-    const partsContainer = document.getElementById("partsList");
-    const partsArray = Array.from(partsContainer.children);
-
-    partsArray.sort((a, b) => {
-        const nameA = a.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-        const nameB = b.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-
-        if (order === "asc") {
-            return nameA.localeCompare(nameB); // Sort in ascending order
-        } else if (order === "desc") {
-            return nameB.localeCompare(nameA); // Sort in descending order
-        }
-    });
-
-    // Clear the current parts list
-    partsContainer.innerHTML = "";
-
-    // Append the sorted parts back to the container
-    partsArray.forEach(part => partsContainer.appendChild(part));
 }
 
 function toggleSidebar() {
@@ -444,6 +531,9 @@ body {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .filter-icon:hover, .sort-icon:hover {
@@ -453,7 +543,7 @@ body {
 .parts-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    gap: 40px;
 }
 
 .part-card {
@@ -498,15 +588,14 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 40px;
+    position: relative;
+    width: 100%; 
+    padding-bottom: 40px; 
 }
 
 .pagination-button {
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 4px;
     background: white;
     border: 1px solid black;
@@ -521,8 +610,6 @@ body {
 }
 
 .active-page {
-    padding: 6px 12px;
-    border-radius: 4px;
     background: black;
     color: white;
     font-weight: bold;
@@ -617,5 +704,9 @@ body {
     background-color: white;
     color: #E10F0F;
     border: 1px solid #E10F0F;
+}
+
+.sort-option.red-button:hover {
+    background-color: #f8f8f8;
 }
 </style>

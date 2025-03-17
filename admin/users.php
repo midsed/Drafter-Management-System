@@ -1,19 +1,51 @@
-<?php 
+<?php
 session_start();
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-if (!isset($_SESSION['Username'])) {
-    $_SESSION['Username'];
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
+include('dbconnect.php');
+
+// Handle search and role filter
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
+$roleFilter = isset($_GET['role']) ? $_GET['role'] : []; // Role filter array
+$limit = 10; // Number of users per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Get total user count for pagination
+$totalQuery = "SELECT COUNT(*) AS total FROM user WHERE 1=1";
+if (!empty($search)) {
+    $totalQuery .= " AND (FName LIKE '%$search%' OR LName LIKE '%$search%' OR RoleType LIKE '%$search%' OR Email LIKE '%$search%')";
 }
+if (!empty($roleFilter)) {
+    $roleFilterSQL = implode("','", $roleFilter);
+    $totalQuery .= " AND RoleType IN ('$roleFilterSQL')";
+}
+$totalResult = $conn->query($totalQuery);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $limit);
+
+// Fetch users with pagination & filtering
+$sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status, LastLogin 
+        FROM user 
+        WHERE 1=1";
+
+if (!empty($search)) {
+    $sql .= " AND (FName LIKE '%$search%' OR LName LIKE '%$search%' OR RoleType LIKE '%$search%' OR Email LIKE '%$search%')";
+}
+if (!empty($roleFilter)) {
+    $sql .= " AND RoleType IN ('$roleFilterSQL')";
+}
+
+$sql .= " ORDER BY UserID DESC LIMIT $limit OFFSET $offset";
+$result = $conn->query($sql);
 ?>
 
-<?php include('navigation/sidebar.php'); ?>
-<?php include('navigation/topbar.php'); ?>
-<?php include('dbconnect.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 
 <div class="main-content">
@@ -25,143 +57,188 @@ if (!isset($_SESSION['Username'])) {
     <a href="usersadd.php" class="add-user-btn">+ Add User</a>
   </div>
 
-  <!-- Search container: left aligned input and search button -->
+  <!-- Search container -->
   <div class="search-container">
     <input type="text" placeholder="Quick search" id="searchInput">
-    <button class="red-button" onclick="searchTable()">Search</button>
   </div>
+
+   <!-- Role Filter -->
+   <div class="filter-container">
+            <span>Filter by Role:</span>
+            <label><input type="checkbox" class="role-filter" value="Admin" <?= in_array("Admin", $roleFilter) ? "checked" : "" ?>> Admin</label>
+            <label><input type="checkbox" class="role-filter" value="Staff" <?= in_array("Staff", $roleFilter) ? "checked" : "" ?>> Staff</label>
+            <button id="applyFilter" class="btn btn-filter">Apply</button>
+        </div>
 
   <div class="table-container">
-    <table id="userTable">
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Email Address</th>
-          <th>Status</th>
-          <th>Last Login</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php
-      $sql = "SELECT UserID, CONCAT(FName, ' ', LName) AS Name, RoleType, Email, Status AS Status, LastLogin FROM user";
-      $result = $conn->query($sql);
+        <table class="supplier-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email Address</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+            <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>#{$row['UserID']}</td>";
+                        echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['LastLogin'] ?? 'Never') . "</td>";
+                        echo '<td><a href="usersedit.php?UserID=' . $row['UserID'] . '" class="btn btn-edit">Edit</a></td>';
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='7'>No users found.</td></tr>";
+                }
+            ?>
+            </tbody>
+        </table>
+    </div>
 
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          echo "<tr>";
-          echo "<td>#{$row['UserID']}</td>";
-          echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
-          echo "<td>" . htmlspecialchars($row['LastLogin'] ?? 'Never') . "</td>";
-          echo "<td><a href='usersedit.php?UserID={$row['UserID']}'><button>Edit</button></a></td>";
-          echo "</tr>";
-        }
-      } else {
-        echo "<tr><td colspan='7'>No users found.</td></tr>";
-      }
-      ?>
-      </tbody>
-    </table>
-  </div>
+    <!-- Pagination -->
+    <div class="pagination">
+        <?php 
+            $queryParams = $_GET;
+            unset($queryParams['page']);
+            $queryString = http_build_query($queryParams); 
 
-  <script>
-    function searchTable() {
+            $visiblePages = 5; // Number of pages to display
+            $startPage = max(1, $page - 2);
+            $endPage = min($totalPages, $startPage + $visiblePages - 1);
+
+            if ($endPage - $startPage < $visiblePages - 1) {
+                $startPage = max(1, $endPage - $visiblePages + 1);
+            }
+            ?>
+
+            <!-- First Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+            <?php endif; ?>
+
+            <!-- Previous Button -->
+            <?php if ($page > 1): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <?php endif; ?>
+
+            <!-- Page Number Buttons -->
+            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <!-- Next Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <?php endif; ?>
+
+            <!-- Last Button -->
+            <?php if ($page < $totalPages): ?>
+                <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+            <?php endif; ?>
+        </div>
+    </div>
+
+<script>
+  document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.trim();
+    const currentUrl = new URL(window.location.href);
+
+    if (searchValue) {
+        currentUrl.searchParams.set("search", searchValue);
+    } else {
+        currentUrl.searchParams.delete("search");
+    }
+
+    currentUrl.searchParams.set("page", "1");
+
+    window.history.replaceState({}, '', currentUrl.toString());
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+        })
+        .catch(error => console.error("Error updating search results:", error));
+});
+  // 🔍 Real-time search function
+  function searchTable() {
       const searchInput = document.getElementById("searchInput").value.toLowerCase();
-      const table = document.getElementById("userTable");
-      const rows = table.getElementsByTagName("tr");
+      const rows = document.querySelectorAll("#userTable tbody tr");
 
-      // Start from index 1 to skip the header row
-      for (let i = 1; i < rows.length; i++) {  
-        let cells = rows[i].getElementsByTagName("td");
-        let match = false;
+      rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          row.style.display = rowText.includes(searchInput) ? "" : "none";
+      });
+  }
 
-        for (let j = 0; j < cells.length; j++) {
-          if (cells[j] && cells[j].textContent.toLowerCase().indexOf(searchInput) > -1) {
-            match = true;
-            break;
-          }
-        }
-        rows[i].style.display = match ? "" : "none";
-      }
-    }
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    }
-  </script>
-</div>
+  document.getElementById("searchInput").addEventListener("input", searchTable);
+</script>
 
 <style>
- .search-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .search-container input[type="text"] {
-        width: 300px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .search-container input[type="text"]:focus {
-        outline: none;
-        border-color: #007bff;
-    }
-
-  .red-button {
-    background: #E10F0F;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.3s ease;
-    text-decoration: none;
-  }
-  .red-button:hover {
-    background: darkred;
+  .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
   }
 
-  #userTable td:last-child {
-    text-align: center;
+  .search-container input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
   }
 
-  #userTable td a button {
-    display: block;
-    margin: 0 auto;
-    color: #fff;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
   }
 
-  button, .add-user-btn {
-    font-family: 'Poppins', sans-serif;
+  .pagination-button {
+      padding: 6px 12px;
+      border-radius: 4px;
+      background: white;
+      border: 1px solid black;
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
   }
 
-  .header .add-user-btn {
-    background-color: #E10F0F;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: auto;
-    align-self: center;
+  .pagination-button:hover {
+      background: #f0f0f0;
+  }
+
+  .active-page {
+      background: black;
+      color: white;
+      font-weight: bold;
+  }
+
+  .add-user-btn {
+      background-color: #E10F0F;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: auto;
   }
 </style>

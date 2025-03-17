@@ -26,6 +26,30 @@ $partsAddedData = [];
 while ($row = mysqli_fetch_assoc($partsAddedResult)) {
     $partsAddedData[$row['date']] = $row['count'];
 }
+
+$recentReceiptsQuery = "SELECT r.ReceiptID, 
+                               CONCAT(r.RetrievedBy, ' (', u.RoleType, ')') AS RetrievedByRole,
+                               r.RetrievedDate, 
+                               r.PartID, 
+                               r.Location, 
+                               r.Quantity, 
+                               r.DateAdded, 
+                               p.Name AS PartName, 
+                               p.Price AS PartPrice, 
+                               s.ServiceID, 
+                               s.Type AS ServiceType, 
+                               s.Price AS ServicePrice
+                        FROM receipt r
+                        LEFT JOIN part p ON r.PartID = p.PartID
+                        LEFT JOIN user u ON r.UserID = u.UserID
+                        LEFT JOIN service s ON s.PartID = p.PartID 
+                        ORDER BY r.RetrievedDate DESC LIMIT 5";
+
+$recentReceiptsResult = mysqli_query($conn, $recentReceiptsQuery);
+
+if (!$recentReceiptsResult) {
+    die("SQL Error: " . mysqli_error($conn));
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -61,22 +85,37 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
             <table>
                 <tr>
                     <th>Receipt ID</th>
-                    <th>Action By</th>
-                    <th>Timestamp</th>
-                    <th>Print Receipt</th>
+                    <th>Retrieved By</th>
+                    <th>Part Name</th>
+                    <th>Quantity</th>
+                    <th>Part Price</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
                 </tr>
-                <tr>
-                    <td>#7676</td>
-                    <td>Admin - Jade</td>
-                    <td>2024-11-15 10:00:00</td>
-                    <td><button>Print</button></td>
-                </tr>
-                <tr>
-                    <td>#7677</td>
-                    <td>Staff - Name N.</td>
-                    <td>2024-11-03 10:00:00</td>
-                    <td><button>Print</button></td>
-                </tr>
+
+                <?php if (mysqli_num_rows($recentReceiptsResult) > 0): ?>
+                    <?php while ($row = mysqli_fetch_assoc($recentReceiptsResult)) { 
+                        $totalPrice = 0;
+                        if ($row['PartPrice']) $totalPrice += $row['PartPrice'];
+                        if ($row['ServicePrice']) $totalPrice += $row['ServicePrice'];
+                    ?>
+                        <tr>
+                            <td>#<?php echo $row['ReceiptID']; ?></td>
+                            <td><?php echo htmlspecialchars($row['RetrievedByRole']); ?></td>
+                            <td><?php echo ($row['PartID'] !== NULL) ? $row['PartName'] : '<i>Unknown</i>'; ?></td>
+                            <td><?php echo $row['Quantity']; ?></td>
+                            <td>₱<?php echo number_format($row['PartPrice'], 2); ?></td>
+                            <td>₱<?php echo number_format($totalPrice, 2); ?></td>
+                            <td>
+                            <a href="receipt_view.php?id=<?php echo $row['ReceiptID']; ?>" target="_blank" class="print-receipt-button">View</a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="7" style="text-align:center;">No recent transactions found.</td>
+                    </tr>
+                <?php endif; ?>
             </table>
         </div>
 
@@ -117,7 +156,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
                 </tr>
                 <?php while ($row = mysqli_fetch_assoc($recentPartsResult)) { ?>
                     <tr>
-                    <td>#<?php echo $row['PartID']; ?></td>
+                        <td>#<?php echo $row['PartID']; ?></td>
                         <td><?php echo $row['Name']; ?></td>
                         <td><?php echo $row['Category']; ?></td>
                         <td><?php echo $row['PartCondition']; ?></td>
@@ -135,37 +174,36 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
     let partsAddedData = <?php echo json_encode($partsAddedData); ?>;
 
     document.addEventListener('DOMContentLoaded', function () {
-    const stockCanvas = document.getElementById('stockLevelChart');
-    const stockLabels = <?php echo json_encode(array_keys($stockLevels)); ?>;
-    const stockDataValues = <?php echo json_encode(array_values($stockLevels)); ?>;
+        const stockCanvas = document.getElementById('stockLevelChart');
+        const stockLabels = <?php echo json_encode(array_keys($stockLevels)); ?>;
+        const stockDataValues = <?php echo json_encode(array_values($stockLevels)); ?>;
 
-    const backgroundColors = stockDataValues.map(qty => qty < 2 ? '#EE5D5D' : '#90B0DF');
+        const backgroundColors = stockDataValues.map(qty => qty < 2 ? '#EE5D5D' : '#90B0DF');
 
-    const stockData = {
-        labels: stockLabels,
-        datasets: [{
-            label: 'Stock Levels',
-            data: stockDataValues,
-            backgroundColor: backgroundColors,
-            borderColor: 'rgba(0, 0, 0, 1)',
-            borderWidth: 1
-        }]
-    };
+        const stockData = {
+            labels: stockLabels,
+            datasets: [{
+                label: 'Stock Levels',
+                data: stockDataValues,
+                backgroundColor: backgroundColors,
+                borderColor: 'rgba(0, 0, 0, 1)',
+                borderWidth: 1
+            }]
+        };
 
-    new Chart(stockCanvas.getContext('2d'), {
-        type: 'bar',
-        data: stockData,
-        options: {
-            scales: { y: { beginAtZero: true } },
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: { legend: { display: true, position: 'top' } }
-        }
+        new Chart(stockCanvas.getContext('2d'), {
+            type: 'bar',
+            data: stockData,
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: true, position: 'top' } }
+            }
+        });
+
+        updateLineChart();
     });
-
-    updateLineChart();
-});
-
 
     function updateLineChart() {
         const updatesCanvas = document.getElementById('recentUpdatesChart');
@@ -254,6 +292,7 @@ while ($row = mysqli_fetch_assoc($partsAddedResult)) {
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         padding: 15px;
+        position: relative; /* Added for better positioning */
     }
 
     .chart-box h2 {

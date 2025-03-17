@@ -178,10 +178,19 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
-                    <option value="Engine">Engine</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Body Panel">Body Panel</option>
-                    <option value="Interior">Interior</option>
+                <option value="Alternator">Alternator</option>
+                <option value="Battery">Battery</option>
+                <option value="Body Panel">Body Panel</option>
+                <option value="Brakes">Brakes</option>
+                <option value="Clutch">Clutch</option>
+                <option value="Differential">Differential</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Engine">Engine</option>
+                <option value="Exhaust">Exhaust</option>
+                <option value="Interior">Interior</option>
+                <option value="Mags">Mags</option>
+                <option value="Suspension">Suspension</option>
+                <option value="Tire">Tire</option>
                 </select>
             </div>
 
@@ -323,9 +332,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $transaction_date = date('Y-m-d H:i:s');
 
     // Handle Image Upload
-    $upload_dir = 'uploads/';
+    $upload_dir = '../partimages/'; 
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
+        mkdir($upload_dir, 0777, true); 
     }
 
     if (!empty($_FILES['part_image']['name'])) {
@@ -333,9 +342,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; 
+            $target_file = $file_name; 
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = $target_file;
+                $media = 'partimages/' . time() . "_" . $file_name; 
             }
         } else {
             die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
@@ -415,7 +424,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Success!',
-                text: 'Part and supplier added successfully!',
+                text: 'Part added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: '#6c5ce7'

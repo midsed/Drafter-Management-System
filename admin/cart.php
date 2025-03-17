@@ -54,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
             <?php
             if (!empty($_SESSION['cart'])) {
                 foreach ($_SESSION['cart'] as $partID => $part) {
-                    $imageSrc = !empty($part['Media']) ? $part['Media'] : 'images/no-image.png';
+                    // Ensure the image path is correct
+                    $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
                     $totalPrice = floatval($part['Price']) * intval($part['Quantity']);
                     echo "
                     <div class='part-card'>
@@ -90,13 +91,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
             }, $_SESSION['cart'])), 2);
             ?></strong></p>
 
-                <button class="confirm-btn" onclick="printReceipt()">Print Receipt</button>
+            <button class="confirm-btn" onclick="printReceipt()">Print Receipt</button>
         </div>
     </div>
 </div>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
 
@@ -105,73 +106,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     function printReceipt() {
-    fetch('save_receipt.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Server response:", data); // Debugging output
-        if (data.success) {
-            // Generate and print the receipt only if storing is successful
-            const parts = document.querySelectorAll('.part-card');
-            const currentDateTime = new Date();
-            const formattedDate = currentDateTime.toLocaleDateString() + ' ' + currentDateTime.toLocaleTimeString();
-
-            let receiptHTML = `
-                <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: auto; text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-                    <img src="../images/Drafter Black.png" alt="Drafter Autotech Black Logo" style="width: 240px; margin: 20px; margin-bottom: -90px; margin-top: -20px;">
-                    <h2 style="color:rgb(70, 70, 70); margin: 10px 0;">Inventory System</h2>
-                    <p style="margin: 5px 0; margin-bottom: 30px;">Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100</p>
-                    <p><strong>Receipt ID:</strong> ${data.receiptID}</p>
-                    <p><strong>Retrieved By:</strong> ${data.userFullName}</p>
-                    <p><strong>Date:</strong> ${formattedDate}</p>
-                    <hr style="margin: 15px 0;">
-                    <h3 style="color: #333;">Parts Retrieved</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr style="background: #f5f5f5;">
-                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Part Name</th>
-                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Model</th>
-                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Location</th>
-                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty.</th>
-                            <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Total Price</th>
-                        </tr>`;
-
-            parts.forEach(part => {
-                const partName = part.querySelector('p:nth-child(2)').textContent.split(': ')[1];
-                const partModel = part.querySelector('p:nth-child(4)').textContent.split(': ')[1];
-                const partLocation = part.querySelector('p:nth-child(5)').textContent.split(': ')[1];
-                const partPrice = parseFloat(part.querySelector('p:nth-child(6)').textContent.replace('Price: ₱ ', '').replace(',', ''));
-                const partQuantity = parseInt(part.querySelector('.quantity-input').value);
-                const totalPrice = partPrice * partQuantity;
-
-                receiptHTML += `
-                    <tr>
-                        <td>${partName}</td>
-                        <td>${partModel}</td>
-                        <td>${partLocation}</td>
-                        <td>${partQuantity}</td>
-                        <td>₱ ${totalPrice.toFixed(2)}</td>
-                    </tr>`;
-            });
-
-            receiptHTML += `</table>
-                <hr style="margin: 20px 0;">
-                <p style="font-size: 12px; color: #888;">Thank you for using Drafter Autotech's Inventory System!</p>     
-            </div>`;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(receiptHTML);
-            printWindow.document.close();
-            printWindow.print();
-
-        } else {
-            alert('Failed to store receipt: ' + data.message);
+        // Ask for the person who retrieved the parts
+        const retrievedBy = prompt("Please enter the name of the person retrieving these parts:", "");
+        
+        if (retrievedBy === null || retrievedBy.trim() === "") {
+            alert("Retriever name is required to print receipt");
+            return;
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
+        
+        // Create a hidden form to submit the data
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'process_receipt.php';
+        form.style.display = 'none';
+        
+        // Add retrieved by field
+        const retrievedByInput = document.createElement('input');
+        retrievedByInput.type = 'hidden';
+        retrievedByInput.name = 'retrievedBy';
+        retrievedByInput.value = retrievedBy;
+        form.appendChild(retrievedByInput);
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    }
 
     function removeFromCart(partID) {
         fetch('remove_from_cart.php', {
@@ -189,18 +148,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     function updateQuantity(partID, change) {
-    fetch('cart.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'partID=' + encodeURIComponent(partID) + '&change=' + encodeURIComponent(change)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
-}
+        fetch('cart.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'partID=' + encodeURIComponent(partID) + '&change=' + encodeURIComponent(change)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
     function searchCart() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const parts = document.querySelectorAll(".part-card");
@@ -210,6 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
             part.style.display = text.includes(input) ? "" : "none";
         });
     }
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+        searchCart();
+    });
 </script>
 
 <style>
@@ -255,11 +219,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         display: flex;
         justify-content: space-around;
         margin-top: 10px;
-    }
-
-    .part-card .actions button {
-        padding: 6px 12px;
-        font-size: 13px;
     }
 
     .remove-btn {
@@ -352,23 +311,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         text-decoration: none;
         transition: background 0.3s ease;
     }
-    @media print {
-    body {
-        -webkit-print-color-adjust: exact;
-    }
-    h2, h3 {
-        margin: 0;
-    }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
+    .red-button:hover {
+        background: darkred;
     }
-
-    th, td {
-        border: 1px solid #000;
-        padding: 8px;
-        text-align: left;
-    }
-}
 </style>

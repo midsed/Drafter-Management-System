@@ -47,6 +47,12 @@ $query->close();
 if (!$part) {
     die("Error: Part not found.");
 }
+
+// Define the upload directory
+$uploadDir = 'partimages/'; // Updated to 'partimages'
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -122,6 +128,32 @@ if (!$part) {
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
+.quantity-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .quantity-container button {
+        background-color: #272727;
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+        cursor: pointer;
+        margin: 0 5px;
+        border-radius: 3px;
+    }
+
+    .quantity-container button:hover {
+        background-color: #444;
+    }
+
+    .quantity-container input {
+        text-align: center;
+        width: 60px;
+    }
+
 
 </style>
 
@@ -149,7 +181,11 @@ if (!$part) {
 
             <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="<?php echo htmlspecialchars($part['Quantity']); ?>" min="1" required>
+                <div class="quantity-container">
+                    <button type="button" onclick="decreaseQuantity()">−</button>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+                    <button type="button" onclick="increaseQuantity()">+</button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -215,33 +251,31 @@ if (!$part) {
     
             <div class="form-group">
                 <label for="part_image">Current Image(s):</label>
-                    <div class="image-preview">
-                        <?php 
-                            $media = json_decode($part['Media'], true);
-
-                            if (is_array($media) && count($media) > 0): 
-                                foreach ($media as $image): 
-                                    $filePath = $uploadDir . $image;
-                                if (file_exists($filePath)): ?>
-                                    <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
-                        <?php else: ?>
-                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-                        <?php endif; 
-                                endforeach;
-
-                        elseif (!empty($part["Media"])): 
-                            $filePath = $part["Media"];
+                <div class="image-preview">
+                    <?php
+                    // Check if Media is a JSON array or a single path
+                    $media = json_decode($part['Media'], true);
+                    if (is_array($media) && count($media) > 0): 
+                        foreach ($media as $image): 
+                            $filePath = "../" . $image; // Navigate out of the admin folder
                             if (file_exists($filePath)): ?>
                                 <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
+                            <?php else: ?>
+                                <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
+                            <?php endif; 
+                        endforeach;
+                    elseif (!empty($part['Media'])): 
+                        $filePath = "../" . $part['Media']; // Navigate out of the admin folder
+                        if (file_exists($filePath)): ?>
+                            <img src="<?php echo htmlspecialchars($filePath); ?>" alt="Part Image">
                         <?php else: ?>
                             <p class="no-image">Image not found: <?php echo htmlspecialchars($filePath); ?></p>
-                        <?php endif; else: ?>
-                            <p class="no-image">No image available</p>
-                        <?php endif; ?>
-                    </div>
+                        <?php endif; 
+                    else: ?>
+                        <p class="no-image">No image available</p>
+                    <?php endif; ?>
                 </div>
-
-
+            </div>
 
             <div class="form-group">
                 <label for="part_image">Upload New Image:</label>
@@ -279,6 +313,17 @@ if (!$part) {
 </div>
 
 <script>
+    function increaseQuantity() {
+        let quantity = document.getElementById('quantity');
+        quantity.value = parseInt(quantity.value) + 1;
+    }
+
+    function decreaseQuantity() {
+        let quantity = document.getElementById('quantity');
+        if (quantity.value > 1) {
+            quantity.value = parseInt(quantity.value) - 1;
+        }
+    }
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');

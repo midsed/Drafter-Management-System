@@ -183,12 +183,13 @@ a:hover {
 .eye-icon {
     cursor: pointer;
     position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 30px; 
-    height: 30px; 
+    right: -10px;
+    top: -6%;
+    transform: translateY(20%);
+    width: 40px; 
+    height: 40px; 
 }
+
 .input-container {
     position: relative;
 }
