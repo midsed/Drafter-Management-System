@@ -30,7 +30,6 @@ include('dbconnect.php');
     <!-- Quick Search: Left-aligned input and search button -->
     <div class="search-container">
         <input type="text" placeholder="Quick search" id="searchInput">
-        <button class="red-button" onclick="searchTable()">Search</button>
     </div>
 
     <div class="table-container">
@@ -119,18 +118,17 @@ function toggleSidebar() {
 
 // 🔎 Search Functionality (More Optimized)
 function searchTable() {
-    const searchInput = document.getElementById("searchInput")?.value.toLowerCase();
-    if (!searchInput) return;
-    
-    document.querySelectorAll(".supplier-table tr:not(:first-child)").forEach(row => {
-        row.style.display = [...row.cells].some(cell => 
-            cell.textContent.toLowerCase().includes(searchInput)
-        ) ? "" : "none";
+    const searchInput = document.getElementById("searchInput").value.trim().toLowerCase();
+    const rows = document.querySelectorAll(".supplier-table tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchInput) ? "" : "none";
     });
 }
 
-// Attach search event listener (Prevents duplicate event listeners)
-document.getElementById("searchInput")?.addEventListener("keyup", searchTable);
+// Attach event listener to input field for real-time search (No button required)
+document.getElementById("searchInput").addEventListener("input", searchTable);
 
 // 🗂️ Archive Service with SweetAlert2
 function archiveService(serviceID) {
@@ -174,6 +172,7 @@ function archiveService(serviceID) {
     });
 }
 </script>
+
 
 <style>
     body {

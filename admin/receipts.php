@@ -97,7 +97,6 @@ $categories = $resultCategory->fetch_all(MYSQLI_ASSOC);
     <div class="search-actions">
         <div class="search-container">
             <input type="text" placeholder="Search by name or retrieved by..." id="searchInput" value="<?= htmlspecialchars($search) ?>">
-            <button onclick="searchReceipts()" class="red-button">Search</button>
             
             <div class="filter-container">
                 <span>Filter</span>
