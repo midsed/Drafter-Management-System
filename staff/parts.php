@@ -87,7 +87,7 @@ include('navigation/topbar.php');
 
     <div class="parts-container" id="partsList">
     <?php
-$limit = 8;
+$limit = 10; // Changed from 8 to 10 parts per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
@@ -113,11 +113,16 @@ if (!empty($search)) {
     $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
 }
 
-// Apply sorting
-if ($sort === 'asc') {
+// Default sorting for first page is by DateAdded DESC (most recent first)
+// On other pages or when specific sort is selected, use that sorting
+if ($page == 1 && empty($sort)) {
+    $sql .= " ORDER BY DateAdded DESC"; // Show most recent first on first page
+} elseif ($sort === 'asc') {
     $sql .= " ORDER BY Name ASC";
 } elseif ($sort === 'desc') {
     $sql .= " ORDER BY Name DESC";
+} else {
+    $sql .= " ORDER BY DateAdded DESC"; // Default to most recent for other pages too
 }
 
 // Pagination
@@ -158,15 +163,15 @@ $result = $conn->query($sql);
 
     <div class="pagination">
         <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
         <?php endif; ?>
 
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <a href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Next</a>
         <?php endif; ?>
     </div>
 </div>
@@ -226,21 +231,33 @@ function archivePart(partID) {
 // Search functionality
 function searchParts() {
     const input = document.getElementById("searchInput").value.trim().toLowerCase();
-    const parts = document.querySelectorAll(".part-card");
-
+    const currentUrl = new URL(window.location.href);
+    
     if (input === "") {
-        window.location.href = window.location.pathname;
-        return;
+        currentUrl.searchParams.delete("search");
+    } else {
+        currentUrl.searchParams.set("search", input);
     }
-
-    parts.forEach(part => {
-        const text = part.textContent.toLowerCase();
-        part.style.display = text.includes(input) ? "" : "none";
-    });
+    
+    // Preserve other parameters
+    currentUrl.searchParams.set("page", "1"); // Reset to first page when searching
+    
+    window.location.href = currentUrl.toString();
 }
 
-document.getElementById("searchInput").addEventListener("input", function () {
-    searchParts();
+document.getElementById("searchInput").addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+        searchParts();
+    }
+});
+
+// Add current search term to input field on page load
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchTerm = urlParams.get("search");
+    if (searchTerm) {
+        document.getElementById("searchInput").value = searchTerm;
+    }
 });
 
 function addToCart(partID) {
@@ -340,6 +357,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const searchQuery = searchInput.value.trim();
         const queryParams = new URLSearchParams(window.location.search);
 
+        // Reset to first page when applying filters
+        queryParams.set("page", "1");
+
         if (selectedCategories.length > 0) {
             queryParams.set("category", selectedCategories.join(",")); 
         } else {
@@ -350,6 +370,12 @@ document.addEventListener("DOMContentLoaded", function () {
             queryParams.set("search", searchQuery);
         } else {
             queryParams.delete("search");
+        }
+
+        // Preserve sort parameter if exists
+        const sortParam = queryParams.get("sort");
+        if (!sortParam) {
+            queryParams.delete("sort");
         }
 
         window.location.search = queryParams.toString(); 
@@ -367,11 +393,18 @@ document.addEventListener("DOMContentLoaded", function () {
             const queryParams = new URLSearchParams(window.location.search);
 
             queryParams.set("sort", selectedSort);
+            
+            // Preserve other parameters
+            const searchQuery = queryParams.get("search");
+            const categoryParam = queryParams.get("category");
+            
+            // Reset to page 1 when sorting changes
+            queryParams.set("page", "1");
+            
             window.location.search = queryParams.toString(); 
         });
     });
 });
-
 
 // Filter parts based on selected categories
 function filterParts(selectedCategories) {
@@ -390,41 +423,6 @@ function filterParts(selectedCategories) {
 
         part.style.display = matchesCategory ? "" : "none";
     });
-}
-
-// Apply filter
-applyFilterButton.addEventListener("click", function () {
-    const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-    filterParts(selectedCategories);
-});
-
-// Clear filter
-clearFilterButton.addEventListener("click", function () {
-    document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-    filterParts([]);
-});
-
-// Sort parts by name (ascending or descending)
-function sortParts(order) {
-    const partsContainer = document.getElementById("partsList");
-    const partsArray = Array.from(partsContainer.children);
-
-    partsArray.sort((a, b) => {
-        const nameA = a.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-        const nameB = b.querySelector("p").textContent.toLowerCase(); // Get the part name from the first <p> tag
-
-        if (order === "asc") {
-            return nameA.localeCompare(nameB); // Sort in ascending order
-        } else if (order === "desc") {
-            return nameB.localeCompare(nameA); // Sort in descending order
-        }
-    });
-
-    // Clear the current parts list
-    partsContainer.innerHTML = "";
-
-    // Append the sorted parts back to the container
-    partsArray.forEach(part => partsContainer.appendChild(part));
 }
 
 function toggleSidebar() {
@@ -533,6 +531,9 @@ body {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .filter-icon:hover, .sort-icon:hover {
@@ -542,7 +543,7 @@ body {
 .parts-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    gap: 40px;
 }
 
 .part-card {
@@ -703,5 +704,9 @@ body {
     background-color: white;
     color: #E10F0F;
     border: 1px solid #E10F0F;
+}
+
+.sort-option.red-button:hover {
+    background-color: #f8f8f8;
 }
 </style>

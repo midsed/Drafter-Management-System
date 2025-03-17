@@ -121,6 +121,14 @@ $username = $user['Username'];
         text-align: center;
         width: 60px;
     }
+
+    .image-preview {
+        display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+    }
+    .image-preview img {
+        max-width: 300px; height: auto; border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
 </style>
 
 <div class="main-content">
@@ -140,7 +148,7 @@ $username = $user['Username'];
             
             <div class="form-group">
                 <label for="part_price">Part Price:</label>
-                <input type="number" id="part_price" name="part_price" required>
+                <input type="number" placeholder="0.00" id="part_price" name="part_price" step="0.01" min="0" required>
             </div>
 
             <div class="form-group">
@@ -170,10 +178,19 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
-                    <option value="Engine">Engine</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Body Panel">Body Panel</option>
-                    <option value="Interior">Interior</option>
+                <option value="Alternator">Alternator</option>
+                <option value="Battery">Battery</option>
+                <option value="Body Panel">Body Panel</option>
+                <option value="Brakes">Brakes</option>
+                <option value="Clutch">Clutch</option>
+                <option value="Differential">Differential</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Engine">Engine</option>
+                <option value="Exhaust">Exhaust</option>
+                <option value="Interior">Interior</option>
+                <option value="Mags">Mags</option>
+                <option value="Suspension">Suspension</option>
+                <option value="Tire">Tire</option>
                 </select>
             </div>
 
@@ -215,7 +232,10 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="part_image">Upload Image:</label>
-                <input type="file" id="part_image" name="part_image">
+                <div class="image-preview">
+                    <img id="previewImage" src="images/no-image.png" alt="No Image Available">
+                </div>
+                <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
             </div>
 
             <!-- Supplier Details -->
@@ -267,6 +287,22 @@ $username = $user['Username'];
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
+    function previewFile(event) {
+        const preview = document.getElementById('previewImage');
+        const fileInput = event.target;
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "images/no-image.png";
+        }
+    }
 </script>
 
 <?php
@@ -296,9 +332,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $transaction_date = date('Y-m-d H:i:s');
 
     // Handle Image Upload
-    $upload_dir = '../uploads/'; // Shared uploads directory
+    $upload_dir = '../partimages/'; 
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true); // Create the directory if it doesn't exist
+        mkdir($upload_dir, 0777, true); 
     }
 
     if (!empty($_FILES['part_image']['name'])) {
@@ -306,9 +342,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
+            $target_file = $file_name; 
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = 'uploads/' . time() . "_" . $file_name; // Store the relative path
+                $media = 'partimages/' . time() . "_" . $file_name; 
             }
         } else {
             die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
@@ -388,7 +424,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>
             Swal.fire({
                 title: 'Success!',
-                text: 'Part and supplier added successfully!',
+                text: 'Part added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: '#6c5ce7'
@@ -406,7 +442,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     confirmButtonColor: '#d63031'
                 });
             </script>";
-    }
+        }
+        
 
     $part_stmt->close();
     $conn->close();
