@@ -333,9 +333,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; // Unique filename
+            $target_file = $file_name; 
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = 'uploads/' . time() . "_" . $file_name; // Store the relative path
+                $media = 'uploads/' . $file_name; 
             }
         } else {
             die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
