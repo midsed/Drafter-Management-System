@@ -18,11 +18,10 @@
                 <input type="text" id="username" name="username" placeholder="Enter your username" maxlength="30" required>
 
                 <label for="password">Password*</label>
-                <input type="password" id="password" name="password" placeholder="Minimum 8 characters" maxlength="30" required>
-
-                <p class="center-text">
-                    <label><input type="checkbox" onclick="togglePassword()"> Show Password</label>
-                </p>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" placeholder="Minimum 8 characters" maxlength="30" required>
+                    <img src="images/showpass1.png" id="togglePassword" class="eye-icon" alt="Show/Hide Password">
+                </div>
 
                 <p>
                     <label><input type="checkbox" name="remember_me"> Remember Me</label>
@@ -41,9 +40,18 @@
 
     <script>
         function togglePassword() {
-            var x = document.getElementById("password");
-            x.type = (x.type === "password") ? "text" : "password";
+        var passwordInput = document.getElementById("password");
+        var toggleIcon = document.getElementById("togglePassword");
+        
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.src = "images/showpass2.png";
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.src = "images/showpass1.png";
         }
+    }
+    document.getElementById("togglePassword").addEventListener("click", togglePassword);
     
         var granimInstance = new Granim({
     element: '#canvas-basic',
