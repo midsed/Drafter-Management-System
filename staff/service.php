@@ -19,6 +19,7 @@ $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
+// **Construct Base Query**
 $sql = "SELECT 
             s.ServiceID, 
             s.Type, 
@@ -36,7 +37,7 @@ $sql = "SELECT
 
 $countSql = "SELECT COUNT(*) AS total FROM service WHERE Archived = 0";
 
-// Apply Filters
+// **Apply Filters**
 if (!empty($types)) {
     $escapedTypes = array_map([$conn, 'real_escape_string'], $types);
     $sql .= " AND s.Type IN ('" . implode("','", $escapedTypes) . "')";
@@ -54,7 +55,7 @@ if (!empty($search)) {
     $countSql .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%')";
 }
 
-// Apply Sorting
+// **Apply Sorting**
 if ($sort === 'asc') {
     $sql .= " ORDER BY s.Type ASC";
 } elseif ($sort === 'desc') {
@@ -63,6 +64,7 @@ if ($sort === 'asc') {
     $sql .= " ORDER BY s.ServiceID DESC";
 }
 
+// **Pagination**
 $sql .= " LIMIT $limit OFFSET $offset";
 
 $totalResult = $conn->query($countSql);
@@ -234,6 +236,7 @@ $result = $conn->query($sql);
 </style>
 
 <script>
+
 // Sidebar Toggle Function
 function toggleSidebar() {
     document.querySelector('.sidebar')?.classList.toggle('collapsed');

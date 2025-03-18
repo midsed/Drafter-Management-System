@@ -223,6 +223,7 @@ if (!$service) {
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+    // Function to validate email format
     function validateEmail(input) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(input.value)) {
@@ -232,14 +233,16 @@ if (!$service) {
                 text: 'Please enter a valid email address.',
                 confirmButtonColor: '#d63031'
             });
-            input.value = ""; 
+            input.value = ""; // Clear invalid input
         }
     }
 
+    // Attach validation to the email field on blur
     document.getElementById("client_email").addEventListener("blur", function () {
         validateEmail(this);
     });
 
+    // Prevent form submission if email is invalid
     document.querySelector("form").addEventListener("submit", function (event) {
         const email = document.getElementById("client_email").value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -251,9 +254,33 @@ if (!$service) {
                 text: 'Please enter a valid email before submitting.',
                 confirmButtonColor: '#d63031'
             });
-            event.preventDefault(); 
+            event.preventDefault(); // Stop form submission
         }
     });
 });
+
+function resetForm() {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This will reset all informations.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, reset it!",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d63031",
+        cancelButtonColor: "#6c757d"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.querySelector("form").reset();
+            document.querySelectorAll("input").forEach(input => input.value = "");
+            Swal.fire({
+                title: "Reset!",
+                text: "The form has been reset.",
+                icon: "success",
+                confirmButtonColor: "#6c5ce7"
+            });
+        }
+    });
+}
 
 </script>
