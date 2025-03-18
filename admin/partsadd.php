@@ -303,6 +303,31 @@ $username = $user['Username'];
             preview.src = "images/no-image.png";
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const clearButton = document.querySelector(".red-button");
+        if (clearButton) {
+            clearButton.addEventListener("click", function(event) {
+                event.preventDefault(); // Prevent immediate clearing
+                
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This will clear all the informations.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, clear it!",
+                    cancelButtonText: "Cancel",
+                    confirmButtonColor: "#d63031",
+                    cancelButtonColor: "#6c5ce7"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.querySelector("form").reset();
+                        document.getElementById('previewImage').src = "images/no-image.png"; // Reset image preview
+                    }
+                });
+            });
+        }
+    });
 </script>
 
 <?php
