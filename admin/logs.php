@@ -541,4 +541,8 @@ th, td {
     padding: 10px;
     text-align: left;
 }
+
+.action-buttons {
+    margin-bottom: 10px;
+}
 </style>

@@ -662,6 +662,12 @@ function toggleSidebar() {
         color: #E10F0F;
         border: 1px solid #E10F0F;
     }
+
+    th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
     </style>
 
     <script>

@@ -260,4 +260,10 @@ $result = $conn->query($sql);
 .btn-filter:hover {
     background-color: #C00D0D;
 }
+
+th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
 </style>
