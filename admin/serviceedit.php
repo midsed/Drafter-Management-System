@@ -259,4 +259,28 @@ if (!$service) {
     });
 });
 
+function resetForm() {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This will reset all informations.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, reset it!",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d63031",
+        cancelButtonColor: "#6c757d"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.querySelector("form").reset();
+            document.querySelectorAll("input").forEach(input => input.value = "");
+            Swal.fire({
+                title: "Reset!",
+                text: "The form has been reset.",
+                icon: "success",
+                confirmButtonColor: "#6c5ce7"
+            });
+        }
+    });
+}
+
 </script>
