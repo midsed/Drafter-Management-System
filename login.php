@@ -19,7 +19,7 @@
 
                 <label for="password">Password*</label>
                 <div class="input-container">
-                    <input type="password" id="password" name="password" placeholder="Minimum 8 characters" maxlength="30" required>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" maxlength="30" required>
                     <img src="images/showpass1.png" id="togglePassword" class="eye-icon" alt="Show/Hide Password">
                 </div>
 

@@ -647,4 +647,10 @@ document.addEventListener("DOMContentLoaded", function () {
     .sort-option.red-button:hover {
         background-color: #f8f8f8;
     }
+
+    th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
 </style>

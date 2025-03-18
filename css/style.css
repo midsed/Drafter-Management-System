@@ -112,7 +112,7 @@ input:focus {
 }
 
 button {
-    width: 100%;
+    width: 105%;
     padding: 15px;
     background: linear-gradient(135deg, #9c0b0b, #202020);
     color: #fff;
@@ -230,4 +230,6 @@ a:hover {
         top: 3%;
         right: 3%;
     }
+    
+    
 }

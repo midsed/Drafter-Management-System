@@ -149,4 +149,10 @@ $conn->close();
     color: #888;
     font-style: italic;
 }
+
+th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
 </style>

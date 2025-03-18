@@ -249,4 +249,10 @@ if (!isset($_SESSION['Username'])) {
     .supplier-table td:nth-child(6) {
         text-align: center;
     }
+
+    th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
 </style>
