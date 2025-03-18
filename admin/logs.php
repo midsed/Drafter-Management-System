@@ -536,4 +536,9 @@ window.addEventListener("click", function (event) {
     font-weight: bold;
 }
 
+th, td {
+    border: 1px solid #333 !important;
+    padding: 10px;
+    text-align: left;
+}
 </style>

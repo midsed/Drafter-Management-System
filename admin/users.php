@@ -233,15 +233,31 @@ $result = $conn->query($sql);
   }
 
   .add-user-btn {
-      background-color: #E10F0F; 
-      color: white; 
-      padding: 10px 15px; 
-      border: none;
-      border-radius: 5px; 
-      cursor: pointer; 
-      margin-left: auto; 
-      text-decoration: none; 
-      font-family: 'Poppins', sans-serif; 
-      font-size: 14px;
-  }
+    background-color: #E10F0F; 
+    color: white !important; /* Ensure text remains white */
+    padding: 10px 15px; 
+    border: none;
+    border-radius: 5px; 
+    cursor: pointer; 
+    margin-left: auto; 
+    text-decoration: none; 
+    font-family: 'Poppins', sans-serif; 
+    font-size: 14px;
+}
+
+  .btn-filter {
+    background-color: #E10F0F;
+    color: white;
+    padding: 10px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.btn-filter:hover {
+    background-color: #C00D0D;
+}
 </style>
