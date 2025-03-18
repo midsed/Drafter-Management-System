@@ -39,6 +39,7 @@ $totalResult = $stmtTotal->get_result();
 $totalRow = $totalResult->fetch_assoc();
 $totalPages = ceil($totalRow['total'] / $limit);
 
+// Fetch receipts with pagination & filtering
 $queryReceipts = "SELECT r.ReceiptID, r.RetrievedBy, r.RetrievedDate, r.PartID, r.Location, r.Quantity, 
                          p.Name AS PartName, p.Price AS PartPrice, p.Category,
                          (r.Quantity * p.Price) AS TotalPrice 
@@ -51,9 +52,10 @@ if ($search) {
 if ($filterCategory) {
     $queryReceipts .= " AND p.Category = ?";
 }
-$queryReceipts .= " ORDER BY $sortField " . ($sortOrder === 'asc' ? 'ASC' : 'DESC');
+$queryReceipts .= " ORDER BY r.RetrievedDate DESC"; // Order by RetrievedDate descending
 $queryReceipts .= " LIMIT ? OFFSET ?";
 
+// Prepare and execute the statement
 $stmtReceipts = $conn->prepare($queryReceipts);
 
 if ($search && $filterCategory) {

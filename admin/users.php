@@ -54,7 +54,7 @@ $result = $conn->query($sql);
       <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
     </a>
     <h1 style="margin: 0;">Users</h1>
-    <a href="usersadd.php" class="add-user-btn">+ Add User</a>
+    <a href="usersadd.php" class="add-user-btn btn">+ Add User</a>
   </div>
 
   <!-- Search container -->
@@ -233,12 +233,15 @@ $result = $conn->query($sql);
   }
 
   .add-user-btn {
-      background-color: #E10F0F;
-      color: #fff;
-      padding: 10px 15px;
+      background-color: #E10F0F; 
+      color: white; 
+      padding: 10px 15px; 
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: auto;
+      border-radius: 5px; 
+      cursor: pointer; 
+      margin-left: auto; 
+      text-decoration: none; 
+      font-family: 'Poppins', sans-serif; 
+      font-size: 14px;
   }
 </style>
