@@ -144,12 +144,14 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
-                <input type="text" id="fName" name="fName" required>
+                <input type="text" id="fName" name="fName" required maxlength="40" 
+                pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
             </div>
             
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
-                <input type="text" id="lName" name="lName" required>
+                <input type="text" id="lName" name="lName" required maxlength="40" 
+                pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
             </div>
             
             <div class="form-group">
