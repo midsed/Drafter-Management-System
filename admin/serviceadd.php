@@ -161,7 +161,8 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
-                <input type="number" id="pNumber" name="pNumber" required maxlength="11">
+                <input type="number" id="pNumber" name="pNumber" required maxlength="11" pattern="\d{11}"
+                title="Phone number must be exactly 11 digits">
             </div>
             
             <div class="form-group">
@@ -171,7 +172,7 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             
             <div class="form-group">
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" required>
+                <input type="number" id="price" name="price" placeholder="0.00"  required>
             </div>
             
             <div class="actions">
@@ -281,4 +282,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    // Function to validate email format
+    function validateEmail(input) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email!',
+                text: 'Please enter a valid email address.',
+                confirmButtonColor: '#d63031'
+            });
+            input.value = ""; // Clear invalid input
+        }
+    }
+
+    // Attach validation to the email field on input
+    document.getElementById("cEmail").addEventListener("blur", function () {
+        validateEmail(this);
+    });
+
+    // Form submission validation
+    document.querySelector("form").addEventListener("submit", function (event) {
+        const email = document.getElementById("cEmail").value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Form Error!',
+                text: 'Please enter a valid email address before submitting.',
+                confirmButtonColor: '#d63031'
+            });
+            event.preventDefault(); // Stop form submission
+        }
+    });
+});
 </script>

@@ -147,13 +147,15 @@ if (!$service) {
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" 
-                       value="<?php echo htmlspecialchars($service['FName'] ?? ''); ?>" required>
+                       value="<?php echo htmlspecialchars($service['FName'] ?? ''); ?>" required 
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
             </div>
 
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" 
-                       value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>" required>
+                       value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>" required
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
             </div>
 
             <div class="form-group">
@@ -164,9 +166,10 @@ if (!$service) {
 
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
-                <input type="number" id="pNumber" name="pNumber" 
-                       value="<?php echo htmlspecialchars($service['PhoneNumber'] ?? ''); ?>" 
-                       required maxlength="11">
+                <input type="text" id="pNumber" name="pNumber" 
+                        value="<?php echo htmlspecialchars($service['PhoneNumber'] ?? ''); ?>" 
+                        required maxlength="11" pattern="\d{11}"
+                        title="Phone number must be exactly 11 digits">
             </div>
 
             <div class="form-group">
@@ -218,4 +221,42 @@ if (!$service) {
         document.querySelector("form").reset();
         document.querySelectorAll("input").forEach(input => input.value = "");
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    // Function to validate email format
+    function validateEmail(input) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email!',
+                text: 'Please enter a valid email address.',
+                confirmButtonColor: '#d63031'
+            });
+            input.value = ""; // Clear invalid input
+        }
+    }
+
+    // Attach validation to the email field on blur
+    document.getElementById("client_email").addEventListener("blur", function () {
+        validateEmail(this);
+    });
+
+    // Prevent form submission if email is invalid
+    document.querySelector("form").addEventListener("submit", function (event) {
+        const email = document.getElementById("client_email").value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Form Error!',
+                text: 'Please enter a valid email before submitting.',
+                confirmButtonColor: '#d63031'
+            });
+            event.preventDefault(); // Stop form submission
+        }
+    });
+});
+
 </script>
