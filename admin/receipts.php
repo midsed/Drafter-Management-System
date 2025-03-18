@@ -263,7 +263,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
     searchReceipts();
 });
 
-// DOMContentLoaded event listener
 document.addEventListener("DOMContentLoaded", function () {
     const filterDropdown = document.getElementById("filterDropdown");
     const sortDropdown = document.getElementById("sortDropdown");
