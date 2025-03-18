@@ -488,6 +488,7 @@ function toggleSidebar() {
         color: #E10F0F;
         font-size: 20px;
         transition: color 0.3s ease;
+        border: none;
     }
 
     .filter-icon:hover, .sort-icon:hover {
