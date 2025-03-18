@@ -148,14 +148,14 @@ if (!$service) {
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" 
                        value="<?php echo htmlspecialchars($service['FName'] ?? ''); ?>" required 
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format">
             </div>
 
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" 
                        value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>" required
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format">
             </div>
 
             <div class="form-group">
@@ -169,14 +169,14 @@ if (!$service) {
                 <input type="text" id="pNumber" name="pNumber" 
                         value="<?php echo htmlspecialchars($service['PhoneNumber'] ?? ''); ?>" 
                         required maxlength="11" pattern="\d{11}"
-                        title="Phone number must be exactly 11 digits">
+                        title="Invalid phone number">
             </div>
 
             <div class="form-group">
                 <label for="type">Service Type:</label>
                 <input type="text" id="type" name="type" 
                        value="<?php echo htmlspecialchars($service['Type']); ?>" 
-                       required oninput="checkPartMatch()">
+                       required oninput="checkPartMatch()" pattern="^[A-Za-z\s]+$" title="Invalid  format.">
             </div>
 
             <div class="form-group">

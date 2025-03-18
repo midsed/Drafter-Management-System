@@ -25,7 +25,6 @@ $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
-// Fetch available parts from database
 $partQuery = $conn->query("SELECT PartID, Name FROM part WHERE ItemStatus = 'Used for Service' AND ServiceID IS NULL");
 $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 ?>
@@ -37,7 +36,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* Added font import and matching style rules from serviceedit.php */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
     .center-container {
@@ -118,7 +116,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 </style>
 
 <div class="main-content">
-    <!-- Same header layout as in serviceedit.php -->
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
             <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
@@ -127,7 +124,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
         <h1>Add Service</h1>
     </div>
 
-    <!-- Centered container just like in serviceedit.php -->
     <div class="center-container">
         <form action="" method="POST">
             <div class="form-group">
@@ -145,13 +141,13 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" required maxlength="40" 
-                pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                pattern="^[A-Za-z\s]+$" title="Invalid name format.">
             </div>
             
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" required maxlength="40" 
-                pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                pattern="^[A-Za-z\s]+$" title="Invalid name format.">
             </div>
             
             <div class="form-group">
@@ -162,12 +158,12 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
                 <input type="number" id="pNumber" name="pNumber" required maxlength="11" pattern="\d{11}"
-                title="Phone number must be exactly 11 digits">
+                title="Invalid phone number.">
             </div>
             
             <div class="form-group">
                 <label for="type">Service Type:</label>
-                <input type="text" id="type" name="type" required>
+                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid  format.">
             </div>
             
             <div class="form-group">
@@ -176,7 +172,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             </div>
             
             <div class="actions">
-                <!-- Matches the styling of serviceedit.php, but keeps the 'Add' function -->
                 <button type="submit" class="black-button btn">Add</button>
                 <button type="reset" class="red-button btn">Reset</button>
             </div>
@@ -185,7 +180,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 </div>
 
 <?php 
-// PHP logic for handling form submission remains unchanged
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $type = $_POST['type']; 
     $fName = $_POST['fName'];
@@ -196,7 +190,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $date_added = date('Y-m-d H:i:s');
     $partID = $_POST['partID'];
 
-    // Check if client exists
     $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
     $checkClient->bind_param("s", $cEmail);
     $checkClient->execute();
@@ -284,7 +277,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-    // Function to validate email format
     function validateEmail(input) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(input.value)) {
@@ -294,16 +286,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 text: 'Please enter a valid email address.',
                 confirmButtonColor: '#d63031'
             });
-            input.value = ""; // Clear invalid input
+            input.value = "";
         }
     }
 
-    // Attach validation to the email field on input
     document.getElementById("cEmail").addEventListener("blur", function () {
         validateEmail(this);
     });
 
-    // Form submission validation
     document.querySelector("form").addEventListener("submit", function (event) {
         const email = document.getElementById("cEmail").value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -311,11 +301,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!emailRegex.test(email)) {
             Swal.fire({
                 icon: 'error',
-                title: 'Form Error!',
+                title: 'Invalid Email Format!',
                 text: 'Please enter a valid email address before submitting.',
                 confirmButtonColor: '#d63031'
             });
-            event.preventDefault(); // Stop form submission
+            event.preventDefault();
         }
     });
 });

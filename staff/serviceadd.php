@@ -4,7 +4,7 @@ session_start();
 require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System/login.php");
+    header("Location: \Drafter-Management-System\login.php");
     exit();
 }
 
@@ -25,10 +25,7 @@ $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
-// Fetch available parts from database
-$partQuery = $conn->query("SELECT PartID, Name FROM part 
-                           WHERE ItemStatus = 'Used for Service' 
-                           AND ServiceID IS NULL");
+$partQuery = $conn->query("SELECT PartID, Name FROM part WHERE ItemStatus = 'Used for Service' AND ServiceID IS NULL");
 $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
@@ -39,20 +36,72 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* Import the Poppins font and replicate the styling from serviceedit.php */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
     .center-container {
-        width: 50%;
-        max-width: 1000px;
-        margin: 0 auto;
+        width: 50%; 
+        max-width: 1000px; 
+        margin: 0 auto; 
         background: white;
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         font-family: 'Poppins', sans-serif;
     }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .btn {
+        font-weight: bold;
+        background-color: #272727;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
 
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 14px;
+        font-weight: 400; 
+    }
+    
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+
+    .black-button {
+        background-color: #272727;
+    }
+    .black-button:hover {
+        background-color: #444;
+    }
+    .red-button {
+        background-color: red;
+    }
+    .red-button:hover {
+        background-color: darkred;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
     .header {
         display: flex;
         align-items: center;
@@ -64,50 +113,9 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
     .header h1 {
         margin: 0;
     }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    input, select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        font-size: 14px;
-        font-weight: 400; 
-    }
-
-    .btn {
-        font-weight: bold;
-        background-color: #272727;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-    }
-
-    .btn:hover {
-        background-color: #444;
-    }
-
-    .actions {
-        margin-top: 20px;
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-    }
 </style>
 
 <div class="main-content">
-    <!-- Same header style as serviceedit.php -->
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
             <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
@@ -116,7 +124,6 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
         <h1>Add Service</h1>
     </div>
 
-    <!-- Centered container for the form -->
     <div class="center-container">
         <form action="" method="POST">
             <div class="form-group">
@@ -124,8 +131,8 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
                 <select id="part" name="partID" required>
                     <option value="">-- Select a Part --</option>
                     <?php foreach ($parts as $part) { ?>
-                        <option value="<?php echo $part['PartID']; ?>">
-                            <?php echo htmlspecialchars($part['Name']); ?>
+                        <option value="<?php echo $part['PartID']; ?>"> 
+                            <?php echo htmlspecialchars($part['Name']); ?> 
                         </option>
                     <?php } ?>
                 </select>
@@ -133,12 +140,14 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
-                <input type="text" id="fName" name="fName" required>
+                <input type="text" id="fName" name="fName" required maxlength="40" 
+                pattern="^[A-Za-z\s]+$" title="Invalid name format.">
             </div>
             
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
-                <input type="text" id="lName" name="lName" required>
+                <input type="text" id="lName" name="lName" required maxlength="40" 
+                pattern="^[A-Za-z\s]+$" title="Invalid name format.">
             </div>
             
             <div class="form-group">
@@ -148,23 +157,23 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
             
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
-                <input type="number" id="pNumber" name="pNumber" required maxlength="11">
+                <input type="number" id="pNumber" name="pNumber" required maxlength="11" pattern="\d{11}"
+                title="Invalid phone number.">
             </div>
             
             <div class="form-group">
                 <label for="type">Service Type:</label>
-                <input type="text" id="type" name="type" required>
+                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid  format.">
             </div>
             
             <div class="form-group">
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" required>
+                <input type="number" id="price" name="price" placeholder="0.00"  required>
             </div>
-
-            <!-- Actions container for the buttons -->
+            
             <div class="actions">
-                <button type="submit" class="btn">Add</button>
-                <button type="reset" class="btn" style="background-color: red;">Reset</button>
+                <button type="submit" class="black-button btn">Add</button>
+                <button type="reset" class="red-button btn">Reset</button>
             </div>
         </form>
     </div>
@@ -181,7 +190,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $date_added = date('Y-m-d H:i:s');
     $partID = $_POST['partID'];
 
-    // Check if client exists
     $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
     $checkClient->bind_param("s", $cEmail);
     $checkClient->execute();
@@ -260,10 +268,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <script>
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
-}
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    function validateEmail(input) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email!',
+                text: 'Please enter a valid email address.',
+                confirmButtonColor: '#d63031'
+            });
+            input.value = "";
+        }
+    }
+
+    document.getElementById("cEmail").addEventListener("blur", function () {
+        validateEmail(this);
+    });
+
+    document.querySelector("form").addEventListener("submit", function (event) {
+        const email = document.getElementById("cEmail").value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email Format!',
+                text: 'Please enter a valid email address before submitting.',
+                confirmButtonColor: '#d63031'
+            });
+            event.preventDefault();
+        }
+    });
+});
 </script>
