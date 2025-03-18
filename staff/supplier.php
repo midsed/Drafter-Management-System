@@ -34,7 +34,6 @@ if (!isset($_SESSION['Username'])) {
     <!-- Quick Search on the left side (Input + Search button) -->
     <div class="search-container">
         <input type="text" placeholder="Quick search" id="searchInput">
-        <button class="red-button" onclick="searchTable()">Search</button>
     </div>
     
     <!-- Table below the search -->
@@ -96,6 +95,9 @@ if (!isset($_SESSION['Username'])) {
         });
     }
 
+    // Add event listener to the search input for real-time search
+    document.getElementById('searchInput').addEventListener('input', searchTable);
+
     // Archive supplier functionality with SweetAlert
     function archiveSupplier(supplierID) {
         Swal.fire({
@@ -145,6 +147,7 @@ if (!isset($_SESSION['Username'])) {
             }
         });
     }
+
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
@@ -204,7 +207,6 @@ if (!isset($_SESSION['Username'])) {
         outline: none;
         border-color: #007bff;
     }
-
     .red-button {
         background: #E10F0F;
         color: white;

@@ -68,52 +68,55 @@ $result = $conn->query($sql);
     </div>
 
     <div class="search-actions">
-        <div class="search-container">
-            <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
-            <div class="filter-container">
-                <span>Filter</span>
-                <div class="dropdown">
-                    <button id="filterButton" class="filter-icon" title="Filter">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <div class="filter-section">
-                            <h4>Action Types</h4>
-                            <div class="filter-options">
-                                <?php
-                                // Fetch distinct action types from the database
-                                $actionTypesResult = $conn->query("SELECT DISTINCT ActionType FROM logs");
-                                while ($actionTypeRow = $actionTypesResult->fetch_assoc()) {
-                                    echo '<label><input type="checkbox" class="filter-option" value="' . htmlspecialchars($actionTypeRow['ActionType']) . '"> ' . htmlspecialchars($actionTypeRow['ActionType']) . '</label>';
-                                }
-                                ?>
-                            </div>
+    <div class="search-container">
+        <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+        
+        <div class="filter-container">
+            <span>Filter</span>
+            <div class="dropdown">
+                <button id="filterButton" class="filter-icon" title="Filter">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <div id="filterDropdown" class="dropdown-content">
+                    <div class="filter-section">
+                        <h4>Action Types</h4>
+                        <div class="filter-options">
+                            <?php
+                            // Fetch distinct action types from the database
+                            $actionTypesResult = $conn->query("SELECT DISTINCT ActionType FROM logs");
+                            while ($actionTypeRow = $actionTypesResult->fetch_assoc()) {
+                                echo '<label><input type="checkbox" class="filter-option" value="' . htmlspecialchars($actionTypeRow['ActionType']) . '"> ' . htmlspecialchars($actionTypeRow['ActionType']) . '</label>';
+                            }
+                            ?>
                         </div>
-                        <div class="date-filters">
-                            <input type="date" name="start_date" id="start_date" placeholder="From Date">
-                            <input type="date" name="end_date" id="end_date" placeholder="To Date">
-                        </div>
-                        <div class="sort-container">
-                            <span>Sort By</span>
-                            <div class="dropdown">
-                                <button id="sortButton" class="sort-icon" title="Sort">
-                                    <i class="fas fa-sort"></i>
-                                </button>
-                                <div id="sortDropdown" class="dropdown-content">
-                                    <button class="sort-option red-button" data-sort="asc">Ascending</button>
-                                    <button class="sort-option red-button" data-sort="desc">Descending</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="filter-actions">
-                            <button id="applyFilter" class="red-button">Apply</button>
-                            <button id="clearFilter" class="red-button">Clear</button>
-                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="applyFilter" class="red-button">Apply</button>
+                        <button id="clearFilter" class="red-button">Clear</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Sort Container with Date Range -->
+        <div class="sort-container">
+            <span>Sort By</span>
+            <div class="dropdown">
+                <button id="sortButton" class="sort-icon" title="Sort">
+                    <i class="fas fa-sort-alpha-down"></i>
+                </button>
+                <div id="sortDropdown" class="dropdown-content">
+                    <button class="sort-option red-button" data-sort="asc">Ascending</button>
+                    <button class="sort-option red-button" data-sort="desc">Descending</button>
+                </div>
+            </div>
+            <div class="date-filters">
+                <input type="date" name="sort_start_date" id="sort_start_date" placeholder="From Date">
+                <input type="date" name="sort_end_date" id="sort_end_date" placeholder="To Date">
+            </div>
+        </div>
     </div>
+</div>
 
     <!-- Download Logs Button -->
 <div class="action-buttons">
@@ -309,19 +312,18 @@ window.addEventListener("click", function (event) {
     }
 
     .search-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-    .search-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .search-container input[type="text"] {
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.search-container input[type="text"] {
         width: 300px;
         padding: 10px;
         border: 1px solid #ccc;
@@ -330,17 +332,23 @@ window.addEventListener("click", function (event) {
         font-family: 'Poppins', sans-serif;
     }
 
-    .search-container input[type="text"]:focus {
-        outline: none;
-        border-color: #007bff;
-    }
+.filter-container, .sort-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adjust gap for better spacing */
+}
 
-    .filter-container, .sort-container {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        cursor: pointer;
-    }
+.date-filters {
+    display: flex;
+    gap: 10px; /* Space between date inputs */
+}
+
+.date-filters input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
 
     .filter-container span, .sort-container span {
         font-size: 14px;
@@ -352,6 +360,7 @@ window.addEventListener("click", function (event) {
         color: #E10F0F;
         font-size: 20px;
         transition: color 0.3s ease;
+        border: none;
     }
 
     .filter-icon:hover, .sort-icon:hover {
