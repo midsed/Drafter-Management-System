@@ -408,19 +408,29 @@ function toggleSidebar() {
         }
 
         table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+}
 
-        th {
-            background-color: #f2f2f2;
-        }
+th {
+    background-color: #f4f4f4;
+    text-align: left;
+}
+
+/* This creates the hover animation from the dashboard */
+tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.2s ease;
+}
 
         .view-receipt-button {
             background: #E10F0F;
