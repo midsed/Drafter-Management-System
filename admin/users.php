@@ -306,7 +306,10 @@ $result = $conn->query($sql);
     font-size: 14px;
     text-decoration: none;
 }
-
+.supplier-table th:nth-child(7),
+.supplier-table td:nth-child(7) {
+    text-align: center;
+}
 .btn-filter:hover {
     background-color: #C00D0D;
 }

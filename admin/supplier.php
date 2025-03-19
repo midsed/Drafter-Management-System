@@ -502,7 +502,12 @@ body {
 .filter-icon:hover, .sort-icon:hover {
     color: darkred;
 }
-
+.supplier-table th:nth-child(6),
+.supplier-table td:nth-child(6),
+.supplier-table th:nth-child(7),
+.supplier-table td:nth-child(7) {
+    text-align: center;
+}
 .dropdown-content {
     display: none;
     position: absolute;
