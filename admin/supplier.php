@@ -118,25 +118,7 @@ $result = $conn->query($sql);
                     </button>
                     <div id="filterDropdown" class="dropdown-content">
                         <!-- Filter by Part ID -->
-                        <div class="filter-section">
-                            <h4>Part ID</h4>
-                            <div class="filter-options">
-                                <?php
-                                // Fetch distinct PartIDs where archived=0
-                                $partQuery = "SELECT DISTINCT p.PartID 
-                                              FROM supplier s
-                                              LEFT JOIN part p ON s.SupplierID = p.SupplierID
-                                              WHERE s.archived = 0
-                                              AND p.PartID IS NOT NULL
-                                              ORDER BY p.PartID";
-                                $partResult = $conn->query($partQuery);
-                                while ($part = $partResult->fetch_assoc()) {
-                                    $pid = htmlspecialchars($part['PartID']);
-                                    echo "<label><input type='checkbox' class='filter-option' data-filter='part' value='{$pid}'> {$pid}</label>";
-                                }
-                                ?>
-                            </div>
-                        </div>
+
                         <!-- Filter by Company Name -->
                         <div class="filter-section">
                             <h4>Company Name</h4>

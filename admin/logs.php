@@ -314,7 +314,6 @@ document.getElementById("applyDateFilter").addEventListener("click", function ()
 
     table, th, td {
         border: 1px solid #ccc;
-        
     }
 
     th, td {
@@ -427,7 +426,6 @@ document.getElementById("applyDateFilter").addEventListener("click", function ()
         background-color: #f0f0f0; /* Light gray on hover */
     }
 
-    /* Pagination Styles */
     .pagination {
     display: flex;
     justify-content: center;
@@ -451,6 +449,7 @@ document.getElementById("applyDateFilter").addEventListener("click", function ()
 .pagination-button:hover {
     background: #f0f0f0;
 }
+
 .active-page {
     background: #000000;
     color: white;
