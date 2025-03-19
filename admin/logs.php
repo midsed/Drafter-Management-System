@@ -107,7 +107,8 @@ $result = $conn->query($sql);
                     </div>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
-                        <button id="clearFilter" class="red-button">Clear</button>
+                        <!-- Clear button uses a separate class -->
+                        <button id="clearFilter" class="clear-button">Clear</button>
                     </div>
                 </div>
             </div>
@@ -285,6 +286,7 @@ window.addEventListener("click", function(e) {
 </script>
 
 <style>
+/* Use Poppins font for everything */
 body, button, select, input, a {
     font-family: 'Poppins', sans-serif;
 }
@@ -371,7 +373,6 @@ body, button, select, input, a {
     border: 1px solid #ccc;
 }
 
-/* Show the native arrow on the <select> */
 .dropdown-content select {
     width: 100%;
     padding: 8px;
@@ -381,7 +382,6 @@ body, button, select, input, a {
     margin-bottom: 15px;
 }
 
-/* Sort & Filter button rows */
 .filter-actions, .sort-options {
     display: flex;
     gap: 10px;
@@ -398,12 +398,24 @@ body, button, select, input, a {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-
 .red-button:hover {
     background-color: darkred;
 }
 
-/* Table Styles */
+.clear-button {
+    background-color: #CCCCCC;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.clear-button:hover {
+    background-color: #999999; 
+}
+
 .table-container {
     overflow-x: auto;
 }

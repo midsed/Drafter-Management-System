@@ -116,7 +116,8 @@ $result = $conn->query($sql);
                     </select>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
-                        <button id="clearFilter" class="red-button">Clear</button>
+                        <!-- The Clear button now has a new class: .clear-button -->
+                        <button id="clearFilter" class="clear-button">Clear</button>
                     </div>
                 </div>
             </div>
@@ -392,6 +393,7 @@ body, button, select, input, a {
     margin-bottom: 10px;
 }
 
+/* Filter & Sort actions */
 .filter-actions, .sort-options {
     display: flex;
     gap: 10px;
@@ -408,9 +410,22 @@ body, button, select, input, a {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-
 .red-button:hover {
     background-color: darkred;
+}
+
+.clear-button {
+    background-color: #CCCCCC; 
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.clear-button:hover {
+    background-color: #999999; 
 }
 
 .table-container {
