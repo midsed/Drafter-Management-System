@@ -1,5 +1,6 @@
 <?php
 session_start();
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: /Drafter-Management-System/login.php");
@@ -8,30 +9,6 @@ if (!isset($_SESSION['UserID'])) {
 
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
-include('dbconnect.php');
-
-// Handle search
-$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
-$limit = 10; // Number of parts per page
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $limit;
-
-// Get total part count for pagination
-$totalQuery = "SELECT COUNT(*) AS total FROM part WHERE archived = 1";
-if (!empty($search)) {
-    $totalQuery .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%')";
-}
-$totalResult = $conn->query($totalQuery);
-$totalRow = $totalResult->fetch_assoc();
-$totalPages = ceil($totalRow['total'] / $limit);
-
-// Fetch parts with pagination & filtering
-$sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 1";
-if (!empty($search)) {
-    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%')";
-}
-$sql .= " ORDER BY DateAdded DESC LIMIT $limit OFFSET $offset";
-$result = $conn->query($sql);
 ?>
 
 <link rel="stylesheet" href="css/style.css">
@@ -48,12 +25,92 @@ $result = $conn->query($sql);
 
     <div class="search-actions">
         <div class="search-container">
-            <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($search) ?>">
+            <input type="text" placeholder="Quick search" id="searchInput">
+            <div class="filter-container">
+                <span>Filter</span>
+                <div class="dropdown">
+                    <button id="filterButton" class="filter-icon" title="Filter">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <div id="filterDropdown" class="dropdown-content">
+                        <div class="filter-section">
+                            <h4>Category</h4>
+                            <div class="filter-options" id="categoryFilter">
+                                <?php
+                                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 1";
+                                $categoryResult = $conn->query($categoryQuery);
+                                if ($categoryResult->num_rows > 0) {
+                                    while ($category = $categoryResult->fetch_assoc()) {
+                                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
+                                    }
+                                } else {
+                                    echo "<p>No categories found.</p>";
+                                }
+                                ?>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="applyFilter" class="red-button">Apply</button>
+                            <button id="clearFilter" class="red-button">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sort-container">
+                <span>Sort By</span>
+                <div class="dropdown">
+                    <button id="sortButton" class="sort-icon" title="Sort">
+                        <i class="fas fa-sort-alpha-down"></i>
+                    </button>
+                    <div id="sortDropdown" class="dropdown-content">
+                        <button class="sort-option red-button" data-sort="asc">Ascending</button>
+                        <button class="sort-option red-button" data-sort="desc">Descending</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card-container">
         <?php
+        $limit = 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+        $categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
+
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media FROM part WHERE archived = 1";
+        $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 1";
+
+        if (!empty($categories)) {
+            $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+            $categoryList = "'" . implode("','", $escapedCategories) . "'";
+            $sql .= " AND Category IN ($categoryList)";
+            $countSql .= " AND Category IN ($categoryList)";
+        }
+
+        if (!empty($search)) {
+            $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%')";
+            $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%')";
+        }
+
+        if ($page == 1 && empty($sort)) {
+            $sql .= " ORDER BY DateAdded DESC";
+        } elseif ($sort === 'asc') {
+            $sql .= " ORDER BY Name ASC";
+        } elseif ($sort === 'desc') {
+            $sql .= " ORDER BY Name DESC";
+        } else {
+            $sql .= " ORDER BY DateAdded DESC";
+        }
+
+        $sql .= " LIMIT $limit OFFSET $offset";
+        $totalResult = $conn->query($countSql);
+        $totalRow = $totalResult->fetch_assoc();
+        $totalPages = ceil($totalRow['total'] / $limit);
+        $result = $conn->query($sql);
+
         if ($result->num_rows > 0) {
             while ($part = $result->fetch_assoc()) {
                 $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
@@ -79,13 +136,13 @@ $result = $conn->query($sql);
 
     <div class="pagination">
         <?php if ($page > 1): ?>
-            <a href="?search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+            <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?search=<?= urlencode($search) ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-            <a href="?search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+            <a href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Next</a>
         <?php endif; ?>
     </div>
 </div>
@@ -134,32 +191,93 @@ function relistPart(partID) {
     });
 }
 
-document.getElementById("searchInput").addEventListener("input", function () {
-    const searchValue = this.value.trim();
+function searchParts() {
+    const input = document.getElementById("searchInput").value.trim().toLowerCase();
     const currentUrl = new URL(window.location.href);
-
-    if (searchValue) {
-        currentUrl.searchParams.set("search", searchValue);
-    } else {
+    if (input === "") {
         currentUrl.searchParams.delete("search");
+    } else {
+        currentUrl.searchParams.set("search", input);
     }
-
     currentUrl.searchParams.set("page", "1");
+    window.location.href = currentUrl.toString();
+}
 
-    // Update the URL without reloading the page
-    window.history.replaceState({}, '', currentUrl.toString());
+document.getElementById("searchInput").addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+        searchParts();
+    }
+});
 
-    // Fetch the updated parts
-    fetch(currentUrl.toString())
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchTerm = urlParams.get("search");
+    if (searchTerm) {
+        document.getElementById("searchInput").value = searchTerm;
+    }
+});
 
-            document.querySelector('.card-container').innerHTML = doc.querySelector('.card-container').innerHTML;
-            document.querySelector('.pagination').innerHTML = doc.querySelector('.pagination').innerHTML;
-        })
-        .catch(error => console.error("Error updating search results:", error));
+document.addEventListener("DOMContentLoaded", function () {
+    const filterDropdown = document.getElementById("filterDropdown");
+    const sortDropdown = document.getElementById("sortDropdown");
+    const filterButton = document.getElementById("filterButton");
+    const sortButton = document.getElementById("sortButton");
+    const applyFilterButton = document.getElementById("applyFilter");
+    const clearFilterButton = document.getElementById("clearFilter");
+    const searchInput = document.getElementById("searchInput");
+    const queryParams = new URLSearchParams(window.location.search);
+    const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
+    
+    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
+        if (selectedCategories.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
+
+    filterButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        filterDropdown.classList.toggle("show");
+        sortDropdown.classList.remove("show");
+    });
+
+    sortButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        sortDropdown.classList.toggle("show");
+        filterDropdown.classList.remove("show");
+    });
+
+    applyFilterButton.addEventListener("click", function () {
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
+            .map(checkbox => checkbox.value);
+        const searchQuery = searchInput.value.trim();
+        const queryParams = new URLSearchParams(window.location.search);
+        queryParams.set("page", "1");
+        if (selectedCategories.length > 0) {
+            queryParams.set("category", selectedCategories.join(",")); 
+        } else {
+            queryParams.delete("category");
+        }
+        if (searchQuery) {
+            queryParams.set("search", searchQuery);
+        } else {
+            queryParams.delete("search");
+        }
+        window.location.search = queryParams.toString(); 
+    });
+
+    clearFilterButton.addEventListener("click", function () {
+        window.location.href = window.location.pathname; 
+    });
+
+    document.querySelectorAll(".sort-option").forEach(option => {
+        option.addEventListener("click", function () {
+            const selectedSort = this.dataset.sort;
+            const queryParams = new URLSearchParams(window.location.search);
+            queryParams.set("sort", selectedSort);
+            queryParams.set("page", "1");
+            window.location.search = queryParams.toString(); 
+        });
+    });
 });
 </script>
 
@@ -189,6 +307,28 @@ body {
 .search-container input[type="text"]:focus {
     outline: none;
     border-color: #007bff;
+}
+.filter-container, .sort-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+.filter-container span, .sort-container span {
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+.filter-icon, .sort-icon {
+    color: #E10F0F;
+    font-size: 20px;
+    transition: color 0.3s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.filter-icon:hover, .sort-icon:hover {
+    color: darkred;
 }
 .card-container {
     display: grid;
@@ -261,5 +401,86 @@ body {
     background: black;
     color: white;
     font-weight: bold;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 500px;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 15px;
+    border-radius: 8px;
+}
+.dropdown-content.show {
+    display: block;
+}
+.filter-section {
+    margin-bottom: 15px;
+}
+.filter-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.filter-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}
+.filter-options input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px 0;
+}
+.filter-actions button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #E10F0F;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.filter-actions button:hover {
+    background-color: darkred;
+}
+.filter-actions #clearFilter {
+    background-color: #ccc;
+    color: #333;
+}
+.filter-actions #clearFilter:hover {
+    background-color: #bbb;
+}
+.sort-option.red-button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 5px 0;
+    background-color: white;
+    color: #E10F0F;
+    border: 1px solid #E10F0F;
+}
+.sort-option.red-button:hover {
+    background-color: #f8f8f8;
 }
 </style>
