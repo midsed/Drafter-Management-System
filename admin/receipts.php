@@ -406,7 +406,6 @@ function toggleSidebar() {
         .container {
             margin: 20px;
         }
-
         table {
     width: 100%;
     border-collapse: collapse;
@@ -415,23 +414,17 @@ function toggleSidebar() {
 
 th, td {
     padding: 10px;
-    border-bottom: 1px solid #ddd !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-top: none !important;
-}
-
-th {
-    background-color: #f4f4f4;
+    border-bottom: 1px solid #ddd;
     text-align: left;
 }
 
-/* This creates the hover animation from the dashboard */
-tr:hover {
-    background-color: #f1f1f1;
-    transition: background-color 0.2s ease;
+th {
+    background-color:rgb(255, 255, 255);
 }
 
+tr:hover {
+    background-color:rgb(218, 218, 218);
+}
         .view-receipt-button {
             background: #E10F0F;
         color: white;
@@ -713,11 +706,6 @@ tr:hover {
         border: 1px solid #E10F0F;
     }
 
-    th, td {
-    border: 1px solid #333 !important;
-    padding: 10px;
-    text-align: left;
-}
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', () => {

@@ -313,10 +313,23 @@ $result = $conn->query($sql);
 .btn-filter:hover {
     background-color: #C00D0D;
 }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
 
 th, td {
-    border: 1px solid #333 !important;
     padding: 10px;
+    border-bottom: 1px solid #ddd;
     text-align: left;
+}
+
+th {
+    background-color:rgb(255, 255, 255);
+}
+
+tr:hover {
+    background-color:rgb(218, 218, 218);
 }
 </style>

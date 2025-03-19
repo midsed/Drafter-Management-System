@@ -52,7 +52,7 @@ if ($search) {
 if ($filterCategory) {
     $queryReceipts .= " AND p.Category = ?";
 }
-$queryReceipts .= " ORDER BY r.RetrievedDate DESC"; // Order by RetrievedDate descending
+$queryReceipts .= " ORDER BY $sortField $sortOrder"; // Dynamic sorting based on sort_field and sort
 $queryReceipts .= " LIMIT ? OFFSET ?";
 
 // Prepare and execute the statement
@@ -265,7 +265,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
     searchReceipts();
 });
 
-// DOMContentLoaded event listener
 document.addEventListener("DOMContentLoaded", function () {
     const filterDropdown = document.getElementById("filterDropdown");
     const sortDropdown = document.getElementById("sortDropdown");
@@ -274,19 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
     const sortOptions = document.querySelectorAll(".sort-option");
-
-    sortOptions.forEach(option => {
-        option.addEventListener("click", function () {
-            const sortOrder = this.dataset.sort;
-            const currentUrl = new URL(window.location.href);
-            
-            // Update URL parameters for sorting
-            currentUrl.searchParams.set("sort", sortOrder);
-            currentUrl.searchParams.set("sort_field", "RetrievedDate");
-            
-            window.location.href = currentUrl.toString(); 
-        });
-    });
 
     // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
@@ -317,9 +303,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Apply filter
     applyFilterButton.addEventListener("click", function () {
-    const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-    console.log("Selected Categories:", selectedCategories); // Debugging line
-    filterParts(selectedCategories);
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
+        console.log("Selected Categories:", selectedCategories); // Debugging line
+        filterParts(selectedCategories);
     });
 
     // Clear filter
@@ -336,20 +322,73 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Preserve selected sort field after reload
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedSortField = urlParams.get('sort_field');
+    if (selectedSortField) {
+        document.getElementById('sortField').value = selectedSortField;
+    }
 });
 
-// Apply filter
-applyFilterButton.addEventListener("click", function () {
-    const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked')).map(checkbox => checkbox.value);
-    console.log("Selected Categories:", selectedCategories); // Debugging line
-    filterParts(selectedCategories);
-});
+// Define the filterParts function
+function filterParts(selectedCategories) {
+    const receipts = document.querySelectorAll("#receipt-table tbody tr");
 
-// Clear filter
-clearFilterButton.addEventListener("click", function () {
-    document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-    filterParts([]);
-});
+    receipts.forEach(row => {
+        const category = row.getAttribute("data-category");
+
+        // If no categories are selected, show all rows
+        if (selectedCategories.length === 0) {
+            row.style.display = "";
+        } else {
+            // Show the row if its category is in the selected categories
+            if (selectedCategories.includes(category)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
+}
+
+// Define the sortParts function
+function sortParts(sortOrder) {
+    const url = new URL(window.location.href);
+    const sortField = document.getElementById("sortField").value; // Get the selected sort field
+    url.searchParams.set("sort", sortOrder);
+    url.searchParams.set("sort_field", sortField); // Include the sort_field parameter
+    window.location.href = url.toString();
+}
+
+// Define the filterParts function
+function filterParts(selectedCategories) {
+    const receipts = document.querySelectorAll("#receipt-table tbody tr");
+
+    receipts.forEach(row => {
+        const category = row.getAttribute("data-category");
+
+        // If no categories are selected, show all rows
+        if (selectedCategories.length === 0) {
+            row.style.display = "";
+        } else {
+            // Show the row if its category is in the selected categories
+            if (selectedCategories.includes(category)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
+}
+
+// Define the sortParts function (if not already defined)
+function sortParts(sortOrder) {
+    const url = new URL(window.location.href);
+    const sortField = document.getElementById("sortField").value; // Get the selected sort field
+    url.searchParams.set("sort", sortOrder);
+    url.searchParams.set("sort_field", sortField); // Include the sort_field parameter
+    window.location.href = url.toString();
+}
 
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
@@ -367,22 +406,25 @@ function toggleSidebar() {
         .container {
             margin: 20px;
         }
-
         table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
 
-        th {
-            background-color: #f2f2f2;
-        }
+th {
+    background-color:rgb(255, 255, 255);
+}
 
+tr:hover {
+    background-color:rgb(218, 218, 218);
+}
         .view-receipt-button {
             background: #E10F0F;
         color: white;
@@ -663,8 +705,8 @@ function toggleSidebar() {
         color: #E10F0F;
         border: 1px solid #E10F0F;
     }
-    </style>
 
+    </style>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const sortButtons = document.querySelectorAll('.sort-option');
@@ -724,6 +766,5 @@ function toggleSidebar() {
         }
     });
     </script>
-
 </body>
 </html>

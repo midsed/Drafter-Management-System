@@ -590,23 +590,6 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-top: 20px;
     }
 
-    .supplier-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    .supplier-table th,
-    .supplier-table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-    }
-    .supplier-table th {
-        background-color: #f4f4f4;
-    }
-    .supplier-table tr:hover {
-        background-color: #f1f1f1;
-    }
 
     .pagination {
         display: flex;
@@ -648,9 +631,23 @@ document.addEventListener("DOMContentLoaded", function () {
         background-color: #f8f8f8;
     }
 
-    th, td {
-    border: 1px solid #333 !important;
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
     padding: 10px;
+    border-bottom: 1px solid #ddd;
     text-align: left;
+}
+
+th {
+    background-color:rgb(255, 255, 255);
+}
+
+tr:hover {
+    background-color:rgb(218, 218, 218);
 }
 </style>
