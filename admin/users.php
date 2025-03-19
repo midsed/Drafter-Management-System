@@ -12,7 +12,7 @@ include('dbconnect.php');
 
 // Handle search and role filter
 $search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
-$roleFilter = isset($_GET['role']) ? $_GET['role'] : []; // Role filter array
+$roleFilter = isset($_GET['role']) ? (array)$_GET['role'] : []; // Role filter array
 $limit = 10; // Number of users per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
@@ -63,12 +63,12 @@ $result = $conn->query($sql);
   </div>
 
    <!-- Role Filter -->
-   <div class="filter-container">
-            <span>Filter by Role:</span>
-            <label><input type="checkbox" class="role-filter" value="Admin" <?= in_array("Admin", $roleFilter) ? "checked" : "" ?>> Admin</label>
-            <label><input type="checkbox" class="role-filter" value="Staff" <?= in_array("Staff", $roleFilter) ? "checked" : "" ?>> Staff</label>
-            <button id="applyFilter" class="btn btn-filter">Apply</button>
-        </div>
+    <div class="filter-container">
+        <span>Filter by Role:</span>
+        <label><input type="checkbox" class="role-filter" value="Admin" <?= in_array("Admin", $roleFilter) ? "checked" : "" ?>> Admin</label>
+        <label><input type="checkbox" class="role-filter" value="Staff" <?= in_array("Staff", $roleFilter) ? "checked" : "" ?>> Staff</label>
+        <button id="applyFilter" class="btn btn-filter">Apply</button>
+    </div>
 
   <div class="table-container">
         <table class="supplier-table">
@@ -119,33 +119,32 @@ $result = $conn->query($sql);
             if ($endPage - $startPage < $visiblePages - 1) {
                 $startPage = max(1, $endPage - $visiblePages + 1);
             }
-            ?>
+        ?>
 
-            <!-- First Button -->
-            <?php if ($page > 1): ?>
-                <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
-            <?php endif; ?>
+        <!-- First Button -->
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+        <?php endif; ?>
 
-            <!-- Previous Button -->
-            <?php if ($page > 1): ?>
-                <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
-            <?php endif; ?>
+        <!-- Previous Button -->
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+        <?php endif; ?>
 
-            <!-- Page Number Buttons -->
-            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
-            <?php endfor; ?>
+        <!-- Page Number Buttons -->
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
 
-            <!-- Next Button -->
-            <?php if ($page < $totalPages): ?>
-                <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
-            <?php endif; ?>
+        <!-- Next Button -->
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+        <?php endif; ?>
 
-            <!-- Last Button -->
-            <?php if ($page < $totalPages): ?>
-                <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
-            <?php endif; ?>
-        </div>
+        <!-- Last Button -->
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+        <?php endif; ?>
     </div>
 
 <script>
@@ -186,6 +185,57 @@ $result = $conn->query($sql);
   }
 
   document.getElementById("searchInput").addEventListener("input", searchTable);
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const applyFilterButton = document.getElementById("applyFilter");
+
+    // Apply filter button event listener
+    applyFilterButton.addEventListener("click", function () {
+        const selectedRoles = Array.from(document.querySelectorAll('.role-filter:checked')).map(checkbox => checkbox.value);
+        const currentUrl = new URL(window.location.href);
+
+        // Update the URL with selected roles
+        if (selectedRoles.length > 0) {
+            currentUrl.searchParams.set("role", selectedRoles);
+        } else {
+            currentUrl.searchParams.delete("role");
+        }
+
+        // Reset to the first page
+        currentUrl.searchParams.set("page", "1");
+
+        // Reload the page with the updated URL
+        window.location.href = currentUrl.toString();
+    });
+
+    // Real-time search function
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", function () {
+        const searchValue = this.value.trim();
+        const currentUrl = new URL(window.location.href);
+
+        if (searchValue) {
+            currentUrl.searchParams.set("search", searchValue);
+        } else {
+            currentUrl.searchParams.delete("search");
+        }
+
+        currentUrl.searchParams.set("page", "1");
+
+        // Update the table dynamically
+        fetch(currentUrl.toString())
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+                document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+            })
+            .catch(error => console.error("Error updating search results:", error));
+    });
+});
+
 </script>
 
 <style>
