@@ -304,7 +304,7 @@ if (!is_dir($uploadDir)) {
 
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
-                <button type="button" class="red-button btn" onclick="clearForm();">Reset</button>
+                <button type="button" class="red-button btn" onclick="clearForm();">Clear</button>
             </div>
         </form>
     </div>
