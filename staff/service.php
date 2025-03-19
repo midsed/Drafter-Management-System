@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // **Apply Filter**
+    // Apply Filter
     applyFilterButton.addEventListener("click", function () {
         const selectedTypes = Array.from(document.querySelectorAll('.filter-option[data-filter="type"]:checked'))
             .map(checkbox => checkbox.value);
@@ -572,14 +572,12 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-top: 20px;
     }
 
-
     .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
     }
-
     .pagination-button {
         padding: 6px 12px;
         border-radius: 4px;
@@ -590,16 +588,15 @@ document.addEventListener("DOMContentLoaded", function () {
         cursor: pointer;
         font-size: 14px;
     }
-
     .pagination-button:hover {
         background: #f0f0f0;
     }
-
     .active-page {
         background: black;
         color: white;
         font-weight: bold;
     }
+
     .sort-option.red-button {
     display: block;
     width: 100%;
