@@ -1,12 +1,12 @@
-<?php 
-session_start(); 
-if (!isset($_SESSION['UserID'])) { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
-include('dbconnect.php'); 
-include('navigation/sidebar.php'); 
-include('navigation/topbar.php'); 
+<?php
+session_start();
+if (!isset($_SESSION['UserID'])) {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
+include('dbconnect.php');
+include('navigation/sidebar.php');
+include('navigation/topbar.php');
 
 // Include the logging function
 include('logging.php'); // Make sure this file exists and contains the logAction function
@@ -14,18 +14,22 @@ include('logging.php'); // Make sure this file exists and contains the logAction
 // Example usage of logging actions
 if (isset($_SESSION['UserID'])) {
     $userId = $_SESSION['UserID'];
-
     // Log actions based on your application logic
-    // For example, you might log a user logging in or performing an action
-    // logAction($conn, $userId, 'User  Logged In'); // Uncomment and use as needed
+    // logAction($conn, $userId, 'User Logged In'); // Uncomment and use as needed
 }
 
-$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : ''; 
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
 $limit = 10; // Results per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Build SQL query with search filtering
+// Sort and date range parameters
+$sortField = isset($_GET['sort_field']) ? $_GET['sort_field'] : 'Timestamp'; // Default sort by Timestamp
+$sortOrder = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'DESC'; // Default sort order
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+
+// Build SQL query with search, sorting, and date range filtering
 $sql = "SELECT l.LogsID, u.Username AS ActionBy, l.ActionType, l.Timestamp 
         FROM logs l
         JOIN user u ON l.UserID = u.UserID
@@ -38,90 +42,68 @@ if (!empty($search)) {
                   OR l.Timestamp LIKE '%$search%')";
 }
 
+// Apply date range filter
+if (!empty($startDate) && !empty($endDate)) {
+    $sql .= " AND l.Timestamp BETWEEN '$startDate 00:00:00' AND '$endDate 23:59:59'";
+}
+
+// Apply sorting
+$sql .= " ORDER BY $sortField $sortOrder LIMIT $limit OFFSET $offset";
+
 // Get total logs count for pagination
-$totalResult = $conn->query($sql);
+$totalResult = $conn->query(str_replace("LIMIT $limit OFFSET $offset", "", $sql));
 $totalLogs = $totalResult->num_rows;
 $totalPages = ceil($totalLogs / $limit);
 
-// Apply sorting and pagination
-$sql .= " ORDER BY l.Timestamp DESC LIMIT $offset, $limit";
+// Fetch logs
 $result = $conn->query($sql);
 ?>
 
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Logs</title> 
-    <link rel="stylesheet" href="css/style.css"> 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
-</head> 
-<body> 
-<div class="main-content"> 
-    <div class="header"> 
-        <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;"> 
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;"> 
-            <h1 style="margin: 0;">Logs</h1> 
-        </a> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="main-content">
+    <div class="header">
+        <a href="dashboard.php" style="text-decoration: none; display: flex; align-items: center;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <h1 style="margin: 0;">Logs</h1>
+        </a>
     </div>
 
+    <!-- Search and Sort Container -->
     <div class="search-actions">
-    <div class="search-container">
-        <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
-        
-        <div class="filter-container">
-            <span>Filter</span>
-            <div class="dropdown">
-                <button id="filterButton" class="filter-icon" title="Filter">
-                    <i class="fas fa-filter"></i>
-                </button>
-                <div id="filterDropdown" class="dropdown-content">
-                    <div class="filter-section">
-                        <h4>Action Types</h4>
-                        <div class="filter-options">
-                            <?php
-                            // Fetch distinct action types from the database
-                            $actionTypesResult = $conn->query("SELECT DISTINCT ActionType FROM logs");
-                            while ($actionTypeRow = $actionTypesResult->fetch_assoc()) {
-                                echo '<label><input type="checkbox" class="filter-option" value="' . htmlspecialchars($actionTypeRow['ActionType']) . '"> ' . htmlspecialchars($actionTypeRow['ActionType']) . '</label>';
-                            }
-                            ?>
-                        </div>
-                    </div>
-                    <div class="filter-actions">
-                        <button id="applyFilter" class="red-button">Apply</button>
-                        <button id="clearFilter" class="red-button">Clear</button>
-                    </div>
-                </div>
+        <div class="search-container">
+            <input type="text" placeholder="Quick search" id="searchInput" value="<?= htmlspecialchars($search) ?>">
+            
+            <!-- Sort Container -->
+            <div class="sort-container">
+                <span>Sort By:</span>
+                <select id="sortField">
+                    <option value="LogsID" <?= $sortField === 'LogsID' ? 'selected' : '' ?>>Log ID</option>
+                    <option value="ActionBy" <?= $sortField === 'ActionBy' ? 'selected' : '' ?>>Action By</option>
+                </select>
+                <select id="sortOrder">
+                    <option value="ASC" <?= $sortOrder === 'ASC' ? 'selected' : '' ?>>Ascending</option>
+                    <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Descending</option>
+                </select>
             </div>
-        </div>
 
-        <!-- Sort Container with Date Range -->
-        <div class="sort-container">
-            <span>Sort By</span>
-            <div class="dropdown">
-                <button id="sortButton" class="sort-icon" title="Sort">
-                    <i class="fas fa-sort-alpha-down"></i>
-                </button>
-                <div id="sortDropdown" class="dropdown-content">
-                    <button class="sort-option red-button" data-sort="asc">Ascending</button>
-                    <button class="sort-option red-button" data-sort="desc">Descending</button>
-                </div>
-            </div>
+            <!-- Date Range Filter -->
             <div class="date-filters">
-                <input type="date" name="sort_start_date" id="sort_start_date" placeholder="From Date">
-                <input type="date" name="sort_end_date" id="sort_end_date" placeholder="To Date">
+                <input type="date" id="start_date" value="<?= htmlspecialchars($startDate) ?>">
+                <input type="date" id="end_date" value="<?= htmlspecialchars($endDate) ?>">
+                <button id="applyDateFilter" class="red-button">Apply Date Filter</button>
             </div>
         </div>
     </div>
-</div>
-
-    <!-- Download Logs Button -->
-<div class="action-buttons">
-    <a href="download_logs.php?<?= http_build_query(array_intersect_key($_GET, array_flip(['action_type', 'username', 'start_date', 'end_date']))) ?>" class="red-button">Download Logs (CSV)</a>
-</div>
 
     <!-- Logs Table -->
     <div class="table-container">
@@ -142,7 +124,7 @@ $result = $conn->query($sql);
                         echo "<td>#{$row['LogsID']}</td>";
                         echo "<td>" . htmlspecialchars($row['ActionBy']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ActionType']) . "</td>";
-                        echo "<td>" . date("F j, Y, g:i A", strtotime($row['Timestamp'])) . "</td>"; 
+                        echo "<td>" . date("F j, Y, g:i A", strtotime($row['Timestamp'])) . "</td>";
                         echo "</tr>";
                     }
                 } else {
@@ -151,61 +133,52 @@ $result = $conn->query($sql);
                 ?>
             </tbody>
         </table>
+    </div>
 
     <!-- Pagination -->
     <div class="pagination">
-        <?php 
-            $queryParams = $_GET;
-            unset($queryParams['page']);
-            $queryString = http_build_query($queryParams); 
+        <?php
+        $queryParams = $_GET;
+        unset($queryParams['page']);
+        $queryString = http_build_query($queryParams);
 
-            $visiblePages = 5; // Number of pages to display
-            $startPage = max(1, $page - 2);
-            $endPage = min($totalPages, $startPage + $visiblePages - 1);
+        $visiblePages = 5; // Number of pages to display
+        $startPage = max(1, $page - 2);
+        $endPage = min($totalPages, $startPage + $visiblePages - 1);
 
-            if ($endPage - $startPage < $visiblePages - 1) {
-                $startPage = max(1, $endPage - $visiblePages + 1);
-            }
-            ?>
+        if ($endPage - $startPage < $visiblePages - 1) {
+            $startPage = max(1, $endPage - $visiblePages + 1);
+        }
+        ?>
 
-            <!-- First Button -->
-            <?php if ($page > 1): ?>
-                <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
-            <?php endif; ?>
+        <!-- First Button -->
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+        <?php endif; ?>
 
-            <!-- Previous Button -->
-            <?php if ($page > 1): ?>
-                <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
-            <?php endif; ?>
+        <!-- Previous Button -->
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+        <?php endif; ?>
 
-            <!-- Page Number Buttons -->
-            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
-            <?php endfor; ?>
+        <!-- Page Number Buttons -->
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <a href="?<?= $queryString ?>&page=<?= $i ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
 
-            <!-- Next Button -->
-            <?php if ($page < $totalPages): ?>
-                <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
-            <?php endif; ?>
+        <!-- Next Button -->
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= $page + 1 ?>" class="pagination-button">Next</a>
+        <?php endif; ?>
 
-            <!-- Last Button -->
-            <?php if ($page < $totalPages): ?>
-                <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
-            <?php endif; ?>
-        </div>
+        <!-- Last Button -->
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
-        // Sidebar Toggle Function
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
-}
-
 // Search functionality
 document.getElementById("searchInput").addEventListener("input", function () {
     const searchValue = this.value.trim();
@@ -218,93 +191,44 @@ document.getElementById("searchInput").addEventListener("input", function () {
     }
 
     currentUrl.searchParams.set("page", "1");
-
-    window.history.replaceState({}, '', currentUrl.toString());
-
-    fetch(currentUrl.toString())
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-
-            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
-
-            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
-        })
-        .catch(error => console.error("Error updating search results:", error));
-});
-
-
-
-// Filter functionality
-document.getElementById("applyFilter").addEventListener("click", function () {
-    const selectedActions = Array.from(document.querySelectorAll('.filter-option:checked')).map(checkbox => checkbox.value);
-    const actionTypeQuery = selectedActions.length > 0 ? selectedActions.join(',') : '';
-    const username = document.getElementById("searchInput").value;
-    const startDate = document.getElementById("start_date").value;
-    const endDate = document.getElementById("end_date").value;
-
-    // Redirect with filters applied
-    window.location.href = `logs.php?action_type=${encodeURIComponent(actionTypeQuery)}&username=${encodeURIComponent(username)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
-});
-
-// Clear filter
-document.getElementById("clearFilter").addEventListener("click", function () {
-    document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
-    document.getElementById("searchInput").value = '';
-    document.getElementById("start_date").value = '';
-    document.getElementById("end_date").value = '';
-    window.location.href = 'logs.php'; // Reload the page without filters
+    window.location.href = currentUrl.toString();
 });
 
 // Sort functionality
-document.querySelectorAll(".sort-option").forEach(option => {
-    option.addEventListener("click", function () {
-        const order = option.dataset.sort;
-        sortLogs(order);
-        document.getElementById("sortDropdown").classList.remove("show");
-    });
+document.getElementById("sortField").addEventListener("change", function () {
+    const sortField = this.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set("sort_field", sortField);
+    window.location.href = currentUrl.toString();
 });
 
-function sortLogs(order) {
-    const rows = Array.from(document.querySelectorAll("#logsTableBody tr"));
-    rows.sort((a, b) => {
-        const timestampA = new Date(a.cells[3].textContent);
-        const timestampB = new Date(b.cells[3].textContent);
-        return order === "asc" ? timestampA - timestampB : timestampB - timestampA;
-    });
-    const tbody = document.getElementById("logsTableBody");
-    tbody.innerHTML = "";
-    rows.forEach(row => tbody.appendChild(row));
-}
-
-// Toggle filter dropdown
-document.getElementById("filterButton").addEventListener("click", function (event) {
-    event.stopPropagation();
-    document.getElementById("filterDropdown").classList.toggle("show");
+document.getElementById("sortOrder").addEventListener("change", function () {
+    const sortOrder = this.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set("sort_order", sortOrder);
+    window.location.href = currentUrl.toString();
 });
 
-// Toggle sort dropdown
-document.getElementById("sortButton").addEventListener("click", function (event) {
-    event.stopPropagation();
-    document.getElementById("sortDropdown").classList.toggle("show");
-});
+// Date range filter functionality
+document.getElementById("applyDateFilter").addEventListener("click", function () {
+    const startDate = document.getElementById("start_date").value;
+    const endDate = document.getElementById("end_date").value;
+    const currentUrl = new URL(window.location.href);
 
-// Prevent dropdown from closing when interacting with its contents
-document.getElementById("filterDropdown").addEventListener("click", function(event) {
-    event.stopPropagation();
-});
-
-// Close dropdowns when clicking outside
-window.addEventListener("click", function (event) {
-    if (!event.target.matches('.filter-icon') && !event.target.matches('.sort-icon')) {
-        document.getElementById("filterDropdown").classList.remove("show");
-        document.getElementById("sortDropdown").classList.remove("show");
+    if (startDate && endDate) {
+        currentUrl.searchParams.set("start_date", startDate);
+        currentUrl.searchParams.set("end_date", endDate);
+    } else {
+        currentUrl.searchParams.delete("start_date");
+        currentUrl.searchParams.delete("end_date");
     }
+
+    currentUrl.searchParams.set("page", "1");
+    window.location.href = currentUrl.toString();
 });
 </script>
-</body> 
-</html> 
+</body>
+</html>
 
 <style>
     body {
