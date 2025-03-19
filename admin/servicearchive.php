@@ -22,20 +22,20 @@ include('navigation/topbar.php');
     </div>
 
     <?php
-        $sql = "SELECT 
-                    s.ServiceID, 
-                    s.Type, 
-                    s.Price, 
-                    c.FName AS CustomerFName, 
-                    c.LName AS CustomerLName, 
-                    s.ClientEmail, 
-                    c.PhoneNumber, 
-                    s.StaffName, 
-                    COALESCE(p.Name, 'N/A') AS PartName
-                FROM service s
-                LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
-                LEFT JOIN part p ON s.PartID = p.PartID
-                WHERE s.Archived = 1";
+       $sql = "SELECT 
+       s.ServiceID, 
+       s.Type, 
+       s.Price, 
+       c.FName AS CustomerFName, 
+       c.LName AS CustomerLName, 
+       s.ClientEmail, 
+       c.PhoneNumber, 
+       s.StaffName, 
+       s.PartName
+   FROM service s
+   LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+   WHERE s.Archived = 1";
+
 
         $result = $conn->query($sql);
 

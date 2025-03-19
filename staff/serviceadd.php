@@ -4,7 +4,7 @@ session_start();
 require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID'])) {
-    header("Location: \Drafter-Management-System\login.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
@@ -25,8 +25,6 @@ $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
-$partQuery = $conn->query("SELECT PartID, Name FROM part WHERE ItemStatus = 'Used for Service' AND ServiceID IS NULL");
-$parts = $partQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -127,15 +125,9 @@ $parts = $partQuery->fetch_all(MYSQLI_ASSOC);
     <div class="center-container">
         <form action="" method="POST">
             <div class="form-group">
-                <label for="part">Select Part:</label>
-                <select id="part" name="partID" required>
-                    <option value="">-- Select a Part --</option>
-                    <?php foreach ($parts as $part) { ?>
-                        <option value="<?php echo $part['PartID']; ?>"> 
-                            <?php echo htmlspecialchars($part['Name']); ?> 
-                        </option>
-                    <?php } ?>
-                </select>
+                <label for="partName">Part Name:</label>
+                <input type="text" id="partName" name="partName" required maxlength="100" 
+                pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
             </div>
 
             <div class="form-group">
@@ -187,8 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $pNumber = $_POST['pNumber'];
     $cEmail = $_POST['cEmail'];
     $price = $_POST['price'];
+    $partName = trim($_POST['partName']);
     $date_added = date('Y-m-d H:i:s');
-    $partID = $_POST['partID'];
 
     $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
     $checkClient->bind_param("s", $cEmail);
@@ -204,41 +196,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $checkClient->close();
 
-    $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartID, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartName, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
     $add = $conn->prepare($sql);
-    $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partID, $username);
+    $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partName, $username);
 
     if ($add->execute()) {
-        $serviceID = $add->insert_id;
-
-        $updatePart = $conn->prepare("UPDATE part 
-                                      SET ServiceID = ? 
-                                      WHERE PartID = ? 
-                                      AND Name = (SELECT Name FROM part WHERE PartID = ?)");
-        $updatePart->bind_param("iii", $serviceID, $partID, $partID);
-        $updatePart->execute();
-        $updatePart->close();
-
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
         $actionBy = $_SESSION['Username'];
         $actionType = "Added new Service";
 
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) 
-                               VALUES (?, ?, ?, ?, ?)");
-        $log->bind_param("sssii", $actionBy, $actionType, $timestamp, $adminId, $partID);
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
+        $log->bind_param("sssi", $username, $actionType, $timestamp, $user_id);
         $log->execute();
         $log->close();
 
         echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
-        echo '<style>
-            @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-            .swal2-popup { font-family: "Inter", sans-serif !important; }
-            .swal2-title { font-weight: 700 !important; }
-            .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
-        </style>';
-        
         echo '<script>
             Swal.fire({
                 title: "Success!",
@@ -250,16 +223,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 window.location = "service.php";
             });
         </script>';
-        } else {
-            echo '<script>
-                Swal.fire({
-                    title: "Error!",
-                    text: "Error adding service",
-                    icon: "error",
-                    confirmButtonText: "OK",
-                    confirmButtonColor: "#d63031"
-                });
-            </script>';
+    } else {
+        echo '<script>
+            Swal.fire({
+                title: "Error!",
+                text: "Error adding service",
+                icon: "error",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#d63031"
+            });
+        </script>';
     }
 
     $add->close();

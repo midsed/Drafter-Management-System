@@ -30,7 +30,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 }
 
 $service_id = $_GET['id'];
-$query = $conn->prepare("SELECT s.*, c.FName, c.LName, c.PhoneNumber 
+$query = $conn->prepare("SELECT s.ServiceID, s.Type, s.Price, s.ClientEmail, s.PartName, c.FName, c.LName, c.PhoneNumber 
                          FROM service s
                          LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
                          WHERE s.ServiceID = ?");
@@ -143,6 +143,13 @@ if (!$service) {
     <div class="center-container">
         <form action="serviceedit_process.php" method="POST">
             <input type="hidden" name="service_id" value="<?php echo $service['ServiceID']; ?>">
+
+            <div class="form-group">
+                <label for="partName">Part Name:</label>
+                <input type="text" id="part_name" name="part_name" 
+                    value="<?php echo htmlspecialchars($service['PartName'] ?? ''); ?>" 
+                    required pattern="^[A-Za-z\s]+$" title="Invalid name format">
+            </div>
 
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>

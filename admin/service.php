@@ -19,55 +19,45 @@ $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-$sql = "SELECT 
-            s.ServiceID, 
-            s.Type, 
-            s.Price, 
-            c.FName AS CustomerFName, 
-            c.LName AS CustomerLName, 
-            s.ClientEmail, 
-            c.PhoneNumber, 
-            s.StaffName, 
-            COALESCE(p.Name, 'N/A') AS PartName
-        FROM service s
-        LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
-        LEFT JOIN part p ON s.PartID = p.PartID
-        WHERE s.Archived = 0";
-
+$sql = "SELECT ServiceID, Type, Price, ClientEmail, StaffName, PartName FROM service WHERE Archived = 0";
 $countSql = "SELECT COUNT(*) AS total FROM service WHERE Archived = 0";
 
 // Apply Filters
 if (!empty($types)) {
     $escapedTypes = array_map([$conn, 'real_escape_string'], $types);
-    $sql .= " AND s.Type IN ('" . implode("','", $escapedTypes) . "')";
+    $sql .= " AND Type IN ('" . implode("','", $escapedTypes) . "')";
     $countSql .= " AND Type IN ('" . implode("','", $escapedTypes) . "')";
 }
 
 if (!empty($staffs)) {
     $escapedStaffs = array_map([$conn, 'real_escape_string'], $staffs);
-    $sql .= " AND s.StaffName IN ('" . implode("','", $escapedStaffs) . "')";
+    $sql .= " AND StaffName IN ('" . implode("','", $escapedStaffs) . "')";
     $countSql .= " AND StaffName IN ('" . implode("','", $escapedStaffs) . "')";
 }
 
 if (!empty($search)) {
-    $sql .= " AND (s.Type LIKE '%$search%' OR c.FName LIKE '%$search%' OR c.LName LIKE '%$search%' OR s.ClientEmail LIKE '%$search%')";
-    $countSql .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%')";
+    $sql .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%' OR PartName LIKE '%$search%')";
+    $countSql .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%' OR PartName LIKE '%$search%')";
 }
+
+// Get total results count
+$totalResult = $conn->query($countSql);
+$totalRow = $totalResult->fetch_assoc();
+$totalRecords = $totalRow['total'];
+$totalPages = ceil($totalRecords / $limit);
 
 // Apply Sorting
 if ($sort === 'asc') {
-    $sql .= " ORDER BY s.Type ASC";
+    $sql .= " ORDER BY Type ASC";
 } elseif ($sort === 'desc') {
-    $sql .= " ORDER BY s.Type DESC";
+    $sql .= " ORDER BY Type DESC";
 } else {
-    $sql .= " ORDER BY s.ServiceID DESC";
+    $sql .= " ORDER BY ServiceID DESC";
 }
 
-$sql .= " LIMIT $limit OFFSET $offset";
-
-$totalResult = $conn->query($countSql);
-$totalRow = $totalResult->fetch_assoc();
-$totalPages = ceil($totalRow['total'] / $limit);
+if ($totalRecords > 10) {
+    $sql .= " LIMIT $limit OFFSET $offset";
+}
 
 $result = $conn->query($sql);
 ?>
@@ -102,29 +92,27 @@ $result = $conn->query($sql);
                         <i class="fas fa-filter"></i>
                     </button>
                     <div id="filterDropdown" class="dropdown-content">
-                        <div class="filter-section">
+                        <div class="filter-options">
                             <h4>Service Type</h4>
-                            <div class="filter-options">
-                                <?php
-                                $typeQuery = "SELECT DISTINCT Type FROM service WHERE Archived = 0";
-                                $typeResult = $conn->query($typeQuery);
-                                while ($type = $typeResult->fetch_assoc()) {
-                                    echo "<label><input type='checkbox' class='filter-option' data-filter='type' value='{$type['Type']}'> {$type['Type']}</label>";
-                                }
-                                ?>
-                            </div>
+                            <?php
+                            $typeQuery = "SELECT DISTINCT Type FROM service WHERE Archived = 0";
+                            $typeResult = $conn->query($typeQuery);
+                            while ($type = $typeResult->fetch_assoc()) {
+                                $checked = in_array($type['Type'], $types) ? "checked" : "";
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='type' value='{$type['Type']}' {$checked}> {$type['Type']}</label>";
+                            }
+                            ?>
                         </div>
-                        <div class="filter-section">
-                            <h4>Staff</h4>
-                            <div class="filter-options">
-                                <?php
-                                $staffQuery = "SELECT DISTINCT StaffName FROM service WHERE Archived = 0";
-                                $staffResult = $conn->query($staffQuery);
-                                while ($staff = $staffResult->fetch_assoc()) {
-                                    echo "<label><input type='checkbox' class='filter-option' data-filter='staff' value='{$staff['StaffName']}'> {$staff['StaffName']}</label>";
-                                }
-                                ?>
-                            </div>
+                        <div class="filter-options">
+                            <h4>Name</h4>
+                            <?php
+                            $staffQuery = "SELECT DISTINCT StaffName FROM service WHERE Archived = 0";
+                            $staffResult = $conn->query($staffQuery);
+                            while ($staff = $staffResult->fetch_assoc()) {
+                                $checked = in_array($staff['StaffName'], $staffs) ? "checked" : "";
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='staff' value='{$staff['StaffName']}' {$checked}> {$staff['StaffName']}</label>";
+                            }
+                            ?>
                         </div>
                         <div class="filter-actions">
                             <button id="applyFilter" class="red-button">Apply</button>
@@ -157,12 +145,10 @@ $result = $conn->query($sql);
                     <th>Service ID</th>
                     <th>Service Type</th>
                     <th>Service Price</th>
-                    <th>Customer Name</th>
                     <th>Customer Email</th>
-                    <th>Customer Number</th>
-                    <th>Staff Name</th>
+                    <th>Staff</th>
                     <th>Part Name</th>
-                    <th>Edit</th>
+                    <th>Edit Service</th>
                     <th>Archive</th>
                 </tr>
             </thead>
@@ -174,23 +160,21 @@ $result = $conn->query($sql);
                         echo "<td>" . htmlspecialchars($row['ServiceID']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['Type']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['Price']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['CustomerFName'] . ' ' . $row['CustomerLName']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ClientEmail'] ?? 'N/A') . "</td>";
-                        echo "<td>" . htmlspecialchars($row['PhoneNumber'] ?? 'N/A') . "</td>";
                         echo "<td>" . htmlspecialchars($row['StaffName'] ?? 'N/A') . "</td>";
                         echo "<td>" . htmlspecialchars($row['PartName']) . "</td>";
-                        echo '<td><a href="serviceedit.php?id=' . $row['ServiceID'] . '" class="btn btn-edit">Edit</a></td>';
-                        echo '<td><button class="btn btn-archive" onclick="archiveService(' . $row['ServiceID'] . ')">Archive</button></td>';
+                        echo "<td><a href='serviceedit.php?id=" . $row['ServiceID'] . "' class='btn btn-edit'>Edit</a></td>";
+                        echo "<td><button class='btn btn-archive' onclick='archiveService(" . $row['ServiceID'] . ")'>Archive</button></td>";
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='10'>No services found.</td></tr>";
+                    echo "<tr><td colspan='8'>No services found.</td></tr>";
                 }
             ?>
             </tbody>
         </table>
     </div>
-
+</div>
     <!-- Pagination -->
     <div class="pagination">
         <?php 
@@ -252,8 +236,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
 
     currentUrl.searchParams.set("page", "1");
 
-    window.history.replaceState({}, '', currentUrl.toString());
-
     fetch(currentUrl.toString())
         .then(response => response.text())
         .then(html => {
@@ -261,7 +243,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
             const doc = parser.parseFromString(html, 'text/html');
 
             document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
-            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination")?.innerHTML || "";
         })
         .catch(error => console.error("Error updating search results:", error));
 });
@@ -340,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // **Apply Filter**
+    // Apply Filter
     applyFilterButton.addEventListener("click", function () {
         const selectedTypes = Array.from(document.querySelectorAll('.filter-option[data-filter="type"]:checked'))
             .map(checkbox => checkbox.value);

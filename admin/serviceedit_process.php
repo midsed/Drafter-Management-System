@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fName = $_POST['fName'];
     $lName = $_POST['lName'];
     $pNumber = $_POST['pNumber'];
-    $part_id = isset($_POST['part_id']) ? $_POST['part_id'] : NULL;
+    $part_name = isset($_POST['part_name']) ? $_POST['part_name'] : NULL;
     $staff_name = $_SESSION['Username'];
 
     // ✅ Get the existing email for this ServiceID
@@ -74,41 +74,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $checkClientQuery->close();
 
-    $checkPartQuery = $conn->prepare("SELECT PartID FROM part WHERE Description = ? AND ItemStatus = 'Used for Service' LIMIT 1");
-    $checkPartQuery->bind_param("s", $type);
-    $checkPartQuery->execute();
-    $partResult = $checkPartQuery->get_result();
-    $part = $partResult->fetch_assoc();
-    $checkPartQuery->close();
-
-    if (!$part) {
-        $part_id = NULL;
-    } else {
-        $part_id = $part['PartID'];
-    }
-
-    // ✅ Update the service
-    $updateQuery = "UPDATE service SET Type = ?, Price = ?, ClientEmail = ?, PartID = ?, StaffName = ? WHERE ServiceID = ?";
-    $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("sssssi", $type, $price, $client_email, $part_id, $staff_name, $service_id);
+    // ✅ Update the service (Using PartName instead of PartID)
+    $updateQuery = "UPDATE service SET Type = ?, Price = ?, ClientEmail = ?, PartName = ?, StaffName = ? WHERE ServiceID = ?";
+        $stmt = $conn->prepare($updateQuery);
+        $stmt->bind_param("sssssi", $type, $price, $client_email, $part_name, $staff_name, $service_id);
 
     if ($stmt->execute()) {
-        // ✅ If PartID is NULL, remove ServiceID from part table
-        if ($part_id === NULL) {
-            $clearPartQuery = $conn->prepare("UPDATE part SET ServiceID = NULL WHERE ServiceID = ?");
-            $clearPartQuery->bind_param("i", $service_id);
-            $clearPartQuery->execute();
-            $clearPartQuery->close();
-        }
-
         // ✅ Log update action
         $user_id = $_SESSION['UserID'];
         $username = $_SESSION['Username'];
         $actionType = "Updated Service";
         $timestamp = date("Y-m-d H:i:s");
 
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) VALUES (?, ?, ?, ?, ?)");
-        $log->bind_param("sssii", $username, $actionType, $timestamp, $user_id, $part_id);
+        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
+        $log->bind_param("sssi", $username, $actionType, $timestamp, $user_id);
         $log->execute();
         $log->close();
 
@@ -134,8 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 });
             });
         </script>';
-        } 
-
+    }
 
     $stmt->close();
     $conn->close();
