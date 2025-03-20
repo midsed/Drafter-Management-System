@@ -7,7 +7,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
             <a href="dashboard.php">
                 <img src="images/sideicon.png" alt="Dashboard Icon" class="nav-icon">
-                <span>Home</span> 
+                <span>Dashboard</span> 
             </a>
         </li>
         <li class="<?php echo ($current_page == 'parts.php') ? 'active' : ''; ?>">
