@@ -606,6 +606,65 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+document.querySelectorAll('.single-relist-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const partId = this.closest('.part-card').dataset.partId;
+        relistPart(partId);
+    });
+});
+
+// Individual re-list function definition (ensure this exists)
+function relistPart(partID) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to re-list this part?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#6c5ce7",
+        cancelButtonColor: "#d63031",
+        confirmButtonText: "Yes, re-list it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('relist_part.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + encodeURIComponent(partID)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Re-listed!",
+                        text: data.message || "Part successfully re-listed.",
+                        icon: "success",
+                        confirmButtonColor: "#6c5ce7"
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: data.message || "Could not re-list part.",
+                        icon: "error",
+                        confirmButtonColor: "#d63031"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonColor: "#d63031"
+                });
+            });
+        }
+    });
+}
 </script>
 
 <style>
