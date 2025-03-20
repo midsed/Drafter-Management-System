@@ -172,12 +172,15 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="year_model">Year Model:</label>
-                <input type="text" id="year_model" name="year_model" required>
+                <input type="text" id="year_model" name="year_model" maxlength="4" pattern="\d{4}" required 
+                    title="Enter a year">
             </div>
 
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
+                <option value="" selected disabled>Select Category</option>
+                <option value="Air Conditioning">Air Conditioning</option>
                 <option value="Alternator">Alternator</option>
                 <option value="Battery">Battery</option>
                 <option value="Body Panel">Body Panel</option>
@@ -197,6 +200,7 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="authenticity">Authenticity:</label>
                 <select id="authenticity" name="authenticity" required>
+                    <option value="" selected disabled>Select Authenticity</option>
                     <option value="Genuine">Genuine</option>
                     <option value="Replacement">Replacement</option>
                 </select>
@@ -205,6 +209,7 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="condition">Condition:</label>
                 <select id="condition" name="condition" required>
+                    <option value="" selected disabled>Select Condition</option>
                     <option value="Used">Used</option>
                     <option value="New">New</option>
                     <option value="For Repair">For Repair</option>
@@ -214,6 +219,7 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="item_status">Item Status:</label>
                 <select id="item_status" name="item_status" required>
+                    <option value="" selected disabled>Select Status</option>
                     <option value="Available">Available</option>
                     <option value="Used for Service">Used for Service</option>
                     <option value="Surrendered">Surrendered</option>
@@ -235,7 +241,7 @@ $username = $user['Username'];
                 <div class="image-preview">
                     <img id="previewImage" src="images/no-image.png" alt="No Image Available">
                 </div>
-                <input type="file" id="part_image" name="part_image" accept="image/*" onchange="previewFile(event)">
+                <input type="file" id="part_image" name="part_image" accept="image/*" required onchange="previewFile(event)">
             </div>
 
             <!-- Supplier Details -->
@@ -257,7 +263,7 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="supplier_address">Supplier Address:</label>
-                <textarea id="supplier_address" name="supplier_address"></textarea>
+                <textarea id="supplier_address" name="supplier_address" placeholder="Extension, B113 L12 Mindanao Avenue, corner Regalado Hwy, Quezon City, 1100"></textarea>
             </div>
 
             <div class="actions">
@@ -289,20 +295,226 @@ $username = $user['Username'];
     }
 
     function previewFile(event) {
-        const preview = document.getElementById('previewImage');
-        const fileInput = event.target;
-        const file = fileInput.files[0];
+    const preview = document.getElementById('previewImage');
+    const fileInput = event.target;
+    const file = fileInput.files[0];
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                preview.src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        } else {
+    // Strictly allow only JPG and PNG
+    const allowedExtensions = /\.(jpg|jpeg|png|heic)$/i;
+
+    if (file) {
+        if (!allowedExtensions.test(file.name)) {
+            alert("Invalid file type! JPG, JPEG, HEIC and PNG are allowed.");
+            fileInput.value = "";
             preview.src = "images/no-image.png";
+            return;
+        }
+
+        // Preview the valid image
+        const reader = new FileReader();
+        reader.onload = function() {
+            preview.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = "images/no-image.png";
+    }
+}
+
+// Show and clear error functions
+function showError(input, message) {
+    let errorSpan = input.nextElementSibling;
+    if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+        errorSpan = document.createElement("span");
+        errorSpan.classList.add("error-message");
+        errorSpan.style.color = "red";
+        errorSpan.style.fontSize = "12px";
+        input.parentNode.appendChild(errorSpan);
+    }
+    errorSpan.textContent = message;
+}
+
+function clearError(input) {
+    let errorSpan = input.nextElementSibling;
+    if (errorSpan && errorSpan.classList.contains("error-message")) {
+        errorSpan.remove();
+    }
+}
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const clearButton = document.querySelector(".red-button");
+        if (clearButton) {
+            clearButton.addEventListener("click", function(event) {
+                event.preventDefault(); // Prevent immediate clearing
+                
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This will clear all the informations.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, clear it!",
+                    cancelButtonText: "Cancel",
+                    confirmButtonColor: "#d63031",
+                    cancelButtonColor: "#6c5ce7"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.querySelector("form").reset();
+                        document.getElementById('previewImage').src = "images/no-image.png"; // Reset image preview
+                    }
+                });
+            });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const partNameInput = document.getElementById("part_name");
+    const partPriceInput = document.getElementById("part_price");
+    const makeInput = document.getElementById("make");
+    const modelInput = document.getElementById("model");
+    const yearModelInput = document.getElementById("year_model");
+    const submitButton = document.querySelector("button[type='submit']");
+
+    // Validate Part Name
+    function validatePartName() {
+        if (partNameInput.value.trim() === "") {
+            showError(partNameInput, "Part Name is required.");
+            return false;
+        } else {
+            clearError(partNameInput);
+            return true;
         }
     }
+
+    // Validate Part Price (Auto format to .00)
+    function validatePartPrice() {
+    let value = parseFloat(partPriceInput.value);
+    if (isNaN(value) || value <= 0) {
+        showError(partPriceInput, "Price must be greater than 0.00.");
+        partPriceInput.value = '0.00';
+        return false;
+    } else {
+        clearError(partPriceInput);
+        return true;
+    }
+}
+
+    partPriceInput.addEventListener('blur', function () {
+        let value = parseFloat(partPriceInput.value).toFixed(2);
+        if (!isNaN(value)) {
+            partPriceInput.value = value;
+        } else {
+            partPriceInput.value = '0.00';
+        }
+    });
+
+    partPriceInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9.]/g, "");
+        if ((this.value.match(/\./g) || []).length > 1) {
+            this.value = this.value.slice(0, -1); // Allow only one decimal point
+        }
+    });
+
+    // Validate Make and Model (No special characters)
+    function validateMakeAndModel(input) {
+        let value = input.value;
+        let validValue = value.replace(/[^a-zA-Z0-9\s]/g, "");
+        
+        if (value !== validValue) {
+            input.value = validValue;
+            showError(input, "No special characters allowed.");
+        } else {
+            clearError(input);
+        }
+    }
+
+    // Validate Year Model (Only 4 digits)
+    yearModelInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, ''); // Only allow numbers
+        if (this.value.length > 4) {
+            this.value = this.value.slice(0, 4); // Limit to 4 digits
+        }
+    });
+
+    // Show and Clear Error Messages
+    function showError(input, message) {
+        let errorSpan = input.nextElementSibling;
+        if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+            errorSpan = document.createElement("span");
+            errorSpan.classList.add("error-message");
+            errorSpan.style.color = "red";
+            errorSpan.style.fontSize = "12px";
+            input.parentNode.appendChild(errorSpan);
+        }
+        errorSpan.textContent = message;
+    }
+
+    function clearError(input) {
+        let errorSpan = input.nextElementSibling;
+        if (errorSpan && errorSpan.classList.contains("error-message")) {
+            errorSpan.remove();
+        }
+    }
+
+    // Event Listeners
+    partNameInput.addEventListener("input", validatePartName);
+    partPriceInput.addEventListener("input", validatePartPrice);
+    makeInput.addEventListener("input", () => validateMakeAndModel(makeInput));
+    modelInput.addEventListener("input", () => validateMakeAndModel(modelInput));
+
+    submitButton.addEventListener("click", function (event) {
+        if (!validatePartName()) {
+            event.preventDefault();
+        }
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const supplierNameInput = document.getElementById("supplier_name");
+    const supplierEmailInput = document.getElementById("supplier_email");
+    const supplierPhoneInput = document.getElementById("supplier_phone");
+    const supplierAddressInput = document.getElementById("supplier_address");
+
+    supplierNameInput.addEventListener("input", function () {
+        if (supplierNameInput.value.trim() !== "") {
+            supplierEmailInput.setAttribute("required", "required");
+            supplierPhoneInput.setAttribute("required", "required");
+            supplierAddressInput.setAttribute("required", "required");
+        } else {
+            supplierEmailInput.removeAttribute("required");
+            supplierPhoneInput.removeAttribute("required");
+            supplierAddressInput.removeAttribute("required");
+        }
+    });
+
+    // Existing real-time validation for Supplier Name
+    supplierNameInput.addEventListener("input", function () {
+        let value = supplierNameInput.value;
+        let validValue = value.replace(/[^a-zA-Z\s]/g, "");
+
+        if (value !== validValue) {
+            supplierNameInput.value = validValue;
+            showError(supplierNameInput, "Only letters and spaces are allowed.");
+        } else {
+            clearError(supplierNameInput);
+        }
+    });
+
+    // Real-time validation for Phone Number (11 digits only)
+    supplierPhoneInput.addEventListener("input", function () {
+        let value = supplierPhoneInput.value;
+        let validValue = value.replace(/[^0-9]/g, "");
+
+        if (value !== validValue) {
+            supplierPhoneInput.value = validValue;
+            showError(supplierPhoneInput, "Only numbers are allowed.");
+        } else if (validValue.length !== 11) {
+            showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+        } else {
+            clearError(supplierPhoneInput);
+        }
+    });
+});
+
 </script>
 
 <?php
@@ -325,11 +537,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $media = '';
 
     // Supplier Details
-    $supplier_name = $_POST['supplier_name'];
-    $supplier_email = $_POST['supplier_email'];
-    $supplier_phone = $_POST['supplier_phone'];
-    $supplier_address = $_POST['supplier_address'];
-    $transaction_date = date('Y-m-d H:i:s');
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $supplier_name = trim($_POST['supplier_name']);
+        $supplier_email = trim($_POST['supplier_email']);
+        $supplier_phone = trim($_POST['supplier_phone']);
+        $supplier_address = trim($_POST['supplier_address']);
+    
+        // Check if any supplier field is filled, then validate all
+        if (!empty($supplier_name) || !empty($supplier_email) || !empty($supplier_phone) || !empty($supplier_address)) {
+            if (empty($supplier_name) || empty($supplier_email) || empty($supplier_phone) || empty($supplier_address)) {
+                die("<script>Swal.fire('Error!', 'All supplier fields must be filled if any are entered.', 'error');</script>");
+            }
+    
+            if (!filter_var($supplier_email, FILTER_VALIDATE_EMAIL)) {
+                die("<script>Swal.fire('Error!', 'Invalid email format.', 'error');</script>");
+            }
+    
+            if (!preg_match('/^\+?\d{7,15}$/', $supplier_phone)) { // Allows phone numbers with 7-15 digits
+                die("<script>Swal.fire('Error!', 'Invalid phone number format.', 'error');</script>");
+            }
+        }
+    }
 
     // Handle Image Upload
     $upload_dir = '../partimages/'; 
@@ -338,7 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (!empty($_FILES['part_image']['name'])) {
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png' , 'image/heic'];
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
