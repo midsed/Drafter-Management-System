@@ -542,17 +542,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $supplier_email = trim($_POST['supplier_email']);
         $supplier_phone = trim($_POST['supplier_phone']);
         $supplier_address = trim($_POST['supplier_address']);
-    
+
         // Check if any supplier field is filled, then validate all
         if (!empty($supplier_name) || !empty($supplier_email) || !empty($supplier_phone) || !empty($supplier_address)) {
             if (empty($supplier_name) || empty($supplier_email) || empty($supplier_phone) || empty($supplier_address)) {
                 die("<script>Swal.fire('Error!', 'All supplier fields must be filled if any are entered.', 'error');</script>");
             }
-    
+
             if (!filter_var($supplier_email, FILTER_VALIDATE_EMAIL)) {
                 die("<script>Swal.fire('Error!', 'Invalid email format.', 'error');</script>");
             }
-    
+
             if (!preg_match('/^\+?\d{7,15}$/', $supplier_phone)) { // Allows phone numbers with 7-15 digits
                 die("<script>Swal.fire('Error!', 'Invalid phone number format.', 'error');</script>");
             }
@@ -560,57 +560,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Handle Image Upload
-    $upload_dir = '../partimages/'; 
+    $upload_dir = 'C:/xampp/htdocs/Drafter-Management-System/partimages/'; // Correct directory
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true); 
+        mkdir($upload_dir, 0777, true); // Create the directory if it doesn't exist
     }
 
     if (!empty($_FILES['part_image']['name'])) {
-        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png' , 'image/heic'];
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $file_name; 
+            $target_file = $upload_dir . time() . "_" . $file_name; // Correct path
+
+            // Move the uploaded file to the correct directory
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
-                $media = 'partimages/' . time() . "_" . $file_name; 
+                $media = 'partimages/' . time() . "_" . $file_name; // Relative path for database
+            } else {
+                die("<script>Swal.fire('Error!', 'Failed to upload image.', 'error');</script>");
             }
         } else {
-            die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, PNG, and GIF are allowed.', 'error');</script>");
+            die("<script>Swal.fire('Error!', 'Invalid file type! Only JPG, JPEG, HEIC, and PNG are allowed.', 'error');</script>");
         }
     }
 
     // Check if the supplier already exists
-    $supplier_sql = "SELECT SupplierID FROM supplier WHERE Email = ?";
-    $supplier_stmt = $conn->prepare($supplier_sql);
-    if ($supplier_stmt === false) {
-        die("Error preparing supplier query: " . $conn->error);
-    }
-    $supplier_stmt->bind_param("s", $supplier_email);
-    $supplier_stmt->execute();
-    $supplier_result = $supplier_stmt->get_result();
+    $supplier_id = null; // Initialize supplier_id as null
 
-    if ($supplier_result->num_rows > 0) {
-        // Supplier exists, use the existing SupplierID
-        $supplier_row = $supplier_result->fetch_assoc();
-        $supplier_id = $supplier_row['SupplierID'];
-    } else {
-        // Supplier does not exist, insert a new supplier
-        $insert_supplier_sql = "INSERT INTO supplier (CompanyName, Email, PhoneNumber, Address, TransactionDate) 
-                                VALUES (?, ?, ?, ?, ?)";
-        $insert_supplier_stmt = $conn->prepare($insert_supplier_sql);
-        if ($insert_supplier_stmt === false) {
-            die("Error preparing supplier insert query: " . $conn->error);
+    if (!empty($supplier_name) || !empty($supplier_email) || !empty($supplier_phone) || !empty($supplier_address)) {
+        $supplier_sql = "SELECT SupplierID FROM supplier WHERE Email = ?";
+        $supplier_stmt = $conn->prepare($supplier_sql);
+        if ($supplier_stmt === false) {
+            die("Error preparing supplier query: " . $conn->error);
         }
-        $insert_supplier_stmt->bind_param("sssss", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $transaction_date);
+        $supplier_stmt->bind_param("s", $supplier_email);
+        $supplier_stmt->execute();
+        $supplier_result = $supplier_stmt->get_result();
 
-        if ($insert_supplier_stmt->execute()) {
-            $supplier_id = $conn->insert_id; // Get the new SupplierID
+        if ($supplier_result->num_rows > 0) {
+            // Supplier exists, use the existing SupplierID
+            $supplier_row = $supplier_result->fetch_assoc();
+            $supplier_id = $supplier_row['SupplierID'];
         } else {
-            die("<script>Swal.fire('Error!', 'Failed to add supplier: " . addslashes($insert_supplier_stmt->error) . "', 'error');</script>");
+            // Supplier does not exist, insert a new supplier
+            $insert_supplier_sql = "INSERT INTO supplier (CompanyName, Email, PhoneNumber, Address, TransactionDate) 
+                                    VALUES (?, ?, ?, ?, ?)";
+            $insert_supplier_stmt = $conn->prepare($insert_supplier_sql);
+            if ($insert_supplier_stmt === false) {
+                die("Error preparing supplier insert query: " . $conn->error);
+            }
+            $insert_supplier_stmt->bind_param("sssss", $supplier_name, $supplier_email, $supplier_phone, $supplier_address, $transaction_date);
+
+            if ($insert_supplier_stmt->execute()) {
+                $supplier_id = $conn->insert_id; // Get the new SupplierID
+            } else {
+                die("<script>Swal.fire('Error!', 'Failed to add supplier: " . addslashes($insert_supplier_stmt->error) . "', 'error');</script>");
+            }
+            $insert_supplier_stmt->close();
         }
-        $insert_supplier_stmt->close();
+        $supplier_stmt->close();
     }
-    $supplier_stmt->close();
 
     // Insert Part
     $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel, SupplierID)

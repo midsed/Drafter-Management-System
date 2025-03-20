@@ -34,12 +34,12 @@ $sql = "SELECT
             p.PartID
         FROM supplier s
         LEFT JOIN part p ON s.SupplierID = p.SupplierID
-        WHERE s.archived = 0";
+        WHERE s.archived = 0 AND p.PartID IS NOT NULL";
 
 $countSql = "SELECT COUNT(*) AS total 
              FROM supplier s
              LEFT JOIN part p ON s.SupplierID = p.SupplierID
-             WHERE s.archived = 0";
+             WHERE s.archived = 0 AND p.PartID IS NOT NULL";
 
 // ----- APPLY FILTERS -----
 if (!empty($partIDs)) {
@@ -190,7 +190,7 @@ $result = $conn->query($sql);
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='7'>No active suppliers found.</td></tr>";
+                    echo "<tr><td colspan='7'>No suppliers with associated parts found.</td></tr>";
                 }
                 ?>
             </tbody>
