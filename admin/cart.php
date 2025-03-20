@@ -24,18 +24,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 
     if ($part) {
         $availableStock = $part['Quantity'];
-
+    
         if (isset($_SESSION['cart'][$partID])) {
             $newQuantity = $_SESSION['cart'][$partID]['Quantity'] + $change;
-
+    
             // Check if the new quantity exceeds available stock
             if ($newQuantity > $availableStock) {
                 echo json_encode(['success' => false, 'message' => 'Cannot add more than available stock.']);
                 exit();
             }
-
+    
             // Update the quantity in the cart
-            $_SESSION['cart'][$partID]['Quantity'] = max(1, $newQuantity); // Ensure quantity is at least 1
+            if ($newQuantity <= 0) {
+                // Set the item to "Out of Stock"
+                $_SESSION['cart'][$partID]['Quantity'] = 0; // Set quantity to 0
+                $_SESSION['cart'][$partID]['Status'] = 'Out of Stock'; // Add a status field
+            } else {
+                $_SESSION['cart'][$partID]['Quantity'] = $newQuantity; // Update to new quantity
+                unset($_SESSION['cart'][$partID]['Status']); // Remove status if quantity is above 0
+            }
         }
     } else {
         echo json_encode(['success' => false, 'message' => 'Part not found.']);

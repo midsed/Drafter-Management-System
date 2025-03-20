@@ -101,52 +101,48 @@ if (!empty($search)) {
     $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
     $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
 }
-if ($page == 1 && empty($sort)) {
-    $sql .= " ORDER BY DateAdded DESC";
-} elseif ($sort === 'asc') {
-    $sql .= " ORDER BY Name ASC";
-} elseif ($sort === 'desc') {
-    $sql .= " ORDER BY Name DESC";
-} else {
-    $sql .= " ORDER BY DateAdded DESC";
-}
+$sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC"; // Out of stock items at the end
 $sql .= " LIMIT $limit OFFSET $offset";
 $totalResult = $conn->query($countSql);
 $totalRow = $totalResult->fetch_assoc();
 $totalPages = ceil($totalRow['total'] / $limit);
 $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            while ($part = $result->fetch_assoc()) {
-                $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
-                echo "
-                    <div class='part-card' data-part-id='{$part['PartID']}'>
-                        <div class='select-checkbox' style='display: none;'>
-                            <input type='checkbox' class='part-checkbox' data-part-id='{$part['PartID']}' data-part-name='{$part['Name']}'>
-                        </div>
-                        <a href='partdetail.php?id={$part['PartID']}' class='part-link'><img src='$imageSrc' alt='Part Image'></a>
-                        <p><strong>Name:</strong> {$part['Name']}</p>
-                        <p><strong>Make:</strong> {$part['Make']}</p>
-                        <p><strong>Model:</strong> {$part['Model']}</p>
-                        <p><strong>Category:</strong> {$part['Category']}</p>
-                        <p><strong>Location:</strong> {$part['Location']}</p>
-                        <p><strong>Quantity:</strong></p>
-                        <div class='actions'>
-                            <button class='qty-btn' onclick='decreaseQuantity({$part['PartID']})'>-</button>
-                            <input type='text' id='quantity_{$part['PartID']}' value='{$part['Quantity']}' readonly class='quantity-input'>
-                            <button class='qty-btn' onclick='increaseQuantity({$part['PartID']})'>+</button>
-                        </div>
-                        <div class='actions card-actions'>
-                            <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
-                            <button class='red-button archive-btn' onclick='archivePart({$part['PartID']})'>Archive</button>
-                            <button class='red-button' onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
-                        </div>
-                    </div>
-                ";
-            }
-        } else {
-            echo "<p>No parts found.</p>";
-        }
-        ?>
+if ($result->num_rows > 0) {
+    while ($part = $result->fetch_assoc()) {
+        $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
+        $isOutOfStock = $part['Quantity'] <= 0;
+        echo "
+            <div class='part-card' data-part-id='{$part['PartID']}'>
+                <div class='select-checkbox' style='display: none;'>
+                    <input type='checkbox' class='part-checkbox' data-part-id='{$part['PartID']}' data-part-name='{$part['Name']}'>
+                </div>
+                <div class='image-container'>
+                    <a href='partdetail.php?id={$part['PartID']}' class='part-link'><img src='$imageSrc' alt='Part Image'></a>
+                    " . ($isOutOfStock ? "<div class='out-of-stock-overlay'><img src='images/outofstock.png' alt='Out of Stock'><span>OUT OF STOCK</span></div>" : "") . "
+                </div>
+                <p><strong>Name:</strong> {$part['Name']}</p>
+                <p><strong>Make:</strong> {$part['Make']}</p>
+                <p><strong>Model:</strong> {$part['Model']}</p>
+                <p><strong>Category:</strong> {$part['Category']}</p>
+                <p><strong>Location:</strong> {$part['Location']}</p>
+                <p><strong>Quantity:</strong></p>
+                <div class='actions'>
+                    <button class='qty-btn' onclick='decreaseQuantity({$part['PartID']})'>-</button>
+                    <input type='text' id='quantity_{$part['PartID']}' value='{$part['Quantity']}'" . ($isOutOfStock ? " class='quantity-input zero-quantity'" : " class='quantity-input'") . " readonly>
+                    <button class='qty-btn' onclick='increaseQuantity({$part['PartID']})'>+</button>
+                </div>
+                <div class='actions card-actions'>
+                    <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
+                    <button class='red-button archive-btn' onclick='archivePart({$part['PartID']})'>Archive</button>
+                    <button class='red-button" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
+                </div>
+            </div>
+        ";
+    }
+} else {
+    echo "<p>No parts found.</p>";
+}
+?>
     </div>
     <div class="pagination">
         <?php if ($page > 1): ?>
@@ -171,22 +167,19 @@ function toggleSelectMode() {
     document.getElementById('selectModeBtn').style.display = selectMode ? 'none' : 'inline-block';
     document.getElementById('archiveSelectedBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
-    document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none'; // Show Select All button
+    document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
     
-    // Toggle checkbox visibility
     const checkboxes = document.querySelectorAll('.select-checkbox');
     checkboxes.forEach(checkbox => {
         checkbox.style.display = selectMode ? 'block' : 'none';
     });
 
-    // Toggle other actions
     const cardActions = document.querySelectorAll('.card-actions');
     cardActions.forEach(action => {
         action.style.display = selectMode ? 'none' : 'flex';
     });
 
-    // Clear selection when exiting select mode
     if (!selectMode) {
         selectedParts.clear();
         updateSelectedCount();
@@ -204,12 +197,11 @@ function selectAllParts() {
     const allSelected = selectedParts.size === checkboxes.length;
 
     checkboxes.forEach(checkbox => {
-        checkbox.checked = !allSelected; // Check or uncheck based on current selection
-        togglePartSelection(checkbox.dataset.partId, checkbox); // Update selection state
+        checkbox.checked = !allSelected;
+        togglePartSelection(checkbox.dataset.partId, checkbox);
     });
 }
 
-// Add event listener for Select All button
 document.getElementById('selectAllBtn').addEventListener('click', selectAllParts);
 
 function updateSelectedCount() {
@@ -295,15 +287,47 @@ function archiveSelectedParts() {
 
 function increaseQuantity(partID) {
     let quantity = document.getElementById('quantity_' + partID);
-    quantity.value = parseInt(quantity.value) + 1;
+    let newQuantity = parseInt(quantity.value) + 1;
+    quantity.value = newQuantity;
     updateQuantity(partID);
+    
+    let card = quantity.closest('.part-card');
+    let overlay = card.querySelector('.out-of-stock-overlay');
+    let addToCartBtn = card.querySelector('.card-actions button:last-child');
+    
+    if (newQuantity > 0) {
+        if (overlay) overlay.style.display = 'none';
+        quantity.classList.remove('zero-quantity');
+        addToCartBtn.classList.remove('disabled-btn');
+        addToCartBtn.disabled = false;
+    }
 }
 
 function decreaseQuantity(partID) {
     let quantity = document.getElementById('quantity_' + partID);
-    if (quantity.value > 1) {
-        quantity.value = parseInt(quantity.value) - 1;
+    if (parseInt(quantity.value) > 0) {
+        let newQuantity = parseInt(quantity.value) - 1;
+        quantity.value = newQuantity;
         updateQuantity(partID);
+        
+        let card = quantity.closest('.part-card');
+        let imageContainer = card.querySelector('.image-container');
+        let overlay = card.querySelector('.out-of-stock-overlay');
+        let addToCartBtn = card.querySelector('.card-actions button:last-child');
+        
+        if (newQuantity === 0) {
+            if (!overlay) {
+                let newOverlay = document.createElement('div');
+                newOverlay.className = 'out-of-stock-overlay';
+                newOverlay.innerHTML = '<img src="images/outofstock.png" alt="Out of Stock"><span>OUT OF STOCK</span>';
+                imageContainer.appendChild(newOverlay);
+            } else {
+                overlay.style.display = 'flex';
+            }
+            quantity.classList.add('zero-quantity');
+            addToCartBtn.classList.add('disabled-btn');
+            addToCartBtn.disabled = true;
+        }
     }
 }
 
@@ -393,26 +417,22 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("searchInput").value = searchTerm;
     }
     
-    // Add event listeners for select mode
     document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
     document.getElementById('cancelSelectBtn').addEventListener('click', toggleSelectMode);
     document.getElementById('archiveSelectedBtn').addEventListener('click', archiveSelectedParts);
     
-    // Initialize checkboxes
     document.querySelectorAll('.part-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             togglePartSelection(this.dataset.partId, this);
         });
     });
     
-    // Make part cards clickable to toggle selection in select mode
     document.querySelectorAll('.part-card').forEach(card => {
         card.addEventListener('click', function(e) {
             if (selectMode && !e.target.closest('.part-checkbox')) {
                 const partId = this.dataset.partId;
                 const checkbox = this.querySelector('.part-checkbox');
                 
-                // Only toggle if not clicking the checkbox directly
                 if (!e.target.closest('.part-checkbox')) {
                     e.preventDefault();
                     checkbox.checked = !checkbox.checked;
@@ -667,11 +687,43 @@ body {
     transform: translateY(-5px);
     box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
 }
-.part-card img {
+.image-container {
+    position: relative;
     width: 100%;
     height: 150px;
+    margin-bottom: 10px;
+}
+.part-card img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: 4px;
+}
+.out-of-stock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(22, 22, 22, 0.64);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+.out-of-stock-overlay img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    z-index: -1;
 }
 .part-card p {
     margin: 8px 0;
