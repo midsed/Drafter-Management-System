@@ -63,7 +63,7 @@ if (!$recentReceiptsResult) {
         <div class="chart-container">
             <div class="chart-box">
                 <h2>Stock Levels</h2>
-                <canvas id="stockLevelChart"></canvas>
+                <canvas id="stockLevelChart" width="600" height="400"></canvas>
             </div>
             <div class="chart-box">
                 <h2>Parts Added</h2>
@@ -72,7 +72,7 @@ if (!$recentReceiptsResult) {
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                 </select>
-                <canvas id="recentUpdatesChart"></canvas>
+                <canvas id="recentUpdatesChart" width="600" height="400"></canvas>
             </div>
         </div>
 
@@ -261,6 +261,7 @@ if (!$recentReceiptsResult) {
 </script>
 
 <style>
+    
     body {
         font-family: 'Poppins', sans-serif;
         background-color: #f8f9fa;
@@ -373,4 +374,42 @@ if (!$recentReceiptsResult) {
         border: 1px solid #ccc;
         width: 100%;
     }
+    @media (max-width: 768px) {
+    .chart-container {
+        flex-direction: column;
+    }
+
+    .chart-box {
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .transaction-history,
+    .low-stock-alerts,
+    .new-updated-parts {
+        margin-top: 10px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px; 
+    }
+}
+.chart-box {
+    flex: 1;
+    margin: 0 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    position: relative; 
+}
+
+canvas {
+    width: 100% !important;
+    height: auto !important;
+}
 </style>
