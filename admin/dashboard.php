@@ -35,14 +35,10 @@ $recentReceiptsQuery = "SELECT r.ReceiptID,
                                r.Quantity, 
                                r.DateAdded, 
                                p.Name AS PartName, 
-                               p.Price AS PartPrice, 
-                               s.ServiceID, 
-                               s.Type AS ServiceType, 
-                               s.Price AS ServicePrice
+                               p.Price AS PartPrice
                         FROM receipt r
                         LEFT JOIN part p ON r.PartID = p.PartID
                         LEFT JOIN user u ON r.UserID = u.UserID
-                        LEFT JOIN service s ON s.PartID = p.PartID 
                         ORDER BY r.RetrievedDate DESC LIMIT 5";
 
 $recentReceiptsResult = mysqli_query($conn, $recentReceiptsQuery);
@@ -97,7 +93,6 @@ if (!$recentReceiptsResult) {
                     <?php while ($row = mysqli_fetch_assoc($recentReceiptsResult)) { 
                         $totalPrice = 0;
                         if ($row['PartPrice']) $totalPrice += $row['PartPrice'];
-                        if ($row['ServicePrice']) $totalPrice += $row['ServicePrice'];
                     ?>
                         <tr>
                             <td>#<?php echo $row['ReceiptID']; ?></td>
