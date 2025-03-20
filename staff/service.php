@@ -213,8 +213,8 @@ $result = $conn->query($sql);
     .swal2-popup { font-family: "Inter", sans-serif !important; }
     .swal2-title { font-weight: 700 !important; }
     .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
-    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
+    .swal2-confirm { background-color: #32CD32 !important; color: white !important; }
+    .swal2-cancel { background-color: #d63031 !important; color: white !important; }
 </style>
 
 <script>
@@ -256,7 +256,7 @@ function archiveService(serviceID) {
         text: "Do you want to archive this service?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#d33",
+        confirmButtonColor: "#32CD32",
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes, archive it!",
         cancelButtonText: "Cancel"
@@ -274,7 +274,7 @@ function archiveService(serviceID) {
                     text: data,
                     icon: "success",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#28a745"
+                    confirmButtonColor: "#32CD32"
                 }).then(() => location.reload());
             })
             .catch(error => {
