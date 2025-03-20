@@ -1,29 +1,45 @@
 <?php
 session_start();
+include('dbconnect.php'); 
+
 if (!isset($_SESSION['UserID'])) {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }
-
-// Initialize cart if not already set
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
-
-$sql = "SELECT r.ReceiptID, u.FName, u.LName
-        FROM receipt r
-        JOIN user u ON r.UserID = u.UserID
-        WHERE r.ReceiptID = ?";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['change'])) {
     $partID = $_POST['partID'];
     $change = intval($_POST['change']);
 
-    if (isset($_SESSION['cart'][$partID])) {
-        $_SESSION['cart'][$partID]['Quantity'] += $change;
-        if ($_SESSION['cart'][$partID]['Quantity'] < 1) {
-            $_SESSION['cart'][$partID]['Quantity'] = 1;
+    // Fetch the available stock for the part
+    $stockQuery = "SELECT Quantity FROM part WHERE PartID = ?";
+    $stmt = $conn->prepare($stockQuery);
+    $stmt->bind_param("i", $partID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $part = $result->fetch_assoc();
+
+    if ($part) {
+        $availableStock = $part['Quantity'];
+
+        if (isset($_SESSION['cart'][$partID])) {
+            $newQuantity = $_SESSION['cart'][$partID]['Quantity'] + $change;
+
+            // Check if the new quantity exceeds available stock
+            if ($newQuantity > $availableStock) {
+                echo json_encode(['success' => false, 'message' => 'Cannot add more than available stock.']);
+                exit();
+            }
+
+            // Update the quantity in the cart
+            $_SESSION['cart'][$partID]['Quantity'] = max(1, $newQuantity); // Ensure quantity is at least 1
         }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Part not found.']);
+        exit();
     }
 
     echo json_encode(['success' => true]);
@@ -35,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 <?php include('navigation/topbar.php'); ?>
 <link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
 <div class="main-content">
     <div class="header">
@@ -106,28 +124,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     function printReceipt() {
-        // Ask for the person who retrieved the parts
         const retrievedBy = prompt("Please enter the name of the person retrieving these parts:", "");
         
         if (retrievedBy === null || retrievedBy.trim() === "") {
-            alert("Retriever name is required to print receipt");
+            swal("Error!", "Retriever name is required to print receipt", "error");
             return;
         }
         
-        // Create a hidden form to submit the data
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'process_receipt.php';
         form.style.display = 'none';
         
-        // Add retrieved by field
         const retrievedByInput = document.createElement('input');
         retrievedByInput.type = 'hidden';
         retrievedByInput.name = 'retrievedBy';
         retrievedByInput.value = retrievedBy;
         form.appendChild(retrievedByInput);
         
-        // Submit the form
         document.body.appendChild(form);
         form.submit();
     }
@@ -156,8 +170,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                location.reload();
+                location.reload(); 
+            } else {
+                swal({
+                    title: "Error!",
+                    text: data.message,
+                    type: "error",
+                    confirmButtonText: "OK"
+                });
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 
@@ -237,14 +261,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .qty-btn {
-    background-color: #d8dcde;
-    border: 1px;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 900;
+        background-color: #d8dcde;
+        border: 1px;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 900;
     }
+
     .quantity-input {
         width: 50px;
         text-align: center;
@@ -255,8 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .summary {
-        margin-top: 120px;
-        margin-left: 60px;
+        margin-top: 20px;
         text-align: center;
     }
 
