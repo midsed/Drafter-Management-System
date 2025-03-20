@@ -158,6 +158,196 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    let selectMode = sessionStorage.getItem('selectMode') === 'true';
+    const selectedParts = new Set(JSON.parse(sessionStorage.getItem('selectedParts') || '[]'));
+
+    const selectModeBtn = document.getElementById('selectModeBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const relistSelectedBtn = document.getElementById('relistSelectedBtn');
+    const cancelSelectBtn = document.getElementById('cancelSelectBtn');
+    const selectionSummary = document.getElementById('selectionSummary');
+    const selectedCountSpan = document.getElementById('selectedCount');
+
+    function updateSelectModeUI() {
+        selectModeBtn.style.display = selectMode ? 'none' : 'inline-block';
+        relistSelectedBtn.style.display = selectMode ? 'inline-block' : 'none';
+        cancelSelectBtn.style.display = selectMode ? 'inline-block' : 'none';
+        selectAllBtn.style.display = selectMode ? 'inline-block' : 'none';
+        selectionSummary.style.display = selectMode ? 'block' : 'none';
+
+        document.querySelectorAll('.select-checkbox').forEach(checkbox => {
+            checkbox.style.display = selectMode ? 'block' : 'none';
+        });
+
+        updateSelectedCheckboxes();
+        updateSelectedCount();
+        sessionStorage.setItem('selectMode', selectMode);
+    }
+
+    function updateSelectedCheckboxes() {
+        document.querySelectorAll('.part-checkbox').forEach(checkbox => {
+            checkbox.checked = selectedParts.has(checkbox.dataset.partId);
+            checkbox.closest('.part-card').classList.toggle('selected-card', checkbox.checked);
+        });
+    }
+
+    function updateSelectedCount() {
+        const count = selectedParts.size;
+        selectedCountSpan.textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+    }
+
+    function toggleSelectMode() {
+        selectMode = !selectMode;
+
+        if (!selectMode) {
+            selectedParts.clear();
+            sessionStorage.removeItem('selectedParts');
+        }
+
+        updateSelectModeUI();
+    }
+
+    selectModeBtn.addEventListener("click", toggleSelectMode);
+    cancelSelectBtn.addEventListener("click", toggleSelectMode);
+
+    selectAllBtn.addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('.part-checkbox');
+        const allChecked = [...checkboxes].every(chk => selectedParts.has(chk.dataset.partId));
+
+        checkboxes.forEach(checkbox => {
+            if (allChecked) {
+                selectedParts.delete(checkbox.dataset.partId);
+            } else {
+                selectedParts.add(checkbox.dataset.partId);
+            }
+        });
+
+        sessionStorage.setItem('selectedParts', JSON.stringify([...selectedParts]));
+        updateSelectedCheckboxes();
+        updateSelectedCount();
+    });
+
+    document.getElementById("relistSelectedBtn").addEventListener("click", function () {
+        if (selectedParts.size === 0) {
+            Swal.fire({
+                title: "No parts selected",
+                text: "Please select at least one part to re-list.",
+                icon: "warning",
+                confirmButtonColor: "#6c5ce7"
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: `Do you want to re-list ${selectedParts.size} selected part${selectedParts.size !== 1 ? 's' : ''}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#6c5ce7",
+            cancelButtonColor: "#d63031",
+            confirmButtonText: "Yes, re-list them!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('relist_multiple_parts.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({partIds: [...selectedParts]})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        title: "Success!",
+                        text: `${data.count} parts have been re-listed successfully.`,
+                        icon: "success",
+                        confirmButtonColor: "#6c5ce7"
+                    }).then(() => {
+                        sessionStorage.removeItem('selectedParts');
+                        sessionStorage.removeItem('selectMode');
+                        location.reload();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error",
+                        text: "Something went wrong!",
+                        icon: "error",
+                        confirmButtonColor: "#d63031"
+                    });
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.part-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function (e) {
+            const partId = this.dataset.partId;
+            if (this.checked) {
+                selectedParts.add(partId);
+            } else {
+                selectedParts.delete(partId);
+            }
+            sessionStorage.setItem('selectedParts', JSON.stringify([...selectedParts]));
+            updateSelectedCount();
+            e.stopPropagation();
+        });
+    });
+
+    document.querySelectorAll('.part-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            if (selectMode && !e.target.closest('.part-checkbox')) {
+                const checkbox = card.querySelector('.part-checkbox');
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    // Ensure selections persist on navigation
+    updateSelectModeUI();
+
+    // Quick Search, Filter & Sort persistence
+    const queryParams = new URLSearchParams(window.location.search);
+
+    document.getElementById("applyFilter").addEventListener("click", function () {
+        queryParams.set("page", "1");
+        queryParams.set("category", [...document.querySelectorAll('.filter-option:checked')].map(chk => chk.value).join(","));
+        queryParams.set("search", document.getElementById("searchInput").value.trim());
+        window.location.search = queryParams.toString();
+    });
+
+    document.getElementById("clearFilter").addEventListener("click", function () {
+        window.location.href = window.location.pathname;
+    });
+
+    document.querySelectorAll(".sort-option").forEach(option => {
+        option.addEventListener("click", function () {
+            queryParams.set("sort", this.dataset.sort);
+            queryParams.set("page", "1");
+            window.location.search = queryParams.toString();
+        });
+    });
+
+    document.getElementById("searchInput").addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            queryParams.set("search", this.value.trim());
+            queryParams.set("page", "1");
+            window.location.search = queryParams.toString();
+        }
+    });
+
+    // Restore search/filter inputs
+    if (queryParams.get('search')) {
+        document.getElementById("searchInput").value = queryParams.get('search');
+    }
+    document.querySelectorAll('.filter-option').forEach(chk => {
+        chk.checked = queryParams.get('category')?.split(',').includes(chk.value);
+    });
+});
+
 let selectMode = false;
 const selectedParts = new Set();
 
@@ -319,6 +509,101 @@ document.querySelectorAll(".sort-option").forEach(option => {
         queryParams.set("sort", selectedSort);
         queryParams.set("page", "1");
         window.location.search = queryParams.toString(); 
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const filterDropdown = document.getElementById("filterDropdown");
+    const sortDropdown = document.getElementById("sortDropdown");
+    const filterButton = document.getElementById("filterButton");
+    const sortButton = document.getElementById("sortButton");
+    const applyFilterButton = document.getElementById("applyFilter");
+    const clearFilterButton = document.getElementById("clearFilter");
+    const searchInput = document.getElementById("searchInput");
+
+    const queryParams = new URLSearchParams(window.location.search);
+
+    // Set selected categories based on URL params
+    const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
+    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
+        if (selectedCategories.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
+
+    // Set search input value from URL params
+    const searchTerm = queryParams.get("search");
+    if (searchTerm) {
+        searchInput.value = searchTerm;
+    }
+
+    filterButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        filterDropdown.classList.toggle("show");
+        sortDropdown.classList.remove("show");
+    });
+
+    sortButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        sortDropdown.classList.toggle("show");
+        filterDropdown.classList.remove("show");
+    });
+
+    filterDropdown.addEventListener("click", function(event) {
+        event.stopPropagation();
+    });
+
+    window.addEventListener("click", function () {
+        filterDropdown.classList.remove("show");
+        sortDropdown.classList.remove("show");
+    });
+
+    applyFilterButton.addEventListener("click", function () {
+        const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
+            .map(checkbox => checkbox.value);
+        const searchQuery = searchInput.value.trim();
+        queryParams.set("page", "1");
+
+        if (selectedCategories.length > 0) {
+            queryParams.set("category", selectedCategories.join(",")); 
+        } else {
+            queryParams.delete("category");
+        }
+
+        if (searchQuery) {
+            queryParams.set("search", searchQuery);
+        } else {
+            queryParams.delete("search");
+        }
+
+        const sortParam = queryParams.get("sort");
+        if (!sortParam) {
+            queryParams.delete("sort");
+        }
+
+        window.location.search = queryParams.toString(); 
+    });
+
+    clearFilterButton.addEventListener("click", function () {
+        window.location.href = window.location.pathname; 
+    });
+
+    document.querySelectorAll(".sort-option").forEach(option => {
+        option.addEventListener("click", function () {
+            const selectedSort = this.dataset.sort;
+            queryParams.set("sort", selectedSort);
+            queryParams.set("page", "1");
+            window.location.search = queryParams.toString(); 
+        });
+    });
+
+    // Quick search functionality (Enter key)
+    searchInput.addEventListener("keyup", function(event) {
+        if (event.key === "Enter") {
+            queryParams.set("search", searchInput.value.trim());
+            queryParams.set("page", "1");
+            window.location.search = queryParams.toString(); 
+        }
     });
 });
 </script>
