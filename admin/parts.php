@@ -70,9 +70,16 @@ include('navigation/topbar.php');
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
             </a>
+            <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Mode</button>
+            <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
+            <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
+            <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
             <a href="partsarchive.php" class="red-button">Archives</a>
             <a href="partsadd.php" class="red-button">+ New Stock</a>
         </div>
+    </div>
+    <div class="selection-summary" id="selectionSummary" style="display: none;">
+        <span id="selectedCount">0 items selected</span>
     </div>
     <div class="parts-container" id="partsList">
     <?php
@@ -112,21 +119,25 @@ $result = $conn->query($sql);
             while ($part = $result->fetch_assoc()) {
                 $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
                 echo "
-                    <div class='part-card'>
-                        <a href='partdetail.php?id={$part['PartID']}'><img src='$imageSrc' alt='Part Image'></a>
+                    <div class='part-card' data-part-id='{$part['PartID']}'>
+                        <div class='select-checkbox' style='display: none;'>
+                            <input type='checkbox' class='part-checkbox' data-part-id='{$part['PartID']}' data-part-name='{$part['Name']}'>
+                        </div>
+                        <a href='partdetail.php?id={$part['PartID']}' class='part-link'><img src='$imageSrc' alt='Part Image'></a>
                         <p><strong>Name:</strong> {$part['Name']}</p>
                         <p><strong>Make:</strong> {$part['Make']}</p>
                         <p><strong>Model:</strong> {$part['Model']}</p>
                         <p><strong>Category:</strong> {$part['Category']}</p>
                         <p><strong>Location:</strong> {$part['Location']}</p>
+                        <p><strong>Quantity:</strong></p>
                         <div class='actions'>
                             <button class='qty-btn' onclick='decreaseQuantity({$part['PartID']})'>-</button>
                             <input type='text' id='quantity_{$part['PartID']}' value='{$part['Quantity']}' readonly class='quantity-input'>
                             <button class='qty-btn' onclick='increaseQuantity({$part['PartID']})'>+</button>
                         </div>
-                        <div class='actions'>
+                        <div class='actions card-actions'>
                             <a href='partsedit.php?id={$part['PartID']}' class='red-button'>Edit</a>
-                            <button class='red-button' onclick='archivePart({$part['PartID']})'>Archive</button>
+                            <button class='red-button archive-btn' onclick='archivePart({$part['PartID']})'>Archive</button>
                             <button class='red-button' onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
                         </div>
                     </div>
@@ -152,6 +163,136 @@ $result = $conn->query($sql);
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+let selectMode = false;
+const selectedParts = new Set();
+
+function toggleSelectMode() {
+    selectMode = !selectMode;
+    document.getElementById('selectModeBtn').style.display = selectMode ? 'none' : 'inline-block';
+    document.getElementById('archiveSelectedBtn').style.display = selectMode ? 'inline-block' : 'none';
+    document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
+    document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none'; // Show Select All button
+    document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
+    
+    // Toggle checkbox visibility
+    const checkboxes = document.querySelectorAll('.select-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.style.display = selectMode ? 'block' : 'none';
+    });
+
+    // Toggle other actions
+    const cardActions = document.querySelectorAll('.card-actions');
+    cardActions.forEach(action => {
+        action.style.display = selectMode ? 'none' : 'flex';
+    });
+
+    // Clear selection when exiting select mode
+    if (!selectMode) {
+        selectedParts.clear();
+        updateSelectedCount();
+        document.querySelectorAll('.part-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        document.querySelectorAll('.part-card').forEach(card => {
+            card.classList.remove('selected-card');
+        });
+    }
+}
+
+function selectAllParts() {
+    const checkboxes = document.querySelectorAll('.part-checkbox');
+    const allSelected = selectedParts.size === checkboxes.length;
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allSelected; // Check or uncheck based on current selection
+        togglePartSelection(checkbox.dataset.partId, checkbox); // Update selection state
+    });
+}
+
+// Add event listener for Select All button
+document.getElementById('selectAllBtn').addEventListener('click', selectAllParts);
+
+function updateSelectedCount() {
+    const count = selectedParts.size;
+    document.getElementById('selectedCount').textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+}
+
+function togglePartSelection(partId, checkbox) {
+    const partCard = document.querySelector(`.part-card[data-part-id="${partId}"]`);
+    
+    if (checkbox.checked) {
+        selectedParts.add(partId);
+        partCard.classList.add('selected-card');
+    } else {
+        selectedParts.delete(partId);
+        partCard.classList.remove('selected-card');
+    }
+    
+    updateSelectedCount();
+}
+
+function archiveSelectedParts() {
+    if (selectedParts.size === 0) {
+        Swal.fire({
+            title: "No parts selected",
+            text: "Please select at least one part to archive.",
+            icon: "warning",
+            confirmButtonColor: "#6c5ce7"
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: `Do you want to archive ${selectedParts.size} selected part${selectedParts.size !== 1 ? 's' : ''}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#6c5ce7",
+        cancelButtonColor: "#d63031",
+        confirmButtonText: "Yes, archive them!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('archive_multiple_parts.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    partIds: Array.from(selectedParts)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Archived!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonColor: "#6c5ce7"
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: data.message || "Something went wrong!",
+                        icon: "error",
+                        confirmButtonColor: "#d63031"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Something went wrong!",
+                    icon: "error",
+                    confirmButtonColor: "#d63031"
+                });
+            });
+        }
+    });
+}
+
 function increaseQuantity(partID) {
     let quantity = document.getElementById('quantity_' + partID);
     quantity.value = parseInt(quantity.value) + 1;
@@ -251,6 +392,35 @@ document.addEventListener("DOMContentLoaded", function() {
     if (searchTerm) {
         document.getElementById("searchInput").value = searchTerm;
     }
+    
+    // Add event listeners for select mode
+    document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
+    document.getElementById('cancelSelectBtn').addEventListener('click', toggleSelectMode);
+    document.getElementById('archiveSelectedBtn').addEventListener('click', archiveSelectedParts);
+    
+    // Initialize checkboxes
+    document.querySelectorAll('.part-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            togglePartSelection(this.dataset.partId, this);
+        });
+    });
+    
+    // Make part cards clickable to toggle selection in select mode
+    document.querySelectorAll('.part-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (selectMode && !e.target.closest('.part-checkbox')) {
+                const partId = this.dataset.partId;
+                const checkbox = this.querySelector('.part-checkbox');
+                
+                // Only toggle if not clicking the checkbox directly
+                if (!e.target.closest('.part-checkbox')) {
+                    e.preventDefault();
+                    checkbox.checked = !checkbox.checked;
+                    togglePartSelection(partId, checkbox);
+                }
+            }
+        });
+    });
 });
 
 function addToCart(partID) {
@@ -491,6 +661,7 @@ body {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
 }
 .part-card:hover {
     transform: translateY(-5px);
@@ -605,6 +776,7 @@ body {
     background: white;
     padding: 10px 0;
 }
+
 .filter-actions button {
     padding: 8px 12px;
     border: none;
