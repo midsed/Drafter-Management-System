@@ -18,27 +18,23 @@
 
     <div class="faq-section">
         <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> What is the purpose of this website?</h2>
+            <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
             <div class="faq-answer">
-                <p>This website serves as a platform to provide information and resources related to our services.</p>
+                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.
+                </p>
             </div>
         </div>
         <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How can I contact customer support?</h2>
+            <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
             <div class="faq-answer">
-                <p>You can contact customer support via the contact form on our website or by emailing support@example.com.</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> What payment methods do you accept?</h2>
-            <div class="faq-answer">
-                <p>We accept various payment methods including credit cards, PayPal, and bank transfers.</p>
+                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.
+                </p>
             </div>
         </div>
         <div class="faq-item">
             <h2 class="faq-question"><span class="icon">></span> How do I reset my password?</h2>
             <div class="faq-answer">
-                <p>To reset your password, click on the 'Forgot Password' link on the login page and follow the instructions.</p>
+                <p>To reset your password, click 'Forgot Password?'. Enter your E-mail and click 'Send OTP'. Check your E-mail and enter the OTP code and click the 'Verify Code' button. Then add your New Password.</p>
             </div>
         </div>
         <div class="faq-item">
