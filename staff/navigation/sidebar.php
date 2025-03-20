@@ -34,6 +34,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <span>Suppliers</span> 
             </a>
         </li>
+        <li class="<?php echo ($current_page == 'faq.php') ? 'active' : ''; ?>">
+            <a href="faq.php">
+                <img src="images/supplier.png" alt="Suppliers Icon" class="nav-icon">
+                <span>FAQ</span> 
+            </a>
+        </li>
     </ul>
 </div>
 <style>
@@ -43,6 +49,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
 }
 
 .sidebar li.active {
-    border-left: 4px solid #E10F0F
+    border-left: 4px solid white
 }
 </style>
