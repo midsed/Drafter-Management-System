@@ -55,41 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
         if ($archivePartQuery->execute()) {
             // Log part archiving
             logAction($conn, $userID, $username, $roleType, "Archive $partName", $partID);
-
-            // Fetch service IDs and types before archiving
-            $serviceQuery = $conn->prepare("SELECT ServiceID, Type FROM service WHERE PartID = ?");
-            $hasServices = false;
-
-            if ($serviceQuery) {
-                $serviceQuery->bind_param("i", $partID);
-                $serviceQuery->execute();
-                $serviceQuery->store_result(); // Prevents sync issues
-                $serviceQuery->bind_result($serviceID, $serviceType);
-
-                while ($serviceQuery->fetch()) {
-                    $hasServices = true;
-
-                    // Archive the service
-                    $archiveServiceQuery = $conn->prepare("UPDATE service SET Archived = 1 WHERE ServiceID = ?");
-                    if ($archiveServiceQuery) {
-                        $archiveServiceQuery->bind_param("i", $serviceID);
-                        $archiveServiceQuery->execute();
-                        $archiveServiceQuery->close();
-                    }
-
-                    // Log service archive
-                    logAction($conn, $userID, $username, $roleType, "Archive $serviceType", $partID);
-                }
-
-                $serviceQuery->close();
-            }
-
-            // Display appropriate message
-            if ($hasServices) {
-                echo "Part '$partName' and related services archived successfully.";
-            } else {
-                echo "Part '$partName' archived successfully.";
-            }
+            echo "Part '$partName' archived successfully.";
         } else {
             echo "Failed to archive part.";
         }
