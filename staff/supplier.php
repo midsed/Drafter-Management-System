@@ -271,7 +271,7 @@ function archiveSupplier(supplierID) {
         text: 'You are about to archive this supplier!',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#E10F0F',
+        confirmButtonColor: '#32CD32',
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Yes, archive it!'
     }).then((result) => {
