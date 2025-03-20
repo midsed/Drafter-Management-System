@@ -305,8 +305,9 @@ function increaseQuantity(partID) {
 
 function decreaseQuantity(partID) {
     let quantity = document.getElementById('quantity_' + partID);
-    if (parseInt(quantity.value) > 0) {
-        let newQuantity = parseInt(quantity.value) - 1;
+    let newQuantity = parseInt(quantity.value) - 1;
+    
+    if (newQuantity >= 0) {
         quantity.value = newQuantity;
         updateQuantity(partID);
         

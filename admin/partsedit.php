@@ -181,7 +181,7 @@ if (!is_dir($uploadDir)) {
                 <label for="quantity">Quantity:</label>
                 <div class="quantity-container">
                     <button type="button" onclick="decreaseQuantity()">−</button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+                    <input type="number" id="quantity" name="quantity" value="0" min="0" required>
                     <button type="button" onclick="increaseQuantity()">+</button>
                 </div>
             </div>
@@ -318,7 +318,7 @@ if (!is_dir($uploadDir)) {
 
     function decreaseQuantity() {
         let quantity = document.getElementById('quantity');
-        if (quantity.value > 1) {
+        if (quantity.value > 0) {
             quantity.value = parseInt(quantity.value) - 1;
         }
     }

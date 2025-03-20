@@ -116,19 +116,18 @@ if (!is_dir($uploadDir)) {
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
     .image-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.image-preview img {
-    max-width: 300px;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-}
-.quantity-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .image-preview img {
+        max-width: 300px;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .quantity-container {
         display: flex;
         align-items: center;
     }
@@ -153,7 +152,6 @@ if (!is_dir($uploadDir)) {
         text-align: center;
         width: 60px;
     }
-
 
 </style>
 
@@ -183,7 +181,7 @@ if (!is_dir($uploadDir)) {
                 <label for="quantity">Quantity:</label>
                 <div class="quantity-container">
                     <button type="button" onclick="decreaseQuantity()">−</button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+                    <input type="number" id="quantity" name="quantity" value="0" min="0" required>
                     <button type="button" onclick="increaseQuantity()">+</button>
                 </div>
             </div>
@@ -320,7 +318,7 @@ if (!is_dir($uploadDir)) {
 
     function decreaseQuantity() {
         let quantity = document.getElementById('quantity');
-        if (quantity.value > 1) {
+        if (quantity.value > 0) {
             quantity.value = parseInt(quantity.value) - 1;
         }
     }
@@ -366,6 +364,4 @@ if (!is_dir($uploadDir)) {
             previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
         }
     }
-
-
 </script>
