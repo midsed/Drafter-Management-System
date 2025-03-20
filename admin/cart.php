@@ -292,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     .confirm-btn {
-        background-color: red;
+        background-color: #E10F0F;
         color: white;
         font-size: 20px;
         padding: 15px 30px;

@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 include('dbconnect.php');
 if (!isset($_SESSION['UserID'])) {
@@ -158,6 +158,7 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// -- Select Mode for Archived Parts --
 
 document.addEventListener("DOMContentLoaded", function () {
     let selectMode = sessionStorage.getItem('selectMode') === 'true';
@@ -200,12 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function toggleSelectMode() {
         selectMode = !selectMode;
-
         if (!selectMode) {
             selectedParts.clear();
             sessionStorage.removeItem('selectedParts');
         }
-
         updateSelectModeUI();
     }
 
@@ -230,7 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("relistSelectedBtn").addEventListener("click", function () {
-        if (selectedParts.size === 0) {
+        const selectedPartsArray = Array.from(document.querySelectorAll('.part-checkbox:checked')).map(checkbox => checkbox.dataset.partId);
+        if (selectedPartsArray.length === 0) {
             Swal.fire({
                 title: "No parts selected",
                 text: "Please select at least one part to re-list.",
@@ -239,10 +239,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             return;
         }
-
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you want to re-list ${selectedParts.size} selected part${selectedParts.size !== 1 ? 's' : ''}?`,
+            text: `Do you want to re-list ${selectedPartsArray.length} selected part${selectedPartsArray.length !== 1 ? 's' : ''}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#6c5ce7",
@@ -254,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 fetch('relist_multiple_parts.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({partIds: [...selectedParts]})
+                    body: JSON.stringify({ partIds: [...selectedParts] })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -283,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll('.part-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function (e) {
+        checkbox.addEventListener('change', function(e) {
             const partId = this.dataset.partId;
             if (this.checked) {
                 selectedParts.add(partId);
@@ -297,19 +296,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll('.part-card').forEach(card => {
-        card.addEventListener('click', function (e) {
+        card.addEventListener('click', function(e) {
             if (selectMode && !e.target.closest('.part-checkbox')) {
-                const checkbox = card.querySelector('.part-checkbox');
+                const partId = this.dataset.partId;
+                const checkbox = this.querySelector('.part-checkbox');
                 checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change'));
+                togglePartSelection(partId, checkbox);
             }
         });
     });
 
-    // Ensure selections persist on navigation
     updateSelectModeUI();
 
-    // Quick Search, Filter & Sort persistence
     const queryParams = new URLSearchParams(window.location.search);
 
     document.getElementById("applyFilter").addEventListener("click", function () {
@@ -339,7 +337,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Restore search/filter inputs
     if (queryParams.get('search')) {
         document.getElementById("searchInput").value = queryParams.get('search');
     }
@@ -379,7 +376,6 @@ function toggleSelectMode() {
 function selectAllParts() {
     const checkboxes = document.querySelectorAll('.part-checkbox');
     const allSelected = selectedParts.size === checkboxes.length;
-
     checkboxes.forEach(checkbox => {
         checkbox.checked = !allSelected;
         togglePartSelection(checkbox.dataset.partId, checkbox);
@@ -395,7 +391,6 @@ function updateSelectedCount() {
 
 function togglePartSelection(partId, checkbox) {
     const partCard = document.querySelector(`.part-card[data-part-id="${partId}"]`);
-    
     if (checkbox.checked) {
         selectedParts.add(partId);
         partCard.classList.add('selected-card');
@@ -403,65 +398,11 @@ function togglePartSelection(partId, checkbox) {
         selectedParts.delete(partId);
         partCard.classList.remove('selected-card');
     }
-    
     updateSelectedCount();
 }
 
 document.getElementById("selectModeBtn").addEventListener("click", toggleSelectMode);
 document.getElementById("cancelSelectBtn").addEventListener("click", toggleSelectMode);
-
-document.getElementById("relistSelectedBtn").addEventListener("click", function() {
-    const selectedPartsArray = Array.from(document.querySelectorAll('.part-checkbox:checked')).map(checkbox => checkbox.dataset.partId);
-    
-    if (selectedPartsArray.length === 0) {
-        Swal.fire({
-            title: "No parts selected",
-            text: "Please select at least one part to re-list.",
-            icon: "warning",
-            confirmButtonColor: "#6c5ce7"
-        });
-        return;
-    }
-    
-    Swal.fire({
-        title: "Are you sure?",
-        text: `Do you want to re-list ${selectedPartsArray.length} selected part${selectedPartsArray.length !== 1 ? 's' : ''}?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#6c5ce7",
-        cancelButtonColor: "#d63031",
-        confirmButtonText: "Yes, re-list them!",
-        cancelButtonText: "Cancel"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('relist_multiple_parts.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ partIds: selectedPartsArray })
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire({
-                    title: "Success!",
-                    text: `${data.count} parts have been re-listed successfully.`,
-                    icon: "success",
-                    confirmButtonColor: "#6c5ce7"
-                }).then(() => {
-                    location.reload();
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error",
-                    text: "Something went wrong!",
-                    icon: "error",
-                    confirmButtonColor: "#d63031"
-                });
-            });
-        }
-    });
-});
 
 document.querySelectorAll('.part-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
@@ -499,7 +440,7 @@ document.getElementById("applyFilter").addEventListener("click", function() {
 });
 
 document.getElementById("clearFilter").addEventListener("click", function() {
-    window.location.href = window.location.pathname; 
+    window.location.href = window.location.pathname;
 });
 
 document.querySelectorAll(".sort-option").forEach(option => {
@@ -508,7 +449,7 @@ document.querySelectorAll(".sort-option").forEach(option => {
         const queryParams = new URLSearchParams(window.location.search);
         queryParams.set("sort", selectedSort);
         queryParams.set("page", "1");
-        window.location.search = queryParams.toString(); 
+        window.location.search = queryParams.toString();
     });
 });
 
@@ -520,151 +461,55 @@ document.addEventListener("DOMContentLoaded", function () {
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
     const searchInput = document.getElementById("searchInput");
-
     const queryParams = new URLSearchParams(window.location.search);
-
-    // Set selected categories based on URL params
     const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
     document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
         if (selectedCategories.includes(checkbox.value)) {
-            checkbox.checked = true; 
+            checkbox.checked = true;
         }
     });
-
-    // Set search input value from URL params
     const searchTerm = queryParams.get("search");
     if (searchTerm) {
         searchInput.value = searchTerm;
     }
-
     filterButton.addEventListener("click", function (event) {
         event.stopPropagation();
         filterDropdown.classList.toggle("show");
         sortDropdown.classList.remove("show");
     });
-
     sortButton.addEventListener("click", function (event) {
         event.stopPropagation();
         sortDropdown.classList.toggle("show");
         filterDropdown.classList.remove("show");
     });
-
     filterDropdown.addEventListener("click", function(event) {
         event.stopPropagation();
     });
-
     window.addEventListener("click", function () {
         filterDropdown.classList.remove("show");
         sortDropdown.classList.remove("show");
     });
-
     applyFilterButton.addEventListener("click", function () {
         const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
             .map(checkbox => checkbox.value);
         const searchQuery = searchInput.value.trim();
         queryParams.set("page", "1");
-
         if (selectedCategories.length > 0) {
-            queryParams.set("category", selectedCategories.join(",")); 
+            queryParams.set("category", selectedCategories.join(","));
         } else {
             queryParams.delete("category");
         }
-
         if (searchQuery) {
             queryParams.set("search", searchQuery);
         } else {
             queryParams.delete("search");
         }
-
-        const sortParam = queryParams.get("sort");
-        if (!sortParam) {
-            queryParams.delete("sort");
-        }
-
-        window.location.search = queryParams.toString(); 
+        window.location.search = queryParams.toString();
     });
-
     clearFilterButton.addEventListener("click", function () {
-        window.location.href = window.location.pathname; 
-    });
-
-    document.querySelectorAll(".sort-option").forEach(option => {
-        option.addEventListener("click", function () {
-            const selectedSort = this.dataset.sort;
-            queryParams.set("sort", selectedSort);
-            queryParams.set("page", "1");
-            window.location.search = queryParams.toString(); 
-        });
-    });
-
-    // Quick search functionality (Enter key)
-    searchInput.addEventListener("keyup", function(event) {
-        if (event.key === "Enter") {
-            queryParams.set("search", searchInput.value.trim());
-            queryParams.set("page", "1");
-            window.location.search = queryParams.toString(); 
-        }
+        window.location.href = window.location.pathname;
     });
 });
-
-document.querySelectorAll('.single-relist-btn').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const partId = this.closest('.part-card').dataset.partId;
-        relistPart(partId);
-    });
-});
-
-// Individual re-list function definition (ensure this exists)
-function relistPart(partID) {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to re-list this part?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#6c5ce7",
-        cancelButtonColor: "#d63031",
-        confirmButtonText: "Yes, re-list it!",
-        cancelButtonText: "Cancel"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('relist_part.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id=' + encodeURIComponent(partID)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: "Re-listed!",
-                        text: data.message || "Part successfully re-listed.",
-                        icon: "success",
-                        confirmButtonColor: "#6c5ce7"
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error",
-                        text: data.message || "Could not re-list part.",
-                        icon: "error",
-                        confirmButtonColor: "#d63031"
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error",
-                    text: "Something went wrong!",
-                    icon: "error",
-                    confirmButtonColor: "#d63031"
-                });
-            });
-        }
-    });
-}
 </script>
 
 <style>
@@ -767,14 +612,14 @@ body {
     background: white;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.3s ease;
     position: relative;
 }
 .part-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 6px 10px rgba(0,0,0,0.15);
 }
 .part-card img {
     width: 100%;
@@ -811,8 +656,8 @@ body {
     gap: 10px;
     margin-top: 40px;
     position: relative;
-    width: 100%; 
-    padding-bottom: 40px; 
+    width: 100%;
+    padding-bottom: 40px;
 }
 .pagination-button {
     padding: 8px 12px;
@@ -839,7 +684,7 @@ body {
     min-width: 500px;
     max-height: 500px;
     overflow-y: auto;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
     z-index: 1000;
     padding: 15px;
     border-radius: 8px;
@@ -912,5 +757,24 @@ body {
 }
 .sort-option.red-button:hover {
     background-color: #f8f8f8;
+}
+
+.selected-card {
+    border: 6px solid #FF0000;
+    animation: pulse 0.5s ease-out;
+}
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255,0,0,0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 10px 5px rgba(255,0,0,0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255,0,0,0);
+    }
 }
 </style>
