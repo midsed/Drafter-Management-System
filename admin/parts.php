@@ -423,113 +423,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const filterDropdown = document.getElementById("filterDropdown");
-    const sortDropdown = document.getElementById("sortDropdown");
-    const filterButton = document.getElementById("filterButton");
-    const sortButton = document.getElementById("sortButton");
-    let selectMode = JSON.parse(sessionStorage.getItem('selectMode')) || false;
-    const selectedParts = new Set(JSON.parse(sessionStorage.getItem('selectedParts')) || []);
-
-    function updateSelectedCount() {
-        const count = selectedParts.size;
-        document.getElementById('selectedCount').textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
-    }
-
-    function toggleSelectMode() {
-        selectMode = !selectMode;
-        sessionStorage.setItem('selectMode', selectMode);
-        document.getElementById('selectModeBtn').style.display = selectMode ? 'none' : 'inline-block';
-        document.getElementById('archiveSelectedBtn').style.display = selectMode ? 'inline-block' : 'none';
-        document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
-        document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
-        document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
-
-        document.querySelectorAll('.select-checkbox').forEach(cb => cb.style.display = selectMode ? 'block' : 'none');
-        document.querySelectorAll('.card-actions').forEach(ca => ca.style.display = selectMode ? 'none' : 'flex');
-
-        if (!selectMode) {
-            selectedParts.clear();
-            sessionStorage.removeItem('selectedParts');
-        }
-
-        updateCheckboxes();
-        updateSelectedCount();
-    }
-
-    function updateCheckboxes() {
-        document.querySelectorAll('.part-checkbox').forEach(checkbox => {
-            checkbox.checked = selectedParts.has(checkbox.dataset.partId);
-            checkbox.closest('.part-card').classList.toggle('selected-card', checkbox.checked);
-        });
-    }
-
-    function togglePartSelection(partId, checkbox) {
-        if (checkbox.checked) {
-            selectedParts.add(partId);
-        } else {
-            selectedParts.delete(partId);
-        }
-        sessionStorage.setItem('selectedParts', JSON.stringify([...selectedParts]));
-        updateSelectedCount();
-    }
-
-    document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
-    document.getElementById('cancelSelectBtn').addEventListener('click', toggleSelectMode);
-
-    document.getElementById('selectAllBtn').addEventListener('click', () => {
-        const checkboxes = document.querySelectorAll('.part-checkbox');
-        const selectAll = [...checkboxes].some(chk => !selectedParts.has(chk.dataset.partId));
-        checkboxes.forEach(chk => {
-            chk.checked = selectAll;
-            togglePartSelection(chk.dataset.partId, chk);
-        });
-    });
-
-    document.querySelectorAll('.part-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            togglePartSelection(checkbox.dataset.partId, checkbox);
-            e.stopPropagation();
-        });
-    });
-
-    document.querySelectorAll('.part-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (selectMode && !e.target.closest('.part-checkbox')) {
-                const checkbox = card.querySelector('.part-checkbox');
-                checkbox.checked = !checkbox.checked;
-                togglePartSelection(checkbox.dataset.partId, checkbox);
-            }
-        });
-    });
-
-    filterButton.addEventListener("click", function (event) {
-        event.stopPropagation();
-        filterDropdown.classList.toggle("show");
-        sortDropdown.classList.remove("show");
-    });
-
-    sortButton.addEventListener("click", function (event) {
-        event.stopPropagation();
-        sortDropdown.classList.toggle("show");
-        filterDropdown.classList.remove("show");
-    });
-
-    filterDropdown.addEventListener("click", function(event) {
-        event.stopPropagation();
-    });
-
-    window.addEventListener("click", function () {
-        filterDropdown.classList.remove("show");
-        sortDropdown.classList.remove("show");
-    });
-
-    updateCheckboxes();
-    updateSelectedCount();
-    toggleSelectMode();
-});
-
-
 function addToCart(partID) {
     fetch('add_to_cart.php', {
         method: 'POST',
@@ -838,8 +731,8 @@ body {
     display: none;
     position: absolute;
     background-color: #fff;
-    min-width: 500px;
-    max-height: 500px;
+    min-width: 300px;
+    max-height: 300px;
     overflow-y: auto;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -904,16 +797,24 @@ body {
 .filter-actions #clearFilter:hover {
     background-color: #bbb;
 }
-.sort-option.red-button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    margin: 5px 0;
-    background-color: white;
-    color: #E10F0F;
-    border: 1px solid #E10F0F;
+.sort-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
 }
-.sort-option.red-button:hover {
-    background-color: #f8f8f8;
+
+.sort-option {
+    background-color: #E10F0F; 
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    padding: 10px 20px; 
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.sort-option:hover {
+    background-color: darkred; 
 }
 </style>
