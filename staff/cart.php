@@ -10,23 +10,51 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
+// User details for logging
+$userID = $_SESSION['UserID'] ?? null;
+$username = $_SESSION['Username'] ?? null;
+$roleType = $_SESSION['RoleType'] ?? null;
+
+/**
+ * Function to log actions - exactly matching your existing format
+ */
+function logAction($conn, $userID, $username, $roleType, $actionType, $partID) {
+    $timestamp = date("Y-m-d H:i:s");
+
+    $logQuery = $conn->prepare("INSERT INTO logs (UserID, ActionBy, RoleType, ActionType, PartID, Timestamp) 
+                                VALUES (?, ?, ?, ?, ?, ?)");
+
+    if (!$logQuery) {
+        return false;
+    }
+
+    $logQuery->bind_param("isssis", $userID, $username, $roleType, $actionType, $partID, $timestamp);
+    $logResult = $logQuery->execute();
+    $logQuery->close();
+    return $logResult;
+}
+
+// Handle quantity updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['change'])) {
     $partID = $_POST['partID'];
     $change = intval($_POST['change']);
 
-    // Fetch the available stock for the part
-    $stockQuery = "SELECT Quantity FROM part WHERE PartID = ?";
-    $stmt = $conn->prepare($stockQuery);
+    // Fetch the part details for logging
+    $partDetailsQuery = "SELECT Name, Quantity FROM part WHERE PartID = ?";
+    $stmt = $conn->prepare($partDetailsQuery);
     $stmt->bind_param("i", $partID);
     $stmt->execute();
     $result = $stmt->get_result();
     $part = $result->fetch_assoc();
+    $stmt->close();
 
     if ($part) {
         $availableStock = $part['Quantity'];
+        $partName = $part['Name'];
 
         if (isset($_SESSION['cart'][$partID])) {
-            $newQuantity = $_SESSION['cart'][$partID]['Quantity'] + $change;
+            $oldQuantity = $_SESSION['cart'][$partID]['Quantity'];
+            $newQuantity = $oldQuantity + $change;
 
             // Check if the new quantity exceeds available stock
             if ($newQuantity > $availableStock) {
@@ -36,6 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 
             // Update the quantity in the cart
             $_SESSION['cart'][$partID]['Quantity'] = max(1, $newQuantity); // Ensure quantity is at least 1
+            
+            // Log the quantity change
+            $actionType = $change > 0 ? 
+                "Increased cart quantity of $partName from $oldQuantity to $newQuantity" : 
+                "Decreased cart quantity of $partName from $oldQuantity to $newQuantity";
+            
+            // Execute the log function
+            $logResult = logAction($conn, $userID, $username, $roleType, $actionType, $partID);
+            
+            echo json_encode(['success' => true, 'logged' => $logResult]);
+            exit();
         }
     } else {
         echo json_encode(['success' => false, 'message' => 'Part not found.']);
@@ -89,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
                             <button class='qty-btn' onclick='updateQuantity(\"$partID\", -1)'>-</button>
                             <input type='text' value='{$part['Quantity']}' readonly class='quantity-input'>
                             <button class='qty-btn' onclick='updateQuantity(\"$partID\", 1)'>+</button>
-                            <button class='remove-btn' onclick='removeFromCart(\"$partID\")'>Remove</button>
+                            <button class='remove-btn' onclick='removeFromCart(\"$partID\", \"{$part['Name']}\")'>Remove</button>
                         </div>
                     </div>
                     ";
@@ -146,11 +185,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         form.submit();
     }
 
-    function removeFromCart(partID) {
+    function removeFromCart(partID, partName) {
         fetch('remove_from_cart.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'partID=' + partID
+            body: 'partID=' + encodeURIComponent(partID) + '&partName=' + encodeURIComponent(partName)
         })
         .then(response => response.text())
         .then(data => {
