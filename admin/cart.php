@@ -2,10 +2,27 @@
 session_start();
 include('dbconnect.php'); 
 
-if (!isset($_SESSION['UserID'])) {
+// Check if user is logged in
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] === 'Staff') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
+    exit();
+} {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }
+
+// Check if user exists and has an admin role
+if (!$user || $user['RoleType'] !== 'Admin') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
+    exit();
+}
+
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
