@@ -211,17 +211,30 @@ $result = $conn->query($sql);
 <!-- Scripts -->
 <script>
 // --- SEARCH ---
-document.getElementById("searchInput").addEventListener("input", function() {
+document.getElementById("searchInput").addEventListener("input", function () {
     const searchValue = this.value.trim();
-    const currentUrl  = new URL(window.location.href);
-
+    const currentUrl = new URL(window.location.href);
     if (searchValue) {
         currentUrl.searchParams.set("search", searchValue);
     } else {
         currentUrl.searchParams.delete("search");
     }
     currentUrl.searchParams.set("page", "1");
-    window.location.href = currentUrl.toString();
+    currentUrl.searchParams.set("ajax", "1");
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            // Update only the logs table body and pagination container
+            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
+            const newPagination = doc.querySelector(".pagination");
+            if (newPagination) {
+                document.querySelector(".pagination").innerHTML = newPagination.innerHTML;
+            }
+        })
+        .catch(error => console.error("Error updating search results:", error));
 });
 
 // --- SORT ---
@@ -422,8 +435,7 @@ body, button, select, input, a {
 
 .logs-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    table-layout: fixed;
 }
 
 .logs-table th, .logs-table td {

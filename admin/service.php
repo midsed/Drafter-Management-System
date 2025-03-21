@@ -213,8 +213,8 @@ $result = $conn->query($sql);
     .swal2-popup { font-family: "Inter", sans-serif !important; }
     .swal2-title { font-weight: 700 !important; }
     .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-    .swal2-confirm { background-color: #32CD32 !important; color: white !important; }
-    .swal2-cancel { background-color: #d63031 !important; color: white !important; }
+    .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+    .swal2-cancel { font-weight: bold !important; background-color: #d63031 !important; color: white !important; }
 </style>
 
 <script>
@@ -256,7 +256,7 @@ function archiveService(serviceID) {
         text: "Do you want to archive this service?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#32CD32",
+        confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes, archive it!",
         cancelButtonText: "Cancel"
@@ -274,7 +274,7 @@ function archiveService(serviceID) {
                     text: data,
                     icon: "success",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#32CD32"
+                    confirmButtonColor: "#28a745"
                 }).then(() => location.reload());
             })
             .catch(error => {
@@ -470,8 +470,8 @@ document.addEventListener("DOMContentLoaded", function () {
     display: none;
     position: absolute;
     background-color: #fff;
-    min-width: 300px;
-    max-height: 300px;
+    min-width: 500px;
+    max-height: 500px;
     overflow-y: auto;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -572,14 +572,12 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-top: 20px;
     }
 
-
     .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
     }
-
     .pagination-button {
         padding: 6px 12px;
         border-radius: 4px;
@@ -590,36 +588,27 @@ document.addEventListener("DOMContentLoaded", function () {
         cursor: pointer;
         font-size: 14px;
     }
-
     .pagination-button:hover {
         background: #f0f0f0;
     }
-
     .active-page {
         background: black;
         color: white;
         font-weight: bold;
     }
-    .sort-options {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
 
-.sort-option {
-    background-color: #E10F0F; /* Red background */
-    color: white;
-    border: none;
-    border-radius: 4px; 
-    padding: 10px 20px; 
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.sort-option:hover {
-    background-color: darkred; /* Darker red on hover */
-}
+    .sort-option.red-button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 5px 0;
+    background-color: white;
+    color: #E10F0F;
+    border: 1px solid #E10F0F;
+    }
+    .sort-option.red-button:hover {
+        background-color: #f8f8f8;
+    }
 
     table {
     width: 100%;
