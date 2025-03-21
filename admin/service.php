@@ -416,10 +416,12 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 14px;
         color: white;
     }
-    .btn-archive, .btn-add, .btn-edit {
+    .btn-archive, .btn-edit {
         background-color: #E10F0F;
     }
-
+    .btn-add {
+    background-color: #32CD32 !important;
+}
     .actions {
         text-align: right;
         width: 100%;
@@ -473,8 +475,8 @@ document.addEventListener("DOMContentLoaded", function () {
     display: none;
     position: absolute;
     background-color: #fff;
-    min-width: 500px;
-    max-height: 500px;
+    min-width: 300px;
+    max-height: 300px;
     overflow-y: auto;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -600,19 +602,27 @@ document.addEventListener("DOMContentLoaded", function () {
         font-weight: bold;
     }
 
-    .sort-option.red-button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    margin: 5px 0;
-    background-color: white;
-    color: #E10F0F;
-    border: 1px solid #E10F0F;
-    }
-    .sort-option.red-button:hover {
-        background-color: #f8f8f8;
-    }
+    .sort-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
 
+.sort-option {
+    background-color: #E10F0F; /* Red background */
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    font-family: 'Poppins', sans-serif;
+    padding: 10px 20px; 
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.sort-option:hover {
+    background-color: darkred; /* Darker red on hover */
+}
     table {
     width: 100%;
     border-collapse: collapse;
