@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('dbconnect.php'); // Ensure database connection
+include('dbconnect.php');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: \Drafter-Management-System\login.php");
@@ -49,36 +49,88 @@ $conn->close();
         <h1><?php echo htmlspecialchars($part["Name"]); ?></h1>
     </div>
 
-    <div class="part-media-container">
-    <?php
-        // Check if Media is a JSON array or a single path
-        $media = json_decode($part["Media"], true);
-        if (is_array($media) && count($media) > 0): 
-            foreach ($media as $image): ?>
-                <img src="<?php echo '../' . htmlspecialchars($image); ?>" alt="Part Image">
-            <?php endforeach; 
-        elseif (!empty($part["Media"])): ?>
-            <img src="<?php echo '../' . htmlspecialchars($part["Media"]); ?>" alt="Part Image">
-        <?php else: ?>
-            <p class="no-image">No image available</p>
-        <?php endif; ?>
+    <div class="part-detail-container">
+        <div class="media-location-wrapper">
+            <div class="part-media-container">
+                <?php
+                $media = json_decode($part["Media"], true);
+                if (is_array($media) && count($media) > 0): 
+                    foreach ($media as $image): ?>
+                        <img src="<?php echo '../' . htmlspecialchars($image); ?>" alt="Part Image">
+                    <?php endforeach; 
+                elseif (!empty($part["Media"])): ?>
+                    <img src="<?php echo '../' . htmlspecialchars($part["Media"]); ?>" alt="Part Image">
+                <?php else: ?>
+                    <div class="no-image">No image available</div>
+                <?php endif; ?>
+            </div>
+            
+            <div class="location-badge">
+                <div class="location-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="location-text">
+                    <?php echo htmlspecialchars($part["Location"]); ?>
+                </div>
+            </div>
+        </div>
 
-
-        <table class="details-table">
-            <tr><td>Part ID</td><td>#<?php echo $part["PartID"]; ?></td></tr>
-            <tr><td>Category</td><td><?php echo htmlspecialchars($part["Category"]); ?></td></tr>
-            <tr><td>Condition</td><td><?php echo htmlspecialchars($part["PartCondition"]); ?></td></tr>
-            <tr><td>Location</td><td><?php echo htmlspecialchars($part["Location"]); ?></td></tr>
-            <tr><td>Quantity</td><td><?php echo $part["Quantity"]; ?></td></tr>
-            <tr><td>Authenticity</td><td><?php echo htmlspecialchars($part["Authenticity"]); ?></td></tr>
-            <tr><td>Make</td><td><?php echo htmlspecialchars($part["Make"]); ?></td></tr>
-            <tr><td>Model</td><td><?php echo htmlspecialchars($part["Model"]); ?></td></tr>
-            <tr><td>Year Model</td><td><?php echo htmlspecialchars($part["YearModel"]); ?></td></tr>
-            <tr><td>Part Price</td><td>₱ <?php echo number_format($part["Price"], 2); ?></td></tr>
-            <tr><td>Date Added</td><td><?php echo htmlspecialchars($part["DateAdded"]); ?></td></tr>
-            <tr><td>Last Updated</td><td><?php echo htmlspecialchars($part["LastUpdated"]); ?></td></tr>
-            <tr><td>Description</td><td><?php echo nl2br(htmlspecialchars($part["Description"])); ?></td></tr>
-        </table>
+        <div class="details-section">
+            <h2>Part Details</h2>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Part ID</div>
+                    <div class="detail-value">#<?php echo $part["PartID"]; ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Category"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Condition</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["PartCondition"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Quantity</div>
+                    <div class="detail-value"><?php echo $part["Quantity"]; ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Authenticity</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Authenticity"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Make</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Make"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Model</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Model"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Year Model</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["YearModel"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Part Price</div>
+                    <div class="detail-value price-value">₱ <?php echo number_format($part["Price"], 2); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Date Added</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["DateAdded"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Last Updated</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["LastUpdated"]); ?></div>
+                </div>
+            </div>
+            
+            <div class="description-section">
+                <h3>Description</h3>
+                <div class="description-content">
+                    <?php echo nl2br(htmlspecialchars($part["Description"])); ?>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -93,14 +145,20 @@ $conn->close();
 </script>
 
 <style>
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
 .part-detail-container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 25px;
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.media-location-wrapper {
+    position: relative;
+    margin-bottom: 30px;
 }
 
 .part-media-container {
@@ -115,44 +173,125 @@ $conn->close();
     max-width: 30%;
     height: auto;
     border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease-in-out;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .part-media-container img:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.details-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background: #f9f9f9;
-    border-radius: 10px;
-    overflow: hidden;
+.location-badge {
+    position: absolute;
+    bottom: -85px;
+    left: 50%;
+    transform: translateX(-50%);
+    background:rgb(213, 58, 58);
+    background: linear-gradient(to right,rgb(228, 93, 93),rgb(43, 8, 3));
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    min-width: 200px;
+    justify-content: center;
 }
 
-.details-table td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    font-size: 16px;
-    text-align: left;
-    color: #333;
+.location-icon {
+    margin-right: 10px;
+    font-size: 22px;
 }
 
-.details-table tr:last-child td {
-    border-bottom: none;
+.location-text {
+    letter-spacing: 0.5px;
 }
 
 .no-image {
-    font-size: 16px;
+    width: 100%;
+    padding: 50px;
+    background: #f5f5f5;
+    border-radius: 10px;
     color: #888;
     font-style: italic;
+    font-size: 18px;
+    text-align: center;
 }
 
-th, td {
-    border: 1px solid #333 !important;
-    padding: 10px;
+.details-section {
+    margin-top: 40px;
+    padding-top: 20px;
+}
+
+.details-section h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
     text-align: left;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.detail-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detail-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.price-value {
+    color: #28a745;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.description-section {
+    margin-top: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.description-section h3 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.description-content {
+    line-height: 1.6;
+    color: #495057;
 }
 </style>
