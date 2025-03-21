@@ -134,10 +134,10 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['FName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="Only letters and spaces allowed." 
+                    title="Please match the requested format, No special character and Number allowed." 
                     required
                 >
-                <span id="firstname-error" class="error-message">Only letters and spaces are allowed.</span>
+                <span id="firstname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
             </div>
 
             <div class="form-group">
@@ -149,10 +149,10 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['LName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="Only letters and spaces allowed." 
+                    title="Please match the requested format, No special character and Number allowed." 
                     required
                 >
-                <span id="lastname-error" class="error-message">Only letters and spaces are allowed.</span>
+                <span id="lastname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
             </div>
 
             <div class="form-group">
