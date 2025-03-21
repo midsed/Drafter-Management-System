@@ -31,7 +31,8 @@ $sql = "SELECT
             s.CompanyName,
             s.Email,
             s.PhoneNumber,
-            p.PartID
+            p.PartID,
+            p.Name AS PartName
         FROM supplier s
         LEFT JOIN part p ON s.SupplierID = p.SupplierID
         WHERE s.archived = 0 AND p.PartID IS NOT NULL";
@@ -42,10 +43,10 @@ $countSql = "SELECT COUNT(*) AS total
              WHERE s.archived = 0 AND p.PartID IS NOT NULL";
 
 // ----- APPLY FILTERS -----
-if (!empty($partIDs)) {
-    $escapedPartIDs = array_map([$conn, 'real_escape_string'], $partIDs);
-    $sql      .= " AND p.PartID IN ('" . implode("','", $escapedPartIDs) . "')";
-    $countSql .= " AND p.PartID IN ('" . implode("','", $escapedPartIDs) . "')";
+if (!empty($partNames)) {
+    $escapedPartNames = array_map([$conn, 'real_escape_string'], $partNames);
+    $sql      .= " AND p.Name IN ('" . implode("','", $escapedPartNames) . "')";
+    $countSql .= " AND p.Name IN ('" . implode("','", $escapedPartNames) . "')";
 }
 
 if (!empty($companies)) {
@@ -167,7 +168,7 @@ $result = $conn->query($sql);
             <thead>
                 <tr>
                     <th>Supplier ID</th>
-                    <th>Part ID</th>
+                    <th>Part Name</th>
                     <th>Email</th>
                     <th>Company Name</th>
                     <th>Phone Number</th>
@@ -181,7 +182,7 @@ $result = $conn->query($sql);
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
                         echo "<td>" . htmlspecialchars($row['SupplierID']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['PartID']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['PartName']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['CompanyName']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['PhoneNumber']) . "</td>";
