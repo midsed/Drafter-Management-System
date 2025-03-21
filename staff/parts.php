@@ -130,7 +130,7 @@ include('navigation/topbar.php');
                     <div class='actions'>
                         <button class='qty-btn' onclick='decreaseQuantity({$part['PartID']})'>-</button>
                         <input type='text' id='quantity_{$part['PartID']}' value='{$part['Quantity']}'" . ($isOutOfStock ? " class='quantity-input zero-quantity'" : " class='quantity-input'") . " readonly>
-                        <button class='qty-btn' onclick='increaseQuantity({$part['PartID']})'>+</button>
+                        <button class='qty-bt1' onclick='increaseQuantity({$part['PartID']})'>+</button>
                     </div>
                     <div class='actions card-actions'>
                         <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
@@ -740,6 +740,15 @@ body {
     font-family: 'Poppins', sans-serif;
     font-weight: 900;
 }
+.qty-bt1 {
+    background-color: #32CD32;
+    border: 1px;
+    border-radius: 5px;
+    padding: 5px 20px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 900;
+}
 .quantity-input {
     width: 50px;
     text-align: center;
@@ -893,7 +902,7 @@ body {
 }
 
 .selected-card {
-    border: 6px solid #FF0000;
+    border: 6px solid rgba(225, 15, 15, 0.7);
     animation: pulse 0.5s ease-out;
 }
 @keyframes pulse {
