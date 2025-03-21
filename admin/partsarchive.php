@@ -171,9 +171,6 @@ function toggleSelectMode() {
     document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
 
-    document.querySelectorAll('.select-checkbox').forEach(checkbox => {
-        checkbox.style.display = selectMode ? 'block' : 'none';
-    });
 
     if (!selectMode) {
         selectedParts.clear();
@@ -227,11 +224,15 @@ document.querySelectorAll('.part-checkbox').forEach(checkbox => {
 
 document.querySelectorAll('.part-card').forEach(card => {
     card.addEventListener('click', function(e) {
-        if (selectMode && !e.target.closest('.part-checkbox')) {
+        if (selectMode) {
+            e.preventDefault();
             const partId = this.dataset.partId;
             const checkbox = this.querySelector('.part-checkbox');
             checkbox.checked = !checkbox.checked;
             togglePartSelection(partId, checkbox);
+        } else {
+            const partId = this.dataset.partId;
+            window.location.href = `partdetail.php?id=${partId}`;
         }
     });
 });
@@ -635,7 +636,6 @@ body {
     background-color: #f8f8f8;
 }
 
-/* Button Overrides */
 .part-card .edit-btn {
     background: gray;
     color: white;
