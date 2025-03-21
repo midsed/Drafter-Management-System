@@ -11,55 +11,43 @@ if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
 include('dbconnect.php');
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
-
-// Include the logging function
 include('logging.php');
 
-// Grab query parameters
 $search     = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
-$limit      = 10; // Results per page
+$limit      = 10;
 $page       = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset     = ($page - 1) * $limit;
-
-// Sorting & Date Range
 $sortField  = isset($_GET['sort_field']) ? $conn->real_escape_string($_GET['sort_field']) : 'Timestamp';
 $sortOrder  = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort_order']) : 'DESC';
 $startDate  = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $endDate    = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 $actionType = isset($_GET['action_type']) ? $conn->real_escape_string($_GET['action_type']) : '';
 
-// Build base query
 $sql = "SELECT l.LogsID, u.Username AS ActionBy, l.ActionType, l.Timestamp
         FROM logs l
         JOIN user u ON l.UserID = u.UserID
         WHERE 1=1";
 
-// Search filter
 if (!empty($search)) {
     $sql .= " AND (u.Username LIKE '%$search%'
                    OR l.ActionType LIKE '%$search%'
                    OR l.Timestamp LIKE '%$search%')";
 }
 
-// Action Type filter (if used in the future)
 if (!empty($actionType)) {
     $sql .= " AND l.ActionType = '$actionType'";
 }
 
-// Date range filter
 if (!empty($startDate) && !empty($endDate)) {
     $sql .= " AND l.Timestamp BETWEEN '$startDate 00:00:00' AND '$endDate 23:59:59'";
 }
 
-// Apply sorting
 $sql .= " ORDER BY $sortField $sortOrder LIMIT $limit OFFSET $offset";
 
-// Get total logs count for pagination
 $totalResult = $conn->query(str_replace("LIMIT $limit OFFSET $offset", "", $sql));
 $totalLogs   = $totalResult->num_rows;
 $totalPages  = ceil($totalLogs / $limit);
 
-// Fetch logs
 $result = $conn->query($sql);
 ?>
 
@@ -68,10 +56,8 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Logs</title>
-    <!-- Poppins font -->
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
@@ -84,9 +70,7 @@ $result = $conn->query($sql);
         </a>
     </div>
 
-    <!-- Search, Filter, Sort -->
     <div class="search-actions">
-        <!-- Quick Search -->
         <div class="search-container">
             <input 
                 type="text" 
@@ -96,7 +80,6 @@ $result = $conn->query($sql);
             >
         </div>
 
-        <!-- Filter (Date Range) -->
         <div class="filter-container">
             <span>Filter</span>
             <div class="dropdown">
@@ -111,14 +94,12 @@ $result = $conn->query($sql);
                     </div>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
-                        <!-- Clear button uses a separate class -->
                         <button id="clearFilter" class="clear-button">Clear</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sort By -->
         <div class="sort-container">
             <span>Sort By</span>
             <div class="dropdown">
@@ -127,7 +108,6 @@ $result = $conn->query($sql);
                 </button>
                 <div id="sortDropdown" class="dropdown-content">
                     <h4>Sort By</h4>
-                    <!-- Show the native arrow -->
                     <select id="sortField">
                         <option value="LogsID"     <?= $sortField === 'LogsID'     ? 'selected' : '' ?>>Log ID</option>
                         <option value="ActionBy"   <?= $sortField === 'ActionBy'   ? 'selected' : '' ?>>Action By</option>
@@ -141,8 +121,9 @@ $result = $conn->query($sql);
             </div>
         </div>
     </div>
-
-    <!-- Logs Table -->
+    <div class="download-container">
+    <a href="download_logs.php?<?= http_build_query($_GET) ?>" class="red-button">Download Logs (Excel)</a>
+    </div>
     <div class="table-container">
         <table class="logs-table">
             <thead>
@@ -170,7 +151,6 @@ $result = $conn->query($sql);
         </table>
     </div>
 
-    <!-- Pagination -->
     <div class="pagination">
         <?php
         $queryParams = $_GET;
@@ -185,26 +165,21 @@ $result = $conn->query($sql);
             $startPage = max(1, $endPage - $visiblePages + 1);
         }
 
-        // First
         if ($page > 1) {
             echo '<a href="?' . $queryString . '&page=1" class="pagination-button">First</a>';
         }
-        // Prev
         if ($page > 1) {
             echo '<a href="?' . $queryString . '&page=' . ($page - 1) . '" class="pagination-button">Previous</a>';
         }
 
-        // Numbered pages
         for ($i = $startPage; $i <= $endPage; $i++) {
             $activeClass = ($i == $page) ? 'active-page' : '';
             echo '<a href="?' . $queryString . '&page=' . $i . '" class="pagination-button ' . $activeClass . '">' . $i . '</a>';
         }
 
-        // Next
         if ($page < $totalPages) {
             echo '<a href="?' . $queryString . '&page=' . ($page + 1) . '" class="pagination-button">Next</a>';
         }
-        // Last
         if ($page < $totalPages) {
             echo '<a href="?' . $queryString . '&page=' . $totalPages . '" class="pagination-button">Last</a>';
         }
@@ -212,9 +187,7 @@ $result = $conn->query($sql);
     </div>
 </div>
 
-<!-- Scripts -->
 <script>
-// --- SEARCH ---
 document.getElementById("searchInput").addEventListener("input", function () {
     const searchValue = this.value.trim();
     const currentUrl = new URL(window.location.href);
@@ -231,7 +204,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            // Update only the logs table body and pagination container
             document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
             const newPagination = doc.querySelector(".pagination");
             if (newPagination) {
@@ -241,7 +213,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
         .catch(error => console.error("Error updating search results:", error));
 });
 
-// --- SORT ---
 document.getElementById("sortButton").addEventListener("click", function(e) {
     e.stopPropagation();
     document.getElementById("sortDropdown").classList.toggle("show");
@@ -258,7 +229,6 @@ document.querySelectorAll(".sort-option").forEach(option => {
     });
 });
 
-// --- FILTER: DATE RANGE ---
 document.getElementById("filterButton").addEventListener("click", function(e) {
     e.stopPropagation();
     document.getElementById("filterDropdown").classList.toggle("show");
@@ -291,7 +261,6 @@ document.getElementById("clearFilter").addEventListener("click", function() {
     window.location.href = currentUrl.toString();
 });
 
-// Close dropdowns if clicking outside
 window.addEventListener("click", function(e) {
     if (!e.target.closest(".dropdown-content") && 
         !e.target.closest(".filter-icon") && 
@@ -303,7 +272,6 @@ window.addEventListener("click", function(e) {
 </script>
 
 <style>
-/* Use Poppins font for everything */
 body, button, select, input, a {
     font-family: 'Poppins', sans-serif;
 }
@@ -376,7 +344,6 @@ body, button, select, input, a {
     color: #333;
 }
 
-/* Date Range inputs in Filter */
 .date-filters {
     display: flex;
     flex-direction: column;
@@ -409,6 +376,7 @@ body, button, select, input, a {
     background-color: #E10F0F;
     color: white;
     border: none;
+    padding-bottom: 10px;
     border-radius: 4px;
     padding: 8px 16px;
     font-size: 14px;
@@ -457,7 +425,6 @@ body, button, select, input, a {
     background-color: rgb(218, 218, 218);
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -484,6 +451,9 @@ body, button, select, input, a {
     background: black;
     color: white;
     font-weight: bold;
+}
+a {
+    text-decoration: none;
 }
 </style>
 
