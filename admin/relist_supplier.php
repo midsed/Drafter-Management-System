@@ -2,8 +2,12 @@
 session_start();
 require_once "dbconnect.php";
 
-if (!isset($_SESSION['UserID'])) {
-    die(json_encode(['status' => 'error', 'message' => 'Access Denied: Please log in.']));
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

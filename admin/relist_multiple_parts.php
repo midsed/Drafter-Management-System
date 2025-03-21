@@ -1,9 +1,11 @@
 <?php
 session_start();
 include('dbconnect.php');
-if (!isset($_SESSION['UserID'])) {
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Unauthorized']);
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
     exit();
 }
 

@@ -2,8 +2,11 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-if (!isset($_SESSION['UserID'])) {
-    echo "User ID is not set.";
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
     exit();
 }
 include('navigation/sidebar.php');

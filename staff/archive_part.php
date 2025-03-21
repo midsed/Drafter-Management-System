@@ -3,8 +3,12 @@ session_start();
 include('dbconnect.php');
 
 // Ensure the user is logged in
-if (!isset($_SESSION['UserID'])) {
-    die("Error: Unauthorized access.");
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
+    exit();
 }
 
 // Get user details from session

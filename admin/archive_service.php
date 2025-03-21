@@ -2,8 +2,12 @@
 session_start();
 require_once "dbconnect.php";
 
-if (!isset($_SESSION['UserID'])) {
-    die("Error: Unauthorized access.");
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
+    echo "<script>
+            alert('Unauthorized access.');
+            window.location.href = '/Drafter-Management-System/login.php';
+          </script>";
+    exit();
 }
 
 $userID = $_SESSION['UserID'];

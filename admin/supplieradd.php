@@ -2,7 +2,7 @@
 
 <?php
 session_start();
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] === 'Staff') {
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
     echo "<script>
             alert('Unauthorized access.');
             window.location.href = '/Drafter-Management-System/login.php';
