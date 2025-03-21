@@ -169,11 +169,6 @@ function toggleSelectMode() {
     document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
-    
-    const checkboxes = document.querySelectorAll('.select-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.style.display = selectMode ? 'block' : 'none';
-    });
 
     const cardActions = document.querySelectorAll('.card-actions');
     cardActions.forEach(action => {

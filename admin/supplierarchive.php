@@ -33,7 +33,7 @@ if (!isset($_SESSION['Username'])) {
             <thead>
                 <tr>
                     <th>Supplier ID</th>
-                    <th>Part ID</th>
+                    <th>Part Name</th>
                     <th>Email</th>
                     <th>Name</th>
                     <th>Phone Number</th>
@@ -43,25 +43,25 @@ if (!isset($_SESSION['Username'])) {
             <tbody>
                 <?php
                 // Fetch archived suppliers (archived = 1)
-                $sql = "SELECT s.SupplierID, s.CompanyName, s.Email, s.PhoneNumber, p.PartID 
-                        FROM supplier s
-                        LEFT JOIN part p ON s.SupplierID = p.SupplierID
-                        WHERE s.archived = 1
-                        ORDER BY s.SupplierID DESC";
+                $sql = "SELECT s.SupplierID, s.CompanyName, s.Email, s.PhoneNumber, p.PartID, p.Name AS PartName 
+                    FROM supplier s
+                    LEFT JOIN part p ON s.SupplierID = p.SupplierID
+                    WHERE s.archived = 1
+                    ORDER BY s.SupplierID DESC";
                 $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "
-                        <tr>
-                            <td>{$row['SupplierID']}</td>
-                            <td>{$row['PartID']}</td>
-                            <td>{$row['Email']}</td>
-                            <td>{$row['CompanyName']}</td>
-                            <td>{$row['PhoneNumber']}</td>
-                            <td><button class='btn btn-relist' onclick='relistSupplier({$row['SupplierID']})'>Re-list</button></td>
-                        </tr>
-                        ";
+                            <tr>
+                                <td>{$row['SupplierID']}</td>
+                                <td>{$row['PartName']}</td> <!-- Updated from PartID to PartName -->
+                                <td>{$row['Email']}</td>
+                                <td>{$row['CompanyName']}</td>
+                                <td>{$row['PhoneNumber']}</td>
+                                <td><button class='btn btn-relist' onclick='relistSupplier({$row['SupplierID']})'>Re-list</button></td>
+                            </tr>
+                            ";
                     }
                 } else {
                     echo "<tr><td colspan='6'>No archived suppliers found.</td></tr>";
