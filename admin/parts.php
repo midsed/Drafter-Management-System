@@ -13,75 +13,75 @@ include('navigation/topbar.php');
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <div class="main-content">
-    <div class="header">
-        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
-        </a>
-        <h1 style="font-family: 'Poppins', sans-serif;">Parts List</h1>
-    </div>
-    <div class="search-actions">
-        <div class="search-container">
-            <input type="text" placeholder="Quick search" id="searchInput">
-            <div class="filter-container">
-                <span>Filter</span>
-                <div class="dropdown">
-                    <button id="filterButton" class="filter-icon" title="Filter">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <div class="filter-section">
-                            <h4>Category</h4>
-                            <div class="filter-options" id="categoryFilter">
-                                <?php
-                                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
-                                $categoryResult = $conn->query($categoryQuery);
-                                if ($categoryResult->num_rows > 0) {
-                                    while ($category = $categoryResult->fetch_assoc()) {
-                                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
-                                    }
-                                } else {
-                                    echo "<p>No categories found.</p>";
-                                }
-                                ?>
-                            </div>
-                        </div>
-                        <div class="filter-actions">
-                            <button id="applyFilter" class="red-button">Apply</button>
-                            <button id="clearFilter" class="red-button">Clear</button>
-                        </div>
-                    </div>
-                </div>
+  <div class="header">
+    <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
+      <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+    </a>
+    <h1 style="font-family: 'Poppins', sans-serif;">Parts List</h1>
+  </div>
+  <div class="search-actions">
+    <div class="search-container">
+      <input type="text" placeholder="Quick search" id="searchInput">
+      <div class="filter-container">
+        <span>Filter</span>
+        <div class="dropdown">
+          <button id="filterButton" class="filter-icon" title="Filter">
+            <i class="fas fa-filter"></i>
+          </button>
+          <div id="filterDropdown" class="dropdown-content">
+            <div class="filter-section">
+              <h4>Category</h4>
+              <div class="filter-options" id="categoryFilter">
+                <?php
+                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
+                $categoryResult = $conn->query($categoryQuery);
+                if ($categoryResult->num_rows > 0) {
+                    while ($category = $categoryResult->fetch_assoc()) {
+                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
+                    }
+                } else {
+                    echo "<p>No categories found.</p>";
+                }
+                ?>
+              </div>
             </div>
-            <div class="sort-container">
-                <span>Sort By</span>
-                <div class="dropdown">
-                    <button id="sortButton" class="sort-icon" title="Sort">
-                        <i class="fas fa-sort-alpha-down"></i>
-                    </button>
-                    <div id="sortDropdown" class="dropdown-content">
-                        <button class="sort-option red-button" data-sort="asc">Ascending</button>
-                        <button class="sort-option red-button" data-sort="desc">Descending</button>
-                    </div>
-                </div>
+            <div class="filter-actions">
+              <button id="applyFilter" class="red-button">Apply</button>
+              <button id="clearFilter" class="red-button">Clear</button>
             </div>
+          </div>
         </div>
-        <div class="right-actions">
-            <a href="cart.php" class="cart-icon" title="Cart">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
-            </a>
-            <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Mode</button>
-            <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
-            <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
-            <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
-            <a href="partsarchive.php" class="red-button">Archives</a>
-            <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
+      </div>
+      <div class="sort-container">
+        <span>Sort By</span>
+        <div class="dropdown">
+          <button id="sortButton" class="sort-icon" title="Sort">
+            <i class="fas fa-sort-alpha-down"></i>
+          </button>
+          <div id="sortDropdown" class="dropdown-content">
+            <button class="sort-option red-button" data-sort="asc">Ascending</button>
+            <button class="sort-option red-button" data-sort="desc">Descending</button>
+          </div>
         </div>
+      </div>
     </div>
-    <div class="selection-summary" id="selectionSummary" style="display: none;">
-        <span id="selectedCount">0 items selected</span>
+    <div class="right-actions">
+      <a href="cart.php" class="cart-icon" title="Cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
+      </a>
+      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Mode</button>
+      <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
+      <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
+      <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+      <a href="partsarchive.php" class="red-button">Archives</a>
+      <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
     </div>
-    <div class="parts-container" id="partsList">
+  </div>
+  <div class="selection-summary" id="selectionSummary" style="display: none;">
+    <span id="selectedCount">0 items selected</span>
+  </div>
+  <div class="parts-container" id="partsList">
     <?php
     $limit = 10;
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -169,11 +169,6 @@ function toggleSelectMode() {
     document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
-    
-    const checkboxes = document.querySelectorAll('.select-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.style.display = selectMode ? 'block' : 'none';
-    });
 
     const cardActions = document.querySelectorAll('.card-actions');
     cardActions.forEach(action => {
@@ -728,9 +723,12 @@ body {
     margin: 8px 0;
     font-size: 14px;
 }
-.part-card .actions {
+/* Center and compact the card actions */
+.part-card .card-actions {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
     margin-top: 10px;
 }
 .qty-btn {
@@ -884,16 +882,18 @@ body {
 .part-card .add-to-cart-btn:hover {
     background: darkorange
 }
+
 .cart-icon {
     color: #FFB52E;
 }
+
 .new-stock-btn {
     background: black;
     color: white;
 }
 
 .selected-card {
-    border: 6px solid #E10F0F;
+    border: 6px solid #FF0000;
     animation: pulse 0.5s ease-out;
 }
 @keyframes pulse {
@@ -909,13 +909,5 @@ body {
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
     }
-}
-
-.part-card .card-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
 }
 </style>
