@@ -413,10 +413,12 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 14px;
         color: white;
     }
-    .btn-archive, .btn-add, .btn-edit {
+    .btn-archive, .btn-edit {
         background-color: #E10F0F;
     }
-
+    .btn-add {
+    background-color: #32CD32 !important;
+}
     .actions {
         text-align: right;
         width: 100%;
@@ -439,7 +441,10 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 14px;
         font-family: 'Poppins', sans-serif;
     }
-
+    .supplier-table td:nth-child(7),
+.supplier-table td:nth-child(8) {
+    text-align: center;
+}
     .filter-container, .sort-container {
     display: flex;
     align-items: center;

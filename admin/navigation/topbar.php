@@ -24,7 +24,7 @@
             text: "You will be logged out of your session!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: '#32CD32',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, log me out'
         }).then((result) => {
