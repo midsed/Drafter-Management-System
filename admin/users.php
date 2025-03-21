@@ -320,7 +320,7 @@ body, button, select, input, a {
 }
 
 .add-user-btn {
-    background-color: #E10F0F; 
+    background-color:  #32CD32;
     color: white !important;
     padding: 10px 15px;
     border: none;
