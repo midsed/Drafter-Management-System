@@ -97,13 +97,19 @@ $username = $user['Username'];
         gap: 15px;
         justify-content: center;
     }
+    
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+        display: none;
+    }
 </style>
 
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
-                 style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Add User</h1>
     </div>
@@ -114,13 +120,15 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="firstname">First Name:</label>
                 <input type="text" id="firstname" name="firstname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed." >
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                <span id="firstname-error" class="error-message">Only letters and spaces are allowed.</span>
             </div>
 
             <div class="form-group">
                 <label for="lastname">Last Name:</label>
                 <input type="text" id="lastname" name="lastname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed." >
+                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                <span id="lastname-error" class="error-message">Only letters and spaces are allowed.</span>
             </div>
 
             <div class="form-group">
@@ -156,42 +164,76 @@ $username = $user['Username'];
 </div>
 
 <script>
-function validateForm() {
-    let password = document.getElementById("password").value;
-    let email = document.getElementById("email").value;
-    
-    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Real-time validation for name fields to prevent numbers and special characters
+    function validateNameField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
 
-    if (!passwordRegex.test(password)) {
-        Swal.fire({
-            title: "Invalid Password!",
-            text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
-            icon: "error",
-            confirmButtonText: "Ok"
+        // Block invalid keystrokes
+        field.addEventListener("keypress", function(e) {
+            let char = String.fromCharCode(e.which);
+            if (!/^[A-Za-z\s]$/.test(char)) {
+                e.preventDefault();
+                errorElem.style.display = "block";
+                return false;
+            }
         });
-        return false;
+
+        // Remove invalid characters from pasted text
+        field.addEventListener("input", function() {
+            let cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
+            if (field.value !== cleaned) {
+                field.value = cleaned;
+                errorElem.style.display = "block";
+            } else {
+                errorElem.style.display = "none";
+            }
+        });
     }
 
-    if (!emailRegex.test(email)) {
-        Swal.fire({
-            title: "Invalid Email!",
-            text: "Please enter a valid email address.",
-            icon: "error",
-            confirmButtonText: "Ok"
-        });
-        return false;
+    // Attach real-time validations after DOM loads
+    document.addEventListener("DOMContentLoaded", function() {
+        validateNameField("firstname", "firstname-error");
+        validateNameField("lastname", "lastname-error");
+    });
+
+    // Existing form validation for email and password
+    function validateForm() {
+        let password = document.getElementById("password").value;
+        let email = document.getElementById("email").value;
+        
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+        let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!passwordRegex.test(password)) {
+            Swal.fire({
+                title: "Invalid Password!",
+                text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
+                icon: "error",
+                confirmButtonText: "Ok"
+            });
+            return false;
+        }
+
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                title: "Invalid Email!",
+                text: "Please enter a valid email address.",
+                icon: "error",
+                confirmButtonText: "Ok"
+            });
+            return false;
+        }
+
+        return true;
     }
 
-    return true;
-}
-
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
-}
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 </script>
 
 <?php
@@ -258,7 +300,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo '<style>
                 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
                 .swal2-popup { font-family: "Inter", sans-serif !important; }
-                .swal2-title { font-weight: 700 !important; !important; }
+                .swal2-title { font-weight: 700 !important; }
                 .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
                 .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
             </style>';
@@ -274,21 +316,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     window.location = 'users.php';
                 });
             </script>";
-            } else {
-                echo "<script>
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Error adding user: " . addslashes($add->error) . "',
-                        icon: 'error',
-                        confirmButtonText: 'Ok',
-                        confirmButtonColor: '#d63031'
-                    });
-                </script>";
-            }
-            
+        } else {
+            echo "<script>
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error adding user: " . addslashes($add->error) . "',
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                    confirmButtonColor: '#d63031'
+                });
+            </script>";
         }
         $add->close();
     }
 
     $conn->close();
+}
 ?>

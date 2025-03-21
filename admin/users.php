@@ -9,7 +9,7 @@ include('navigation/sidebar.php');
 include('navigation/topbar.php');
 include('dbconnect.php');
 
-// Grab search term
+// Grab search
 $search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
 
 // Grab role filter (single dropdown)
@@ -75,10 +75,9 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8"/>
     <title>Users</title>
-    <!-- Poppins font -->
     <link rel="stylesheet" href="css/style.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
@@ -116,7 +115,6 @@ $result = $conn->query($sql);
                     </select>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
-                        <!-- The Clear button now has a new class: .clear-button -->
                         <button id="clearFilter" class="clear-button">Clear</button>
                     </div>
                 </div>
@@ -147,7 +145,7 @@ $result = $conn->query($sql);
                 </div>
             </div>
         </div>
-    </div> <!-- end .search-actions -->
+    </div>
 
     <!-- Table Container -->
     <div class="table-container">
@@ -188,12 +186,11 @@ $result = $conn->query($sql);
     <!-- Pagination -->
     <div class="pagination">
         <?php
-        // Build query string for pagination links (excluding page)
         $queryParams = $_GET;
         unset($queryParams['page']);
         $queryString = http_build_query($queryParams);
 
-        $visiblePages = 5; // Number of pages to display
+        $visiblePages = 5;
         $startPage    = max(1, $page - 2);
         $endPage      = min($totalPages, $startPage + $visiblePages - 1);
 
@@ -230,23 +227,34 @@ $result = $conn->query($sql);
     </div>
 </div>
 
-<!-- Scripts -->
 <script>
-// --- SEARCH ---
+// SEARCH 
 document.getElementById("searchInput").addEventListener("input", function () {
     const searchValue = this.value.trim();
     const currentUrl = new URL(window.location.href);
-
     if (searchValue) {
         currentUrl.searchParams.set("search", searchValue);
     } else {
         currentUrl.searchParams.delete("search");
     }
     currentUrl.searchParams.set("page", "1");
-    window.location.href = currentUrl.toString();
+    currentUrl.searchParams.set("ajax", "1");
+
+    fetch(currentUrl.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            document.getElementById("userTableBody").innerHTML = doc.getElementById("userTableBody").innerHTML;
+            const newPagination = doc.querySelector(".pagination");
+            if (newPagination) {
+                document.querySelector(".pagination").innerHTML = newPagination.innerHTML;
+            }
+        })
+        .catch(error => console.error("Error updating search results:", error));
 });
 
-// --- FILTER: ROLE ---
+// FILTER: ROLE 
 document.getElementById("filterButton").addEventListener("click", function (event) {
     event.stopPropagation();
     document.getElementById("filterDropdown").classList.toggle("show");
@@ -274,7 +282,7 @@ document.getElementById("clearFilter").addEventListener("click", function () {
     window.location.href = currentUrl.toString();
 });
 
-// --- SORT ---
+// SORT 
 document.getElementById("sortButton").addEventListener("click", function (event) {
     event.stopPropagation();
     document.getElementById("sortDropdown").classList.toggle("show");

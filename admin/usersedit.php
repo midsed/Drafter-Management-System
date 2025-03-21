@@ -15,10 +15,8 @@ include('dbconnect.php');
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* Import Poppins font (regular + bold) */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-    /* Centered container with Poppins font */
     .container {
         max-width: 600px;
         margin: 40px auto;
@@ -26,23 +24,15 @@ include('dbconnect.php');
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        font-family: 'Poppins', sans-serif; /* Everything in the container uses Poppins */
+        font-family: 'Poppins', sans-serif;
     }
 
-    /* Make labels and buttons bold, but keep input text normal */
     .container label {
-        font-weight: bold;  
+        font-weight: bold;
     }
     .container .btn {
         font-weight: bold;
     }
-
-    /* (Optional) If you want the heading bold too, uncomment:
-       .header h1 {
-           font-family: 'Poppins', sans-serif;
-           font-weight: bold;
-       }
-    */
 
     .form-group {
         margin-bottom: 15px;
@@ -50,15 +40,16 @@ include('dbconnect.php');
     label {
         display: block;
         margin-bottom: 5px;
+        font-family: 'Poppins', sans-serif;
     }
     input, select {
         width: 100%;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 3px;
-        /* By default, inputs will have a normal font-weight unless overridden */
+        font-family: 'Poppins', sans-serif;
     }
-    /* Button styling */
+
     .btn {
         background-color: #272727;
         color: white;
@@ -66,11 +57,11 @@ include('dbconnect.php');
         border: none;
         border-radius: 3px;
         cursor: pointer;
+        font-family: 'Poppins', sans-serif;
     }
     .btn:focus {
         outline: none;
     }
-    /* Center the buttons */
     .actions {
         display: flex;
         justify-content: center;
@@ -78,17 +69,26 @@ include('dbconnect.php');
         margin-top: 20px;
     }
 
-    /* Header styles (back arrow + title) */
     .main-content .header {
         display: flex;
         align-items: center;
         margin-bottom: 20px;
+        font-family: 'Poppins', sans-serif;
     }
     .main-content .header img {
         cursor: pointer;
     }
     .main-content .header h1 {
         margin: 0;
+    }
+    
+    /* Error message styling */
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        font-family: 'Poppins', sans-serif;
+        display: none;
+        margin-top: 3px;
     }
 </style>
 
@@ -134,9 +134,10 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['FName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="No special character and Number allowed." 
+                    title="Only letters and spaces allowed." 
                     required
                 >
+                <span id="firstname-error" class="error-message">Only letters and spaces are allowed.</span>
             </div>
 
             <div class="form-group">
@@ -148,9 +149,10 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['LName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="No special character and Number allowed." 
+                    title="Only letters and spaces allowed." 
                     required
                 >
+                <span id="lastname-error" class="error-message">Only letters and spaces are allowed.</span>
             </div>
 
             <div class="form-group">
@@ -207,7 +209,6 @@ include('dbconnect.php');
 
             <div class="actions">
                 <button type="submit" class="btn">Update</button>
-                
                 <?php if ($user['Status'] == 'Active') { ?>
                     <a href="process_user_status.php?UserID=<?php echo $user['UserID']; ?>&status=Inactive">
                         <button type="button" class="btn" style="background-color: #C00F0C;">Mark as Inactive</button>
@@ -223,14 +224,38 @@ include('dbconnect.php');
 </div>
 
 <script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+    // Function to validate input fields in real time
+    function validateInputField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
 
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
+        // Prevent invalid key presses
+        field.addEventListener("keypress", function(e) {
+            let char = String.fromCharCode(e.which);
+            if (!/^[A-Za-z\s]$/.test(char)) {
+                e.preventDefault();
+                errorElem.style.display = "block";
+                return false;
+            }
+        });
+
+        // Remove invalid characters from pasted input and update error message
+        field.addEventListener("input", function(e) {
+            let cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
+            if (field.value !== cleaned) {
+                field.value = cleaned;
+                errorElem.style.display = "block";
+            } else {
+                errorElem.style.display = "none";
+            }
+        });
     }
 
+    // Attach real-time validations for first name and last name
+    validateInputField("firstname", "firstname-error");
+    validateInputField("lastname", "lastname-error");
+
+    // Existing form submission validation for all fields and password pattern
     document.getElementById("editUserForm").addEventListener("submit", function(event) {
         let firstname = document.getElementById("firstname").value.trim();
         let lastname  = document.getElementById("lastname").value.trim();
@@ -238,7 +263,6 @@ include('dbconnect.php');
         let username  = document.getElementById("username").value.trim();
         let password  = document.getElementById("password").value.trim();
 
-        // Basic client-side validation
         if (firstname.length === 0 || lastname.length === 0 || email.length === 0 || username.length === 0) {
             Swal.fire("Error", "All fields must be filled out.", "error");
             event.preventDefault();
@@ -257,12 +281,8 @@ include('dbconnect.php');
             return;
         }
 
-        // If password is provided, validate its pattern
         if (password.length > 0) {
-            // Count only alphabetical letters (a-z, A-Z)
             let letterCount = (password.match(/[a-zA-Z]/g) || []).length;
-
-            // Password must contain at least 8 alphabetical characters (A-Z, a-z), one uppercase, one lowercase, and one number
             let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
             if (letterCount < 8 || !passwordPattern.test(password)) {
@@ -272,10 +292,16 @@ include('dbconnect.php');
                     text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
                     showConfirmButton: true
                 });
-                event.preventDefault(); // Prevent form submission
+                event.preventDefault();
             }
         }
     });
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 </script>
-
-
