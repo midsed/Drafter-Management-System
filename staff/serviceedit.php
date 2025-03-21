@@ -166,6 +166,7 @@ if (!$service) {
                 <input type="text" id="lName" name="lName" 
                        value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>" required
                        pattern="^[A-Za-z\s]+$" title="Invalid name format">
+                       
             </div>
 
             <div class="form-group">
@@ -233,41 +234,56 @@ if (!$service) {
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-    // Function to validate email format
-    function validateEmail(input) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(input.value)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email!',
-                text: 'Please enter a valid email address.',
-                confirmButtonColor: '#d63031'
+        // Real-time name validation for first and last name
+        function watchNameField(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+            const pattern = /^[A-Za-z\s]+$/;
+
+            // Show/hide error in real-time as user types
+            field.addEventListener("input", function () {
+                if (!pattern.test(field.value)) {
+                    errorElem.style.display = "block";  // show error
+                } else {
+                    errorElem.style.display = "none";   // hide error
+                }
             });
-            input.value = ""; // Clear invalid input
         }
-    }
+        watchNameField("fName", "fName-error");
+        watchNameField("lName", "lName-error");
 
-    // Attach validation to the email field on blur
-    document.getElementById("client_email").addEventListener("blur", function () {
-        validateEmail(this);
-    });
-
-    // Prevent form submission if email is invalid
-    document.querySelector("form").addEventListener("submit", function (event) {
-        const email = document.getElementById("client_email").value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Form Error!',
-                text: 'Please enter a valid email before submitting.',
-                confirmButtonColor: '#d63031'
-            });
-            event.preventDefault(); // Stop form submission
+        // Email validation on blur
+        function validateEmail(input) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Email!',
+                    text: 'Please enter a valid email address.',
+                    confirmButtonColor: '#d63031'
+                });
+                input.value = ""; // Clear invalid input
+            }
         }
+        document.getElementById("client_email").addEventListener("blur", function () {
+            validateEmail(this);
+        });
+
+        // Prevent form submission if email is invalid
+        document.querySelector("form").addEventListener("submit", function (event) {
+            const email = document.getElementById("client_email").value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Form Error!',
+                    text: 'Please enter a valid email before submitting.',
+                    confirmButtonColor: '#d63031'
+                });
+                event.preventDefault();
+            }
+        });
     });
-});
 
 function resetForm() {
     Swal.fire({

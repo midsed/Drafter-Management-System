@@ -128,6 +128,12 @@ $username = $user['Username'];
     <div class="center-container">
         <form action="" method="POST">
             <div class="form-group">
+                <label for="partName">Part Name:</label>
+                <input type="text" id="partName" name="partName" required maxlength="100" 
+                pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
+            </div>
+
+            <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" required maxlength="40" 
                     pattern="^[A-Za-z\s]+$" title="Invalid name format.">
@@ -138,12 +144,11 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
-                <input type="text" id="lName" name="lName" required maxlength="40">
-            </div>
-
-            <div class="form-group">
-                <label for="lName">Customer Last Name:</label>
-                <input type="text" id="lName" name="lName" required maxlength="40">
+                <input type="text" id="lName" name="lName" required maxlength="40" 
+                    pattern="^[A-Za-z\s]+$" title="Invalid name format.">
+                <span id="lName-error" class="error-message" style="color: red; display: none;">
+                    Invalid name format. Only letters and spaces allowed.
+                </span>
             </div>
             
             <div class="form-group">
@@ -253,6 +258,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mainContent.classList.toggle('collapsed');
     }
 
+    function validateNameField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+
+        // Prevent invalid keystrokes
+        field.addEventListener("keypress", function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/^[A-Za-z\s]$/.test(char)) {
+                e.preventDefault();
+                errorElem.style.display = "block";
+                return false;
+            }
+        });
+
+        // Clean pasted text and show/hide error message accordingly
+        field.addEventListener("input", function() {
+            const cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
+            if (field.value !== cleaned) {
+                field.value = cleaned;
+                errorElem.style.display = "block";
+            } else {
+                errorElem.style.display = "none";
+            }
+        });
+    }
+
+    // Attach validations after the DOM is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        validateNameField("fName", "fName-error");
+        validateNameField("lName", "lName-error");
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
     function validateEmail(input) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -266,35 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             input.value = "";
         }
     }
-
-    function validateNameField(fieldId, errorId) {
-        const field = document.getElementById(fieldId);
-        const errorElem = document.getElementById(errorId);
-
-        field.addEventListener("keypress", function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/^[A-Za-z\s]$/.test(char)) {
-                e.preventDefault();
-                errorElem.style.display = "block";
-                return false;
-            }
-        });
-
-        field.addEventListener("input", function() {
-            const cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
-            if (field.value !== cleaned) {
-                field.value = cleaned;
-                errorElem.style.display = "block";
-            } else {
-                errorElem.style.display = "none";
-            }
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        validateNameField("fName", "fName-error");
-        validateNameField("lName", "lName-error");
-    });
 
     document.getElementById("cEmail").addEventListener("blur", function () {
         validateEmail(this);
