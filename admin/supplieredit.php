@@ -2,13 +2,10 @@
 session_start();
 require_once "dbconnect.php"; // Include the database connection
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
-    echo "<script>
-            alert('Unauthorized access.');
-            window.location.href = '/Drafter-Management-System/login.php';
-          </script>";
-    exit();
-}
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
+    header("Location: /Drafter-Management-System/login.php"); 
+    exit(); 
+} 
 
 if (!isset($_GET['id'])) {
     die("Supplier ID not provided.");

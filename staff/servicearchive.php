@@ -2,13 +2,10 @@
 session_start();
 include('dbconnect.php');
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') {
-    echo "<script>
-            alert('Unauthorized access.');
-            window.location.href = '/Drafter-Management-System/login.php';
-          </script>";
-    exit();
-}
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
+    header("Location: /Drafter-Management-System/login.php"); 
+    exit(); 
+} 
 
 include('navigation/sidebar.php');
 include('navigation/topbar.php');

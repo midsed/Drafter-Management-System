@@ -1,13 +1,10 @@
 <?php
 session_start();
 include('dbconnect.php');
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
-    echo "<script>
-            alert('Unauthorized access.');
-            window.location.href = '/Drafter-Management-System/login.php';
-          </script>";
-    exit();
-}
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
+    header("Location: /Drafter-Management-System/login.php"); 
+    exit(); 
+} 
 
 // Get user details from session
 $userID = $_SESSION['UserID'];
