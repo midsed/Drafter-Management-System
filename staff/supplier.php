@@ -417,8 +417,11 @@ body {
     font-size: 14px;
     color: white;
 }
-.btn-archive, .btn-add, .btn-edit {
+.btn-archive, .btn-edit {
     background-color: #E10F0F;
+}
+.btn-add {
+    background-color: #32CD32 !important;
 }
 .actions {
     text-align: right;
