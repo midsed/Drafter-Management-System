@@ -435,7 +435,7 @@ body, button, select, input, a {
 
 .logs-table {
     width: 100%;
-    table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .logs-table th, .logs-table td {
