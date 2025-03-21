@@ -37,7 +37,7 @@ $email = $_SESSION['verified_email'];
             </form>
         </div>
         <div class="right-section">
-            <img src="images/Drafter Logo Cropped.png" alt="Drafter AutoTech Logo">
+            <img src="images/New Drafter Logo Cropped.png" alt="Drafter AutoTech Logo">
         </div>
     </div>
 </body>
