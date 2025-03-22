@@ -79,6 +79,12 @@ $result = $conn->query($sql);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Ensure dropdowns show when 'show' class is added */
+        .dropdown-content.show {
+            display: block !important;
+        }
+    </style>
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
 
