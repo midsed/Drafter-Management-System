@@ -4,7 +4,7 @@ session_start();
 require_once "dbconnect.php"; 
 
 if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
-    header("Location: /Drafter-Management-System/login.php"); 
+    header("Location: /Drafter-Management-System/login.php");
     exit(); 
 } 
 
@@ -25,7 +25,6 @@ $_SESSION['UserID'] = $user['UserID'];
 $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
-
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -117,24 +116,26 @@ $username = $user['Username'];
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
-                 style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Add Service</h1>
     </div>
 
+    <!-- Added id="service-form" -->
     <div class="center-container">
-        <form action="" method="POST">
+        <form id="service-form" action="" method="POST">
             <div class="form-group">
                 <label for="partName">Part Name:</label>
                 <input type="text" id="partName" name="partName" required maxlength="100" 
-                pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
+                       pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
+                <!-- Span for Part Name error -->
+                <span id="partName-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" required maxlength="40" 
-                    pattern="^[A-Za-z\s]+$" title="Invalid name format.">
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format.">
                 <span id="fName-error" class="error-message" style="color: red; display: none;">
                     Invalid name format. Only letters and spaces allowed.
                 </span>
@@ -143,7 +144,7 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" required maxlength="40" 
-                    pattern="^[A-Za-z\s]+$" title="Invalid name format.">
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format.">
                 <span id="lName-error" class="error-message" style="color: red; display: none;">
                     Invalid name format. Only letters and spaces allowed.
                 </span>
@@ -151,34 +152,32 @@ $username = $user['Username'];
             
             <div class="form-group">
                 <label for="cEmail">Customer Email:</label>
-                <input 
-                    type="email" 
-                    id="cEmail" 
-                    name="cEmail" 
-                    required 
-                    pattern="^[^\s@]+@gmail\.com$" 
-                    title="Please enter a valid Gmail address (e.g., sample@gmail.com)." 
-                    placeholder="sample@gmail.com">
+                <input type="email" id="cEmail" name="cEmail" required 
+                       pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" 
+                       title="Please enter a valid email address (e.g., sample@sample.com).">
+                <span id="cEmail-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
                 <input type="text" id="pNumber" name="pNumber" required 
-                    pattern="^09\d{9}$" 
-                    title="Invalid phone number format. Must start with 09 and be exactly 11 digits." 
-                    value="09" maxlength="11" 
-                    placeholder="e.g. 09171234567">
+                       pattern="^09\d{9}$" 
+                       title="Invalid phone number format. Must start with 09 and be exactly 11 digits." 
+                       value="09" maxlength="11" placeholder="e.g. 09171234567">
                 <span id="pNumber-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="form-group">
                 <label for="type">Service Type:</label>
-                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid  format.">
+                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid format.">
+                <!-- Span for Service Type error -->
+                <span id="type-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="form-group">
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" placeholder="0.00"  required>
+                <input type="number" id="price" name="price" placeholder="0.00" required>
+                <span id="price-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="actions">
@@ -259,6 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <script>
+    // Toggle sidebar
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
@@ -266,42 +266,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mainContent.classList.toggle('collapsed');
     }
 
-    function validateNameField(fieldId, errorId) {
+    // Modified validateNameField to check for empty value as well as pattern match.
+    function validateNameField(fieldId, errorId, fieldName) {
         const field = document.getElementById(fieldId);
         const errorElem = document.getElementById(errorId);
+        const pattern = /^[A-Za-z\s]+$/; // one or more letters/spaces
 
-        // Prevent invalid keystrokes
-        field.addEventListener("keypress", function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/^[A-Za-z\s]$/.test(char)) {
-                e.preventDefault();
-                errorElem.style.display = "block";
-                return false;
-            }
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
         });
 
-        // Clean pasted text and show/hide error message accordingly
-        field.addEventListener("input", function() {
-            const cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
-            if (field.value !== cleaned) {
-                field.value = cleaned;
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
                 errorElem.style.display = "block";
+                errorElem.textContent = fieldName + " is required.";
+            } else if (!pattern.test(field.value)) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid name format. Only letters and spaces allowed.";
             } else {
                 errorElem.style.display = "none";
+                errorElem.textContent = "";
             }
         });
     }
 
+    // Validate phone field (checks required and pattern) on blur.
     function validatePhoneField(fieldId, errorId) {
         const field = document.getElementById(fieldId);
         const errorElem = document.getElementById(errorId);
 
-        // Prevent deletion/backspace of the "09" prefix.
+        // Enforce digit-only input and "09" prefix while typing.
         field.addEventListener("keydown", function(e) {
             if (field.value.startsWith("09")) {
                 const start = field.selectionStart;
                 const end = field.selectionEnd;
-                // Prevent deletion if the cursor is within the first two characters or if selection covers them.
                 if ((e.key === "Backspace" && start <= 2) ||
                     (e.key === "Delete" && start < 2) ||
                     (start < 2 && end > 0)) {
@@ -309,83 +308,101 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         });
-
-        // On keypress, allow only digits.
         field.addEventListener("keypress", function(e) {
             const char = String.fromCharCode(e.which);
             if (!/^\d$/.test(char)) {
                 e.preventDefault();
-                errorElem.style.display = "block";
-                errorElem.textContent = "Invalid character. Only numbers allowed.";
             }
         });
-
-        // On input: clean the input and validate the complete format.
         field.addEventListener("input", function() {
             let value = field.value;
-            
-            // If field becomes empty, reinsert "09"
             if (value === "") {
                 value = "09";
             }
-            
-            // Remove any non-digit characters
             value = value.replace(/\D/g, "");
-            
-            // Force the value to always start with "09"
             if (!value.startsWith("09")) {
                 value = "09" + value;
             }
-            
-            field.value = value;
-            
-            // Always set the maxlength to 11 characters.
-            field.setAttribute("maxlength", "11");
-            
-            // Validate that the number is exactly 11 digits and starts with "09"
-            if (!/^09\d{9}$/.test(value)) {
+            field.value = value.slice(0, 11); // Limit to 11 digits.
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            const value = field.value;
+            if (value.trim() === "" || value === "09") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Phone number is required.";
+            } else if (!/^09\d{9}$/.test(value)) {
                 errorElem.style.display = "block";
                 errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
             } else {
                 errorElem.style.display = "none";
+                errorElem.textContent = "";
             }
         });
     }
 
-    function validateEmail(input) {
-        // This regex ensures the email ends with @gmail.com.
-        const emailRegex = /^[^\s@]+@gmail\.com$/;
-        if (!emailRegex.test(input.value)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email!',
-                text: 'Please enter a valid Gmail address (must end with @gmail.com).',
-                confirmButtonColor: '#d63031'
-            });
-            input.value = "";
-        }
+    // Modified validateEmailField to check for required value.
+    function validateEmailField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Email is required.";
+            } else if (!emailRegex.test(field.value.trim())) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Please enter a valid email address (e.g., sample@sample.com).";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
     }
 
+    // Generic function to check that a required field is not empty.
+    function validateRequiredField(fieldId, errorId, message) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = message;
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    // Validate form submission (additional checks can be added as needed)
     function validateFormSubmission() {
         const phoneField = document.getElementById("pNumber");
-        const errorElem = document.getElementById("pNumber-error");
+        const phoneError = document.getElementById("pNumber-error");
         if (!/^09\d{9}$/.test(phoneField.value)) {
-            errorElem.style.display = "block";
-            errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
+            phoneError.style.display = "block";
+            phoneError.textContent = "Invalid phone number. Must be exactly 11 digits.";
             return false;
         }
-        const email = document.getElementById("cEmail").value.trim();
-        // Using the same regex for Gmail addresses.
-        const emailRegex = /^[^\s@]+@gmail\.com$/;
-        if (!emailRegex.test(email)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email Format!',
-                text: 'Please enter a valid Gmail address (must end with @gmail.com) before submitting.',
-                confirmButtonColor: '#d63031'
-            });
+        const emailField = document.getElementById("cEmail");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailField.value.trim())) {
+            document.getElementById("cEmail-error").style.display = "block";
+            document.getElementById("cEmail-error").textContent = "Please enter a valid email address.";
             return false;
         }
+        // Additional required checks could be performed here if desired.
         return true;
     }
 
@@ -414,38 +431,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        validateNameField("fName", "fName-error");
-        validateNameField("lName", "lName-error");
-        // Attach phone validation for pNumber
+        // Validate name fields with required check.
+        validateNameField("fName", "fName-error", "First name");
+        validateNameField("lName", "lName-error", "Last name");
+        // Validate email field.
+        validateEmailField("cEmail", "cEmail-error");
+        // Validate phone field.
         validatePhoneField("pNumber", "pNumber-error");
-
-        // Attach form submission validation.
+        // Validate required for Part Name and Service Type.
+        validateRequiredField("partName", "partName-error", "Part Name is required.");
+        validateRequiredField("type", "type-error", "Service Type is required.");
+        // Validate required for Price.
+        validateRequiredField("price", "price-error", "Price is required.");
+        
         document.getElementById("service-form").addEventListener("submit", function(e) {
             if (!validateFormSubmission()) {
                 e.preventDefault();
             }
         });
-
-        // Email validation on blur
-        document.getElementById("cEmail").addEventListener("blur", function() {
-            validateEmail(this);
-        });
-
-        // Additional email validation on form submission
-        document.querySelector("form").addEventListener("submit", function(event) {
-            const email = document.getElementById("cEmail").value.trim();
-            const emailRegex = /^[^\s@]+@gmail\.com$/;
-            if (!emailRegex.test(email)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Email Format!',
-                    text: 'Please enter a valid Gmail address (must end with @gmail.com) before submitting.',
-                    confirmButtonColor: '#d63031'
-                });
-                event.preventDefault();
-            }
-        });
     });
 </script>
-
-

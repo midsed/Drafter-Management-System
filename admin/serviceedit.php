@@ -1,7 +1,7 @@
-<?php 
+<?php
 ob_start();
 session_start();
-require_once "dbconnect.php"; 
+require_once "dbconnect.php";
 
 if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
     header("Location: /Drafter-Management-System/login.php"); 
@@ -17,7 +17,8 @@ $user = $result->fetch_assoc();
 $check->close();
 
 if (!$user) {
-    die("Access Denied: Invalid user session. Please log in again.");
+    header("Location: /Drafter-Management-System/login.php"); 
+    exit(); 
 }
 
 $_SESSION['UserID'] = $user['UserID'];
@@ -25,6 +26,26 @@ $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    header("Location: /Drafter-Management-System/admin/service.php"); 
+    exit(); 
+}
+
+$service_id = $_GET['id'];
+$query = $conn->prepare("SELECT s.*, c.FName, c.LName, c.PhoneNumber 
+                         FROM service s
+                         LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+                         WHERE s.ServiceID = ?");
+$query->bind_param("i", $service_id);
+$query->execute();
+$result = $query->get_result();
+$service = $result->fetch_assoc();
+$query->close();
+
+if (!$service) {
+    echo '<script>window.location.reload();</script>';
+    exit();
+}
 ?>
 
 <?php include('navigation/sidebar.php'); ?>
@@ -46,7 +67,7 @@ $username = $user['Username'];
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         font-family: 'Poppins', sans-serif;
     }
-    
+
     label {
         display: block;
         margin-bottom: 5px;
@@ -61,7 +82,7 @@ $username = $user['Username'];
         border-radius: 3px;
         cursor: pointer;
     }
-    
+
     .form-group {
         margin-bottom: 15px;
     }
@@ -74,7 +95,7 @@ $username = $user['Username'];
         font-size: 14px;
         font-weight: 400; 
     }
-    
+
     textarea {
         resize: vertical;
         height: 100px;
@@ -99,7 +120,7 @@ $username = $user['Username'];
         gap: 15px;
         justify-content: center;
     }
-    
+
     .header {
         display: flex;
         align-items: center;
@@ -116,232 +137,281 @@ $username = $user['Username'];
 <div class="main-content">
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" 
-                 style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
-        <h1>Add Service</h1>
+        <h1>Edit Service</h1>
     </div>
 
     <div class="center-container">
-        <form action="" method="POST">
+        <form id="service-form" action="serviceedit_process.php" method="POST">
+            <!-- Hidden field for service_id -->
+            <input type="hidden" name="service_id" value="<?php echo htmlspecialchars($service['ServiceID']); ?>">
+
+            <!-- Part Name Field -->
             <div class="form-group">
-                <label for="partName">Part Name:</label>
-                <input type="text" id="partName" name="partName" required maxlength="100" 
-                pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
+                <label for="part_name">Part Name:</label>
+                <input type="text" id="part_name" name="part_name" required maxlength="100" 
+                    pattern=".*" 
+                    title="Enter a valid part name. Special characters and numbers are allowed."
+                    value="<?php echo htmlspecialchars($service['PartName'] ?? ''); ?>">
             </div>
 
+            <!-- Customer First Name Field -->
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" required maxlength="40" 
-                    pattern="^[A-Za-z\s]+$" title="Invalid name format.">
-                <span id="fName-error" class="error-message" style="color: red; display: none;">
-                    Invalid name format. Only letters and spaces allowed.
-                </span>
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format."
+                       value="<?php echo htmlspecialchars($service['FName'] ?? ''); ?>">
+                <span id="fName-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
+            <!-- Customer Last Name Field -->
             <div class="form-group">
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" required maxlength="40" 
-                    pattern="^[A-Za-z\s]+$" title="Invalid name format.">
-                <span id="lName-error" class="error-message" style="color: red; display: none;">
-                    Invalid name format. Only letters and spaces allowed.
-                </span>
+                       pattern="^[A-Za-z\s]+$" title="Invalid name format."
+                       value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>">
+                <span id="lName-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
+            <!-- Customer Email Field (Any valid email ending with .com) -->
             <div class="form-group">
-                <label for="cEmail">Customer Email:</label>
-                <input type="email" id="cEmail" name="cEmail" required>
+                <label for="client_email">Customer Email:</label>
+                <input type="email" id="client_email" name="client_email" required
+                    pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" 
+                    title="Please enter a valid email address (e.g., sample@sample.com)." 
+                    value="<?php echo htmlspecialchars($service['ClientEmail']); ?>">
+                <span id="client_email-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
+            <!-- Customer Phone Number Field -->
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
-                <input type="number" id="pNumber" name="pNumber" required maxlength="11" pattern="\d{11}"
-                title="Invalid phone number.">
+                <!-- Use type="text" for JS control; prepopulate with existing phone number -->
+                <input type="text" id="pNumber" name="pNumber" required 
+                       value="<?php echo htmlspecialchars($service['PhoneNumber'] ?? '09'); ?>" 
+                       maxlength="11" placeholder="e.g., 09171234567">
+                <span id="pNumber-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
+            <!-- Service Type Field -->
             <div class="form-group">
                 <label for="type">Service Type:</label>
-                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid  format.">
+                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" 
+                       title="Invalid format. Only letters and spaces allowed."
+                       value="<?php echo htmlspecialchars($service['Type']); ?>">
             </div>
             
+            <!-- Price Field -->
             <div class="form-group">
-                <label for="price">Price:</label>
-                <input type="number" id="price" name="price" placeholder="0.00"  required>
+                <label for="price">Service Price:</label>
+                <input type="number" id="price" name="price" placeholder="0.00" required
+                       value="<?php echo htmlspecialchars($service['Price']); ?>">
+                    <span id="price-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
+            <!-- Hidden Part ID Field (if needed) -->
+            <input type="hidden" id="part_id" name="part_id" value="<?php echo htmlspecialchars($service['PartID'] ?? ''); ?>">
+
             <div class="actions">
-                <button type="submit" class="black-button btn">Add</button>
-                <button type="reset" class="red-button btn" onclick="resetForm()">Reset</button>
+                <button type="submit" class="black-button btn">Update</button>
+                <button type="button" class="red-button btn" onclick="resetForm()">Reset</button>
             </div>
         </form>
     </div>
 </div>
 
-<?php 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $type = $_POST['type']; 
-    $fName = $_POST['fName'];
-    $lName = $_POST['lName'];
-    $pNumber = $_POST['pNumber'];
-    $cEmail = $_POST['cEmail'];
-    $price = $_POST['price'];
-    $partName = trim($_POST['partName']);
-    $date_added = date('Y-m-d H:i:s');
-
-    $checkClient = $conn->prepare("SELECT ClientEmail FROM client WHERE ClientEmail = ?");
-    $checkClient->bind_param("s", $cEmail);
-    $checkClient->execute();
-    $checkClient->store_result();
-
-    if ($checkClient->num_rows == 0) {
-        $insertClient = "INSERT INTO client (ClientEmail, FName, LName, PhoneNumber) VALUES (?, ?, ?, ?)";
-        $addClient = $conn->prepare($insertClient);
-        $addClient->bind_param("ssss", $cEmail, $fName, $lName, $pNumber);
-        $addClient->execute();
-        $addClient->close();
-    }
-    $checkClient->close();
-
-    $sql = "INSERT INTO service (Type, Date, Price, ClientEmail, PartName, StaffName) VALUES (?, ?, ?, ?, ?, ?)";
-    $add = $conn->prepare($sql);
-    $add->bind_param("ssssss", $type, $date_added, $price, $cEmail, $partName, $username);
-
-    if ($add->execute()) {
-        $timestamp = date("Y-m-d H:i:s");
-        $adminId = $_SESSION['UserID'];
-        $actionBy = $_SESSION['Username'];
-        $actionType = "Added new Service";
-
-        $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
-        $log->bind_param("sssi", $username, $actionType, $timestamp, $user_id);
-        $log->execute();
-        $log->close();
-
-        echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
-        echo '<script>
-            Swal.fire({
-                title: "Success!",
-                text: "Service added successfully!",
-                icon: "success",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#6c5ce7"
-            }).then(() => {
-                window.location = "service.php";
-            });
-        </script>';
-    } else {
-        echo '<script>
-            Swal.fire({
-                title: "Error!",
-                text: "Error adding service",
-                icon: "error",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#d63031"
-            });
-        </script>';
-    }
-
-    $add->close();
-    $conn->close();
-}
-?>
-
 <script>
+    // Toggle sidebar
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
 
-    function validateNameField(fieldId, errorId) {
+    // Modified validateNameField to check for empty value as well as pattern match.
+    function validateNameField(fieldId, errorId, fieldName) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const pattern = /^[A-Za-z\s]+$/; // one or more letters/spaces
+
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = fieldName + " is required.";
+            } else if (!pattern.test(field.value)) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid name format. Only letters and spaces allowed.";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    // Validate phone field (checks required and pattern) on blur.
+    function validatePhoneField(fieldId, errorId) {
         const field = document.getElementById(fieldId);
         const errorElem = document.getElementById(errorId);
 
-        // Prevent invalid keystrokes
+        // Enforce digit-only input and "09" prefix while typing.
+        field.addEventListener("keydown", function(e) {
+            if (field.value.startsWith("09")) {
+                const start = field.selectionStart;
+                const end = field.selectionEnd;
+                if ((e.key === "Backspace" && start <= 2) ||
+                    (e.key === "Delete" && start < 2) ||
+                    (start < 2 && end > 0)) {
+                    e.preventDefault();
+                }
+            }
+        });
         field.addEventListener("keypress", function(e) {
             const char = String.fromCharCode(e.which);
-            if (!/^[A-Za-z\s]$/.test(char)) {
+            if (!/^\d$/.test(char)) {
                 e.preventDefault();
-                errorElem.style.display = "block";
-                return false;
             }
         });
-
-        // Clean pasted text and show/hide error message accordingly
         field.addEventListener("input", function() {
-            const cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
-            if (field.value !== cleaned) {
-                field.value = cleaned;
+            let value = field.value;
+            if (value === "") {
+                value = "09";
+            }
+            value = value.replace(/\D/g, "");
+            if (!value.startsWith("09")) {
+                value = "09" + value;
+            }
+            field.value = value.slice(0, 11); // Limit to 11 digits.
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            const value = field.value;
+            if (value.trim() === "" || value === "09") {
                 errorElem.style.display = "block";
+                errorElem.textContent = "Phone number is required.";
+            } else if (!/^09\d{9}$/.test(value)) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
             } else {
                 errorElem.style.display = "none";
+                errorElem.textContent = "";
             }
         });
     }
 
-    // Attach validations after the DOM is loaded
-    document.addEventListener("DOMContentLoaded", function() {
-        validateNameField("fName", "fName-error");
-        validateNameField("lName", "lName-error");
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-    function validateEmail(input) {
+    // Modified validateEmailField to check for required value.
+    function validateEmailField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(input.value)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email!',
-                text: 'Please enter a valid email address.',
-                confirmButtonColor: '#d63031'
-            });
-            input.value = "";
-        }
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Email is required.";
+            } else if (!emailRegex.test(field.value.trim())) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Please enter a valid email address (e.g., sample@sample.com).";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
     }
 
-    document.getElementById("cEmail").addEventListener("blur", function () {
-        validateEmail(this);
-    });
+    // Generic function to check that a required field is not empty.
+    function validateRequiredField(fieldId, errorId, message) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = message;
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
 
-    document.querySelector("form").addEventListener("submit", function (event) {
-        const email = document.getElementById("cEmail").value.trim();
+    // Validate form submission (additional checks can be added as needed)
+    function validateFormSubmission() {
+        const phoneField = document.getElementById("pNumber");
+        const phoneError = document.getElementById("pNumber-error");
+        if (!/^09\d{9}$/.test(phoneField.value)) {
+            phoneError.style.display = "block";
+            phoneError.textContent = "Invalid phone number. Must be exactly 11 digits.";
+            return false;
+        }
+        const emailField = document.getElementById("client_email");
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Email Format!',
-                text: 'Please enter a valid email address before submitting.',
-                confirmButtonColor: '#d63031'
-            });
-            event.preventDefault();
+        if (!emailRegex.test(emailField.value.trim())) {
+            document.getElementById("client_email-error").style.display = "block";
+            document.getElementById("client_email-error").textContent = "Please enter a valid email address.";
+            return false;
         }
-    });
-});
+        // Additional required checks could be performed here if desired.
+        return true;
+    }
 
-function resetForm() {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This will reset all informations.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, reset it!",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#d63031",
-        cancelButtonColor: "#6c757d"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.querySelector("form").reset();
-            document.querySelectorAll("input").forEach(input => input.value = "");
-            Swal.fire({
-                title: "Reset!",
-                text: "The form has been reset.",
-                icon: "success",
-                confirmButtonColor: "#6c5ce7"
-            });
-        }
+    function resetForm() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will reset all informations.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, reset it!",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#d63031",
+            cancelButtonColor: "#6c757d"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelector("form").reset();
+                document.querySelectorAll("input").forEach(input => input.value = "");
+                Swal.fire({
+                    title: "Reset!",
+                    text: "The form has been reset.",
+                    icon: "success",
+                    confirmButtonColor: "#6c5ce7"
+                });
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Validate name fields with required check.
+        validateNameField("fName", "fName-error", "First name");
+        validateNameField("lName", "lName-error", "Last name");
+        // Validate email field.
+        validateEmailField("client_email", "client_email-error");
+        // Validate phone field.
+        validatePhoneField("pNumber", "pNumber-error");
+        // Validate required for Part Name and Service Type.
+        validateRequiredField("partName", "partName-error", "Part Name is required.");
+        validateRequiredField("type", "type-error", "Service Type is required.");
+        // Validate required for Price.
+        validateRequiredField("price", "price-error", "Price is required.");
+        
+        document.getElementById("service-form").addEventListener("submit", function(e) {
+            if (!validateFormSubmission()) {
+                e.preventDefault();
+            }
+        });
     });
-}
 </script>
