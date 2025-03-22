@@ -37,15 +37,13 @@ include('navigation/topbar.php');
         <div class="faq-item">
             <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
             <div class="faq-answer">
-                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.
-                </p>
+                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.</p>
             </div>
         </div>
         <div class="faq-item">
             <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
             <div class="faq-answer">
-                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.
-                </p>
+                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.</p>
             </div>
         </div>
         <div class="faq-item">
@@ -67,7 +65,6 @@ include('navigation/topbar.php');
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
@@ -78,12 +75,14 @@ include('navigation/topbar.php');
             const answer = question.nextElementSibling;
             const icon = question.querySelector('.icon');
 
-            // Toggle the height for smooth animation
+            // Toggle the height & rotate icon
             if (answer.style.maxHeight) {
                 answer.style.maxHeight = null;
+                answer.classList.remove('expanded');
                 icon.classList.remove('rotated');
             } else {
-                answer.style.maxHeight = answer.scrollHeight + "px"; // Set to the scroll height for animation
+                answer.style.maxHeight = answer.scrollHeight + "px";
+                answer.classList.add('expanded');
                 icon.classList.add('rotated');
             }
         });
@@ -97,15 +96,16 @@ include('navigation/topbar.php');
         faqItems.forEach(item => {
             const questionText = item.querySelector('.faq-question').textContent.toLowerCase();
             if (questionText.includes(filter)) {
-                item.style.display = ""; // Show item
+                item.style.display = "";
             } else {
-                item.style.display = "none"; // Hide item
+                item.style.display = "none";
             }
         });
     });
 </script>
 
 <style>
+/* Base styles */
 body {
     font-family: 'Poppins', sans-serif;
 }
@@ -121,9 +121,9 @@ body {
 }
 
 .search-container {
-    margin-top: 10px; /* Space between title and search bar */
-    margin-bottom: 20px; /* Space below the search bar */
-    text-align: left; /* Align text to the left */
+    margin-top: 10px; 
+    margin-bottom: 20px; 
+    text-align: left;
 }
 
 .search-container input[type="text"] {
@@ -131,8 +131,8 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
-    width: 100%; /* Make the search bar take the full width */
-    max-width: 300px; /* Optional: Set a max width for the search bar */
+    width: 100%;
+    max-width: 300px;
 }
 
 .search-container input[type="text"]:focus {
@@ -147,39 +147,63 @@ body {
     margin: 20px 0;
 }
 
+/* FAQ items: Add fadeInUp animation */
 .faq-item {
     margin-bottom: 15px;
     border-bottom: 1px solid #ddd;
     padding: 10px 0;
+    /* Here's the fadeInUp animation */
+    animation: fadeInUp 0.5s ease forwards;
 }
 
+/* FAQ questions */
 .faq-question {
     cursor: pointer;
-    color: black; /* Set text color to black */
+    color: black; 
     margin: 0;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center items vertically */
+    display: flex; 
+    align-items: center; 
     transition: color 0.3s;
 }
 
-.faq-answer {
-    max-height: 0; /* Initially hide answers */
-    overflow: hidden; /* Hide overflow */
-    transition: max-height 0.3s ease; /* Smooth transition for height */
-    color: black; /* Set answer text color to black */
+/* Change color on hover */
+.faq-item:hover .faq-question {
+    color: #007bff; 
 }
 
+/* FAQ answers: Add fade transition by toggling opacity */
+.faq-answer {
+    max-height: 0; 
+    opacity: 0;
+    overflow: hidden; 
+    transition: max-height 0.5s ease, opacity 0.5s ease; 
+    color: black; 
+}
+
+/* When expanded, make the answer fully visible */
+.faq-answer.expanded {
+    opacity: 1;
+}
+
+/* Icon rotation */
 .icon {
-    margin-right: 10px; /* Space between icon and text */
-    transition: transform 0.3s; /* Smooth rotation */
+    margin-right: 10px; 
+    transition: transform 0.3s;
 }
 
 .icon.rotated {
-    transform: rotate(90deg); /* Rotate icon when answer is shown */
+    transform: rotate(90deg); 
 }
 
-/* Additional styles for the FAQ section */
-.faq-item:hover .faq-question {
-    color: #007bff; /* Change color on hover */
+/* Keyframes for fadeInUp */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
