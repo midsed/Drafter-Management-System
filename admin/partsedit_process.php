@@ -76,7 +76,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
         $allowedTypes = ["jpg", "jpeg", "png"];
         if (!in_array($imageFileType, $allowedTypes)) {
-            die("Error: Invalid file type. Only JPG, JPEG, & PNG allowed.");
+            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+            echo '<style>
+                @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+                .swal2-popup { font-family: "Inter", sans-serif !important; }
+                .swal2-title { font-weight: 700 !important; }
+                .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
+                .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+            </style>';
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Invalid file type. Only JPG, JPEG, & PNG allowed.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#6c5ce7"
+                    }).then(() => {
+                        window.history.back(); // Redirect back to the previous page
+                    });
+                });
+            </script>';
+            exit(); // Stop further execution of the PHP script
         }
     
         if ($_FILES["part_image"]["error"] !== UPLOAD_ERR_OK) {
