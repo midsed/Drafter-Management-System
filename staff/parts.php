@@ -70,7 +70,7 @@ include('navigation/topbar.php');
         <i class="fas fa-shopping-cart"></i>
         <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
       </a>
-      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Mode</button>
+      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
       <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
       <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
       <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
