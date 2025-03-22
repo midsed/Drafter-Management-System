@@ -127,7 +127,7 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="partName">Part Name:</label>
                 <input type="text" id="partName" name="partName" required maxlength="100" 
-                       pattern="^[A-Za-z0-9\s]+$" title="Invalid format. Only letters, numbers, and spaces allowed.">
+                    pattern="^[A-Za-z0-9\s\-\_\.\,\!\?\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\|\:\;\'\">
                 <!-- Span for Part Name error -->
                 <span id="partName-error" class="error-message" style="color: red; display: none;"></span>
             </div>
