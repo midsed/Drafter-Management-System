@@ -317,7 +317,7 @@ body, button, select, input, a {
 }
 
 .add-user-btn {
-    background-color:  #32CD32;
+    background-color:  #00D100;
     color: white !important;
     padding: 10px 15px;
     border: none;
