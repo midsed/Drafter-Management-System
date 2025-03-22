@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
         background-color: #E10F0F;
     }
     .btn-add {
-    background-color: #00D100 !important;
+    background-color: #00A300 !important;
 }
     .actions {
         text-align: right;
