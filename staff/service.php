@@ -144,6 +144,9 @@ $result = $conn->query($sql);
         .filter-icon:hover, .sort-icon:hover {
             color: darkred;
         }
+        .sort-option {
+            font-family: 'Poppins', sans-serif;
+        }
     </style>
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
@@ -223,7 +226,7 @@ $result = $conn->query($sql);
                         <i class="fas fa-sort-alpha-down"></i>
                     </button>
                     <div id="sortDropdown" class="dropdown-content">
-                        <h4 style="margin: 0 0 10px; font-size: 16px; color: #333;">Sort By</h4>
+                        <h4 style="margin: 0 0 10px; font-family: 'Poppins', sans-serif; font-size: 16px; color: #333;"></h4>
                         <button class="sort-option red-button" data-sort="asc" style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer; margin-bottom: 10px;">
                             Ascending
                         </button>
