@@ -89,21 +89,33 @@ include('navigation/topbar.php');
     $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
     $categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
     $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
+    
     $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
-    $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
-    if (!empty($categories)) {
-        $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
-        $categoryList = "'" . implode("','", $escapedCategories) . "'";
-        $sql .= " AND Category IN ($categoryList)";
-        $countSql .= " AND Category IN ($categoryList)";
-    }
-    if (!empty($search)) {
-        $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-        $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-    }
-    // Out of stock items at the end
-    $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
-    $sql .= " LIMIT $limit OFFSET $offset";
+        $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
+        if (!empty($categories)) {
+            $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+            $categoryList = "'" . implode("','", $escapedCategories) . "'";
+            $sql .= " AND Category IN ($categoryList)";
+            $countSql .= " AND Category IN ($categoryList)";
+        }
+        if (!empty($search)) {
+            $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+            $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+        }
+
+        // Sorting logic
+        if ($sort === 'asc') {
+            $sql .= " ORDER BY Name ASC";
+        } elseif ($sort === 'desc') {
+            $sql .= " ORDER BY Name DESC";
+        } else {
+            // Default sorting (out of stock items at the end)
+            $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
+        }
+
+        $sql .= " LIMIT $limit OFFSET $offset";
+
+
     $totalResult = $conn->query($countSql);
     $totalRow = $totalResult->fetch_assoc();
     $totalPages = ceil($totalRow['total'] / $limit);
@@ -540,11 +552,20 @@ document.addEventListener("DOMContentLoaded", function () {
             const selectedSort = this.dataset.sort;
             const queryParams = new URLSearchParams(window.location.search);
             queryParams.set("sort", selectedSort);
-            const searchQuery = queryParams.get("search");
-            const categoryParam = queryParams.get("category");
-            queryParams.set("page", "1");
+            queryParams.set("page", "1"); // Reset to the first page when sorting
             window.location.search = queryParams.toString();
         });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get("sort");
+
+    document.querySelectorAll(".sort-option").forEach(option => {
+        if (option.dataset.sort === currentSort) {
+            option.classList.add("active-sort");
+        }
     });
 });
 
@@ -860,6 +881,11 @@ body {
     cursor: pointer;
     transition: background 0.3s ease;
 }
+
+.sort-option.active-sort {
+    background-color: darkred;
+}
+
 .sort-option:hover {
     background-color: darkred; 
 }
