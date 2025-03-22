@@ -27,22 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         // Validate password if provided
         if (!empty($newPassword)) {
-            // Count the number of alphabetical characters
-            $letterCount = preg_match_all('/[a-zA-Z]/', $newPassword);
-
-            // Check password conditions
-            if ($letterCount < 8 || !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $newPassword)) {
-                throw new Exception("Password must contain at least 8 alphabetical characters (a-z only), one uppercase letter, one lowercase letter, and one number.");
+            // Updated password pattern to allow special characters
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $newPassword)) {
+                throw new Exception("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
             }
-
+        
             // Hash the password before updating
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
+        
             // Update password if valid
             $passwordSql = "UPDATE user SET Password = ? WHERE UserID = ?";
             $updatePassword = $conn->prepare($passwordSql);
             $updatePassword->bind_param("si", $hashedPassword, $userID);
-
+        
             if (!$updatePassword->execute()) {
                 throw new Exception("Failed to update password: " . $updatePassword->error);
             }

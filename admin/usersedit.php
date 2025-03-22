@@ -185,7 +185,7 @@ include('dbconnect.php');
                     id="password" 
                     name="password"
                 >
-                <small>(Minimum 8 characters, at least one uppercase letter, one lowercase letter, and one number.)</small>
+                <small>(Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character.)</small>
             </div>
 
             <div class="form-group">
@@ -282,14 +282,13 @@ include('dbconnect.php');
         }
 
         if (password.length > 0) {
-            let letterCount = (password.match(/[a-zA-Z]/g) || []).length;
-            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
-            if (letterCount < 8 || !passwordPattern.test(password)) {
+            if (!passwordPattern.test(password)) {
                 Swal.fire({
                     icon: "error",
                     title: "Invalid Password!",
-                    text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
+                    text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
                     showConfirmButton: true
                 });
                 event.preventDefault();
