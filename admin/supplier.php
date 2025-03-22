@@ -635,4 +635,16 @@ th {
 tr:hover {
     background-color:rgb(218, 218, 218);
 }
+
+.supplier-table th:nth-child(6),
+.supplier-table td:nth-child(6),
+.supplier-table th:nth-child(7),
+.supplier-table td:nth-child(7) {
+    text-align: center;
+}
+
+.supplier-table th,
+.supplier-table td {
+    text-align: left;
+}
 </style>
