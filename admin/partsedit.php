@@ -115,6 +115,14 @@ if (!is_dir($uploadDir)) {
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
+
+    .gray-button {
+        background-color: #6c757d; /* Gray color */
+    }
+    .gray-button:hover {
+        background-color: #5a6268; /* Darker gray on hover */
+    }
+
     .image-preview {
         display: flex;
         justify-content: center;
@@ -310,6 +318,7 @@ if (!is_dir($uploadDir)) {
             <div class="actions">
                 <button type="submit" class="black-button btn">Update</button>
                 <button type="button" class="red-button btn" onclick="clearForm();">Clear</button>
+                <button type="button" class="btn gray-button" onclick="cancelEdit();">Cancel</button>
             </div>
         </form>
     </div>
@@ -368,5 +377,69 @@ if (!is_dir($uploadDir)) {
         } else {
             previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
         }
+    }
+
+    function cancelEdit() {
+        // Redirect to the previous page or a specific page
+        window.location.href = "partslist.php"; // Replace with your desired URL
+    }
+
+    function increaseQuantity() {
+        let quantity = document.getElementById('quantity');
+        quantity.value = parseInt(quantity.value) + 1;
+    }
+
+    function decreaseQuantity() {
+        let quantity = document.getElementById('quantity');
+        if (quantity.value > 0) {
+            quantity.value = parseInt(quantity.value) - 1;
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
+
+    function clearForm() {
+        document.querySelectorAll("input, select, textarea").forEach(element => {
+            if (element.type === "file") {
+                element.value = ""; // Clear file input
+            } else if (element.tagName === "SELECT") {
+                element.selectedIndex = 0; // Reset select to first option
+            } else {
+                element.value = ""; // Clear all other fields
+            }
+        });
+    }
+
+    function previewFile(event) {
+        const previewContainer = document.querySelector('.image-preview');
+        previewContainer.innerHTML = "";
+        
+        const fileInput = event.target;
+        const files = fileInput.files;
+        
+        if (files.length > 0) {
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.alt = "New Image Preview";
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            previewContainer.innerHTML = "<p class='no-image'>No image available</p>";
+        }
+    }
+
+    function cancelEdit() {
+        window.history.back(); // Go back to the previous page
     }
 </script>
