@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $service_id = $_POST['service_id'];
     $type = $_POST['type'];
     $price = $_POST['price'];
-    $client_email = $_POST['client_email'];
+    $client_email = $_POST['client_email']; 
     $fName = $_POST['fName'];
     $lName = $_POST['lName'];
     $pNumber = $_POST['pNumber'];
