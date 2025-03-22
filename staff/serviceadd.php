@@ -17,7 +17,8 @@ $user = $result->fetch_assoc();
 $check->close();
 
 if (!$user) {
-    die("Access Denied: Invalid user session. Please log in again.");
+    header("Location: /Drafter-Management-System/login.php");
+    exit(); 
 }
 
 $_SESSION['UserID'] = $user['UserID'];
@@ -150,18 +151,29 @@ $username = $user['Username'];
             
             <div class="form-group">
                 <label for="cEmail">Customer Email:</label>
-                <input type="email" id="cEmail" name="cEmail" required>
+                <input 
+                    type="email" 
+                    id="cEmail" 
+                    name="cEmail" 
+                    required 
+                    pattern="^[^\s@]+@gmail\.com$" 
+                    title="Please enter a valid Gmail address (e.g., sample@gmail.com)." 
+                    placeholder="sample@gmail.com">
             </div>
             
             <div class="form-group">
                 <label for="pNumber">Customer Phone Number:</label>
-                <input type="number" id="pNumber" name="pNumber" required maxlength="11" pattern="\d{11}"
-                title="Invalid phone number.">
+                <input type="text" id="pNumber" name="pNumber" required 
+                    pattern="^09\d{9}$" 
+                    title="Invalid phone number format. Must start with 09 and be exactly 11 digits." 
+                    value="09" maxlength="11" 
+                    placeholder="e.g. 09171234567">
+                <span id="pNumber-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="form-group">
                 <label for="type">Service Type:</label>
-                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid  format.">
+                <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid format.">
             </div>
             
             <div class="form-group">
@@ -250,7 +262,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
@@ -281,67 +292,160 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     }
 
-    // Attach validations after the DOM is loaded
-    document.addEventListener("DOMContentLoaded", function() {
-        validateNameField("fName", "fName-error");
-        validateNameField("lName", "lName-error");
-    });
+    function validatePhoneField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
 
-    document.addEventListener("DOMContentLoaded", function () {
+        // Prevent deletion/backspace of the "09" prefix.
+        field.addEventListener("keydown", function(e) {
+            if (field.value.startsWith("09")) {
+                const start = field.selectionStart;
+                const end = field.selectionEnd;
+                // Prevent deletion if the cursor is within the first two characters or if selection covers them.
+                if ((e.key === "Backspace" && start <= 2) ||
+                    (e.key === "Delete" && start < 2) ||
+                    (start < 2 && end > 0)) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // On keypress, allow only digits.
+        field.addEventListener("keypress", function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/^\d$/.test(char)) {
+                e.preventDefault();
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid character. Only numbers allowed.";
+            }
+        });
+
+        // On input: clean the input and validate the complete format.
+        field.addEventListener("input", function() {
+            let value = field.value;
+            
+            // If field becomes empty, reinsert "09"
+            if (value === "") {
+                value = "09";
+            }
+            
+            // Remove any non-digit characters
+            value = value.replace(/\D/g, "");
+            
+            // Force the value to always start with "09"
+            if (!value.startsWith("09")) {
+                value = "09" + value;
+            }
+            
+            field.value = value;
+            
+            // Always set the maxlength to 11 characters.
+            field.setAttribute("maxlength", "11");
+            
+            // Validate that the number is exactly 11 digits and starts with "09"
+            if (!/^09\d{9}$/.test(value)) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
+            } else {
+                errorElem.style.display = "none";
+            }
+        });
+    }
+
     function validateEmail(input) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // This regex ensures the email ends with @gmail.com.
+        const emailRegex = /^[^\s@]+@gmail\.com$/;
         if (!emailRegex.test(input.value)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Email!',
-                text: 'Please enter a valid email address.',
+                text: 'Please enter a valid Gmail address (must end with @gmail.com).',
                 confirmButtonColor: '#d63031'
             });
             input.value = "";
         }
     }
 
-    document.getElementById("cEmail").addEventListener("blur", function () {
-        validateEmail(this);
-    });
-
-    document.querySelector("form").addEventListener("submit", function (event) {
+    function validateFormSubmission() {
+        const phoneField = document.getElementById("pNumber");
+        const errorElem = document.getElementById("pNumber-error");
+        if (!/^09\d{9}$/.test(phoneField.value)) {
+            errorElem.style.display = "block";
+            errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
+            return false;
+        }
         const email = document.getElementById("cEmail").value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+        // Using the same regex for Gmail addresses.
+        const emailRegex = /^[^\s@]+@gmail\.com$/;
         if (!emailRegex.test(email)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Email Format!',
-                text: 'Please enter a valid email address before submitting.',
+                text: 'Please enter a valid Gmail address (must end with @gmail.com) before submitting.',
                 confirmButtonColor: '#d63031'
             });
-            event.preventDefault();
+            return false;
         }
-    });
-});
+        return true;
+    }
 
-function resetForm() {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This will reset all informations.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, reset it!",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#d63031",
-        cancelButtonColor: "#6c757d"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.querySelector("form").reset();
-            document.querySelectorAll("input").forEach(input => input.value = "");
-            Swal.fire({
-                title: "Reset!",
-                text: "The form has been reset.",
-                icon: "success",
-                confirmButtonColor: "#6c5ce7"
-            });
-        }
+    function resetForm() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will reset all informations.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, reset it!",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#d63031",
+            cancelButtonColor: "#6c757d"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelector("form").reset();
+                document.querySelectorAll("input").forEach(input => input.value = "");
+                Swal.fire({
+                    title: "Reset!",
+                    text: "The form has been reset.",
+                    icon: "success",
+                    confirmButtonColor: "#6c5ce7"
+                });
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        validateNameField("fName", "fName-error");
+        validateNameField("lName", "lName-error");
+        // Attach phone validation for pNumber
+        validatePhoneField("pNumber", "pNumber-error");
+
+        // Attach form submission validation.
+        document.getElementById("service-form").addEventListener("submit", function(e) {
+            if (!validateFormSubmission()) {
+                e.preventDefault();
+            }
+        });
+
+        // Email validation on blur
+        document.getElementById("cEmail").addEventListener("blur", function() {
+            validateEmail(this);
+        });
+
+        // Additional email validation on form submission
+        document.querySelector("form").addEventListener("submit", function(event) {
+            const email = document.getElementById("cEmail").value.trim();
+            const emailRegex = /^[^\s@]+@gmail\.com$/;
+            if (!emailRegex.test(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Email Format!',
+                    text: 'Please enter a valid Gmail address (must end with @gmail.com) before submitting.',
+                    confirmButtonColor: '#d63031'
+                });
+                event.preventDefault();
+            }
+        });
     });
-}
 </script>
+
+
