@@ -888,7 +888,7 @@ body {
 }
 
 .new-stock-btn {
-    background: #32CD32;
+    background: #00A300;
     color: white;
 }
 
