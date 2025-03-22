@@ -40,7 +40,7 @@ if (!empty($search)) {
     $countSql .= " AND (Type LIKE '%$search%' OR ClientEmail LIKE '%$search%' OR StaffName LIKE '%$search%' OR PartName LIKE '%$search%')";
 }
 
-// Count total
+// Count total records for pagination
 $totalResult = $conn->query($countSql);
 $totalRow    = $totalResult->fetch_assoc();
 $totalRecords= $totalRow['total'];
@@ -55,7 +55,7 @@ if ($sort === 'asc') {
     $sql .= " ORDER BY ServiceID DESC";
 }
 
-// Apply pagination limit
+// Apply pagination limit if there are more than 10 records
 if ($totalRecords > 10) {
     $sql .= " LIMIT $limit OFFSET $offset";
 }
@@ -63,17 +63,96 @@ if ($totalRecords > 10) {
 $result = $conn->query($sql);
 ?>
 
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Service</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Dropdown content hidden by default, shown when "show" class is added */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 200px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .dropdown-content.show {
+            display: block;
+        }
+        /* Pagination styling */
+        .pagination-button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: white;
+            border: 1px solid black;
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .pagination-button:hover {
+            background: #f0f0f0;
+        }
+        .active-page {
+            background: black;
+            color: white;
+            font-weight: bold;
+        }
+        /* Button styling */
+        .btn {
+            font-family: 'Poppins', sans-serif;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .btn-archive, .btn-edit {
+            background-color: #E10F0F;
+        }
+        .btn-add {
+            background-color: #00A300 !important;
+        }
+        .actions a.btn {
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        /* Table row hover */
+        tr:hover {
+            background-color: rgb(218, 218, 218);
+        }
+        /* Icon styling */
+        .filter-icon, .sort-icon {
+            color: #E10F0F;
+            font-size: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .filter-icon:hover, .sort-icon:hover {
+            color: darkred;
+        }
+    </style>
+</head>
+<body style="font-family: 'Poppins', sans-serif;">
 
 <div class="main-content">
     <!-- Header with Back Arrow & Title -->
     <div class="header" style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" 
-                 alt="Back" 
-                 style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1 style="margin: 0;">Service</h1>
     </div>
@@ -92,12 +171,10 @@ $result = $conn->query($sql);
             <div class="filter-container" style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
                 <span style="font-size: 14px; color: #333;">Filter</span>
                 <div class="dropdown" style="position: relative; display: inline-block;">
-                    <button id="filterButton" class="filter-icon"
-                            style="color: #E10F0F; font-size: 20px; background: none; border: none; cursor: pointer;">
+                    <button id="filterButton" class="filter-icon" style="color: #E10F0F; font-size: 20px; background: none; border: none; cursor: pointer;">
                         <i class="fas fa-filter"></i>
                     </button>
-                    <div id="filterDropdown" class="dropdown-content"
-                         style="display: none; position: absolute; background-color: #fff; min-width: 300px; max-height: 300px; overflow-y: auto; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1000; padding: 15px; border-radius: 8px;">
+                    <div id="filterDropdown" class="dropdown-content">
                         <div class="filter-options" style="display: flex; flex-direction: column; gap: 8px;">
                             <h4 style="margin: 0 0 10px; font-size: 16px; color: #333;">Service Type</h4>
                             <?php
@@ -127,12 +204,10 @@ $result = $conn->query($sql);
                             ?>
                         </div>
                         <div class="filter-actions" style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
-                            <button id="applyFilter" class="red-button"
-                                    style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
+                            <button id="applyFilter" class="red-button" style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
                                 Apply
                             </button>
-                            <button id="clearFilter" class="red-button"
-                                    style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
+                            <button id="clearFilter" class="red-button" style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
                                 Clear
                             </button>
                         </div>
@@ -144,19 +219,15 @@ $result = $conn->query($sql);
             <div class="sort-container" style="display: flex; white-space: nowrap; align-items: center; gap: 5px; cursor: pointer;">
                 <span style="font-size: 14px; color: #333;">Sort By</span>
                 <div class="dropdown" style="position: relative; display: inline-block;">
-                    <button id="sortButton" class="sort-icon"
-                            style="color: #E10F0F; font-size: 20px; background: none; border: none; cursor: pointer;">
+                    <button id="sortButton" class="sort-icon" style="color: #E10F0F; font-size: 20px; background: none; border: none; cursor: pointer;">
                         <i class="fas fa-sort-alpha-down"></i>
                     </button>
-                    <div id="sortDropdown" class="dropdown-content"
-                         style="display: none; position: absolute; background-color: #fff; min-width: 300px; max-height: 300px; overflow-y: auto; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1000; padding: 15px; border-radius: 8px;">
+                    <div id="sortDropdown" class="dropdown-content">
                         <h4 style="margin: 0 0 10px; font-size: 16px; color: #333;">Sort By</h4>
-                        <button class="sort-option red-button" data-sort="asc"
-                                style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer; margin-bottom: 10px;">
+                        <button class="sort-option red-button" data-sort="asc" style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer; margin-bottom: 10px;">
                             Ascending
                         </button>
-                        <button class="sort-option red-button" data-sort="desc"
-                                style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
+                        <button class="sort-option red-button" data-sort="desc" style="background-color: #E10F0F; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer;">
                             Descending
                         </button>
                     </div>
@@ -164,14 +235,12 @@ $result = $conn->query($sql);
             </div>
         </div>
 
-        <!-- Right group: Archives & + Add Service (pushed down) -->
+        <!-- Right group: Archives & + Add Service -->
         <div class="actions" style="margin-top: 15px;">
-            <a href="servicearchive.php" class="btn btn-archive" 
-               style="margin-left: 10px; background-color: #E10F0F; text-decoration: none;">
+            <a href="servicearchive.php" class="btn btn-archive" style="margin-left: 10px; background-color: #E10F0F; text-decoration: none;">
                Archives
             </a>
-            <a href="serviceadd.php" class="btn btn-add" 
-               style="margin-left: 10px; background-color: #00A300 !important; text-decoration: none;">
+            <a href="serviceadd.php" class="btn btn-add" style="margin-left: 10px; background-color: #00A300 !important; text-decoration: none;">
                + Add Service
             </a>
         </div>
@@ -204,13 +273,12 @@ $result = $conn->query($sql);
                     echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['StaffName'] ?? 'N/A') . "</td>";
                     echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['PartName']) . "</td>";
                     echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>
-                            <a href='serviceedit.php?id=" . $row['ServiceID'] . "' class='btn btn-edit'
-                               style='background-color: #E10F0F; text-decoration: none;'>
+                            <a href='serviceedit.php?id=" . $row['ServiceID'] . "' class='btn btn-edit' style='text-decoration: none;'>
                                Edit
                             </a>
                           </td>";
                     echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>
-                            <button class='btn btn-archive' style='background-color: #E10F0F;' onclick='archiveService(" . $row['ServiceID'] . ")'>
+                            <button class='btn btn-archive' onclick='archiveService(" . $row['ServiceID'] . ")'>
                                 Archive
                             </button>
                           </td>";
@@ -241,155 +309,26 @@ $result = $conn->query($sql);
         }
 
         if ($page > 1) {
-            echo '<a href="?' . $queryString . '&page=1" class="pagination-button" 
-                  style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">First</a>';
-            echo '<a href="?' . $queryString . '&page=' . ($page - 1) . '" class="pagination-button" 
-                  style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Previous</a>';
+            echo '<a href="?' . $queryString . '&page=1" class="pagination-button" style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">First</a>';
+            echo '<a href="?' . $queryString . '&page=' . ($page - 1) . '" class="pagination-button" style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Previous</a>';
         }
 
         for ($i = $startPage; $i <= $endPage; $i++) {
             $activeClass = ($i == $page) ? 'active-page' : '';
             $activeStyle = ($i == $page) ? 'background: black; color: white; font-weight: bold;' : '';
-            echo '<a href="?' . $queryString . '&page=' . $i . '" class="pagination-button ' . $activeClass . '" 
-                  style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black; ' . $activeStyle . '">' 
-                  . $i . '</a>';
+            echo '<a href="?' . $queryString . '&page=' . $i . '" class="pagination-button ' . $activeClass . '" style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black; ' . $activeStyle . '">' . $i . '</a>';
         }
 
         if ($page < $totalPages) {
-            echo '<a href="?' . $queryString . '&page=' . ($page + 1) . '" class="pagination-button" 
-                  style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Next</a>';
-            echo '<a href="?' . $queryString . '&page=' . $totalPages . '" class="pagination-button" 
-                  style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Last</a>';
+            echo '<a href="?' . $queryString . '&page=' . ($page + 1) . '" class="pagination-button" style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Next</a>';
+            echo '<a href="?' . $queryString . '&page=' . $totalPages . '" class="pagination-button" style="padding: 6px 12px; border-radius: 4px; background: white; border: 1px solid black; color: black;">Last</a>';
         }
     ?>
 </div>
 
+<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-    .swal2-popup { font-family: "Inter", sans-serif !important; }
-    .swal2-title { font-weight: 700 !important; }
-    .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-    .swal2-confirm { background-color: #32CD32 !important; color: white !important; }
-    .swal2-cancel   { background-color: #d63031 !important; color: white !important; }
-
-    /* Force link color to remain white for visited links, etc. */
-    .actions a.btn:link,
-    .actions a.btn:visited,
-    .actions a.btn:hover,
-    .actions a.btn:active {
-        color: #fff !important;
-        text-decoration: none !important;
-    }
-
-    .btn {
-        font-family: 'Poppins', sans-serif;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-        color: white; /* fallback if the above link rule isn't enough */
-    }
-    .btn-archive, .btn-edit {
-        background-color: #E10F0F;
-    }
-    .btn-add {
-        background-color: #00A300 !important;
-    }
-    .actions {
-        text-align: right;
-        width: 100%;
-    }
-    .actions .btn {
-        margin-left: 10px;
-    }
-
-    .supplier-table td:nth-child(7),
-    .supplier-table td:nth-child(8) {
-        text-align: center;
-    }
-
-    /* Filter & Sort styling remains mostly unchanged from your code */
-    .filter-icon, .sort-icon {
-        color: #E10F0F;
-        font-size: 20px;
-        transition: color 0.3s ease;
-        background: none;
-        border: none;
-        cursor: pointer;
-    }
-    .filter-icon:hover, .sort-icon:hover {
-        color: darkred;
-    }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #fff;
-        min-width: 300px;
-        max-height: 300px;
-        overflow-y: auto;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        padding: 15px;
-        border-radius: 8px;
-    }
-    .dropdown-content.show {
-        display: block;
-    }
-
-    .pagination-button {
-        padding: 6px 12px;
-        border-radius: 4px;
-        background: white;
-        border: 1px solid black;
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-        font-size: 14px;
-    }
-    .pagination-button:hover {
-        background: #f0f0f0;
-    }
-    .active-page {
-        background: black;
-        color: white;
-        font-weight: bold;
-    }
-
-    /* Table row hover, etc. */
-    tr:hover {
-        background-color: rgb(218, 218, 218);
-    }
-</style>
-
 <script>
-function toggleSidebar() {
-    document.querySelector('.sidebar')?.classList.toggle('collapsed');
-    document.querySelector('.main-content')?.classList.toggle('collapsed');
-}
-
-document.getElementById("searchInput").addEventListener("input", function () {
-    const searchValue = this.value.trim();
-    const currentUrl = new URL(window.location.href);
-    if (searchValue) {
-        currentUrl.searchParams.set("search", searchValue);
-    } else {
-        currentUrl.searchParams.delete("search");
-    }
-    currentUrl.searchParams.set("page", "1");
-
-    fetch(currentUrl.toString())
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
-            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination")?.innerHTML || "";
-        })
-        .catch(error => console.error("Error updating search results:", error));
-});
-
 function archiveService(serviceID) {
     Swal.fire({
         title: "Are you sure?",
@@ -521,9 +460,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 document.getElementById("logsTableBody").innerHTML = doc.getElementById("logsTableBody").innerHTML;
-                document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML || "";
+                document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination")?.innerHTML || "";
             })
             .catch(error => console.error("Error updating search results:", error));
     });
 });
 </script>
+
+</body>
+</html>
