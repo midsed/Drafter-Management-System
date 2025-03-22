@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
     header("Location: /Drafter-Management-System/login.php"); 
     exit(); 
 } 
@@ -399,7 +399,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<!-- STYLES (same alignment and design) -->
 <style>
 body {
     font-family: 'Poppins', sans-serif;
@@ -635,16 +634,6 @@ th {
 tr:hover {
     background-color:rgb(218, 218, 218);
 }
-
-.supplier-table th:nth-child(6),
-.supplier-table td:nth-child(6),
-.supplier-table th:nth-child(7),
-.supplier-table td:nth-child(7) {
-    text-align: center;
-}
-
-.supplier-table th,
-.supplier-table td {
-    text-align: left;
-}
 </style>
+</body>
+</html>

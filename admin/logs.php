@@ -452,6 +452,11 @@ body, button, select, input, a {
 a {
     text-decoration: none;
 }
+.logs-table th, .logs-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
 </style>
 
 </body>
