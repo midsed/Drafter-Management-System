@@ -494,6 +494,11 @@ body, button, select, input, a {
     color: white;
     font-weight: bold;
 }
+.supplier-table th, .supplier-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
 </style>
 
 </body>

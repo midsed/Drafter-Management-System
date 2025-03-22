@@ -624,16 +624,17 @@ table {
 th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
+    text-align: center !important; /* Center the content with !important */
 }
 
 th {
-    background-color:rgb(255, 255, 255);
+    background-color: rgb(255, 255, 255);
 }
 
 tr:hover {
     background-color:rgb(218, 218, 218);
 }
+
 </style>
 </body>
 </html>
