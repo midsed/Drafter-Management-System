@@ -2,10 +2,12 @@
 session_start();
 include('dbconnect.php'); 
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
+// Allow only Staff and Admin roles to access the cart page
+if (isset($_SESSION['UserID']) && ($_SESSION['RoleType'] != 'Staff' && $_SESSION['RoleType'] != 'Admin')) { 
     header("Location: /Drafter-Management-System/login.php"); 
     exit(); 
 } 
+
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
@@ -60,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+<!-- Rest of your HTML and PHP code -->
 
 <div class="main-content">
     <div class="header">

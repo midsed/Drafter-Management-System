@@ -474,45 +474,64 @@ document.addEventListener("DOMContentLoaded", function () {
     const supplierPhoneInput = document.getElementById("supplier_phone");
     const supplierAddressInput = document.getElementById("supplier_address");
 
+    // Validate Supplier Name (only when input is provided)
     supplierNameInput.addEventListener("input", function () {
-        if (supplierNameInput.value.trim() !== "") {
+        let value = supplierNameInput.value.trim();
+        if (value !== "") {
+            // Validate characters (only letters and spaces allowed)
+            let validValue = value.replace(/[^a-zA-Z\s]/g, "");
+            if (value !== validValue) {
+                supplierNameInput.value = validValue;
+                showError(supplierNameInput, "Only letters and spaces are allowed.");
+            } else {
+                clearError(supplierNameInput);
+            }
+
+            // Make other fields required
             supplierEmailInput.setAttribute("required", "required");
             supplierPhoneInput.setAttribute("required", "required");
             supplierAddressInput.setAttribute("required", "required");
         } else {
+            // Clear errors and remove required attributes
+            clearError(supplierNameInput);
             supplierEmailInput.removeAttribute("required");
             supplierPhoneInput.removeAttribute("required");
             supplierAddressInput.removeAttribute("required");
         }
     });
 
-    // Existing real-time validation for Supplier Name
-    supplierNameInput.addEventListener("input", function () {
-        let value = supplierNameInput.value;
-        let validValue = value.replace(/[^a-zA-Z\s]/g, "");
-
-        if (value !== validValue) {
-            supplierNameInput.value = validValue;
-            showError(supplierNameInput, "Only letters and spaces are allowed.");
+    // Validate Supplier Email (only when input is provided)
+    supplierEmailInput.addEventListener("input", function () {
+        if (supplierEmailInput.value.trim() !== "") {
+            if (!validateEmail(supplierEmailInput.value)) {
+                showError(supplierEmailInput, "Invalid email format.");
+            } else {
+                clearError(supplierEmailInput);
+            }
         } else {
-            clearError(supplierNameInput);
+            clearError(supplierEmailInput);
         }
     });
 
-    // Real-time validation for Phone Number (11 digits only)
+    // Validate Supplier Phone (only when input is provided)
     supplierPhoneInput.addEventListener("input", function () {
-        let value = supplierPhoneInput.value;
-        let validValue = value.replace(/[^0-9]/g, "");
-
-        if (value !== validValue) {
-            supplierPhoneInput.value = validValue;
-            showError(supplierPhoneInput, "Only numbers are allowed.");
-        } else if (validValue.length !== 11) {
-            showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+        if (supplierPhoneInput.value.trim() !== "") {
+            let value = supplierPhoneInput.value.replace(/[^0-9]/g, "");
+            if (value.length !== 11) {
+                showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+            } else {
+                clearError(supplierPhoneInput);
+            }
         } else {
             clearError(supplierPhoneInput);
         }
     });
+
+    // Helper function to validate email format
+    function validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
 });
 
 </script>
@@ -542,19 +561,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $supplier_email = trim($_POST['supplier_email']);
         $supplier_phone = trim($_POST['supplier_phone']);
         $supplier_address = trim($_POST['supplier_address']);
-
-        // Check if any supplier field is filled, then validate all
+    
+        // Validate supplier fields only if any field is filled
         if (!empty($supplier_name) || !empty($supplier_email) || !empty($supplier_phone) || !empty($supplier_address)) {
+            // Ensure all fields are filled
             if (empty($supplier_name) || empty($supplier_email) || empty($supplier_phone) || empty($supplier_address)) {
                 die("<script>Swal.fire('Error!', 'All supplier fields must be filled if any are entered.', 'error');</script>");
             }
-
+    
+            // Validate email format
             if (!filter_var($supplier_email, FILTER_VALIDATE_EMAIL)) {
                 die("<script>Swal.fire('Error!', 'Invalid email format.', 'error');</script>");
             }
-
-            if (!preg_match('/^\+?\d{7,15}$/', $supplier_phone)) { // Allows phone numbers with 7-15 digits
-                die("<script>Swal.fire('Error!', 'Invalid phone number format.', 'error');</script>");
+    
+            // Validate phone number (exactly 11 digits)
+            if (!preg_match('/^\d{11}$/', $supplier_phone)) {
+                die("<script>Swal.fire('Error!', 'Phone number must be exactly 11 digits.', 'error');</script>");
+            }
+    
+            // Validate supplier name (max 100 characters)
+            if (strlen($supplier_name) > 100) {
+                die("<script>Swal.fire('Error!', 'Supplier name must not exceed 100 characters.', 'error');</script>");
             }
         }
     }
