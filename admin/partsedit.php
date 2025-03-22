@@ -181,7 +181,7 @@ if (!is_dir($uploadDir)) {
                 <label for="quantity">Quantity:</label>
                 <div class="quantity-container">
                     <button type="button" onclick="decreaseQuantity()">−</button>
-                    <input type="number" id="quantity" name="quantity" value="0" min="0" required>
+                    <input type="number" id="quantity" name="quantity" value="<?php echo htmlspecialchars($part['Quantity'] ?? 0); ?>" min="0" required>
                     <button type="button" onclick="increaseQuantity()">+</button>
                 </div>
             </div>
