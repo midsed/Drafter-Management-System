@@ -204,10 +204,15 @@ if (!is_dir($uploadDir)) {
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
-                    <option value="Engine" <?php echo ($part['Category'] == 'Engine' ? 'selected' : ''); ?>>Engine</option>
-                    <option value="Suspension" <?php echo ($part['Category'] == 'Suspension' ? 'selected' : ''); ?>>Suspension</option>
+                    <option value="" selected disabled>Select Category</option>
+                    <option value="Accessories" <?php echo ($part['Category'] == 'Accessories' ? 'selected' : ''); ?>>Accessories</option>
                     <option value="Body Panel" <?php echo ($part['Category'] == 'Body Panel' ? 'selected' : ''); ?>>Body Panel</option>
+                    <option value="Brakes" <?php echo ($part['Category'] == 'Brakes' ? 'selected' : ''); ?>>Brakes</option>
+                    <option value="Engine & Transmission" <?php echo ($part['Category'] == 'Engine & Transmission' ? 'selected' : ''); ?>>Engine & Transmission</option>
                     <option value="Interior" <?php echo ($part['Category'] == 'Interior' ? 'selected' : ''); ?>>Interior</option>
+                    <option value="Lights" <?php echo ($part['Category'] == 'Lights' ? 'selected' : ''); ?>>Lights</option>
+                    <option value="Suspension" <?php echo ($part['Category'] == 'Suspension' ? 'selected' : ''); ?>>Suspension</option>
+                    <option value="Wheels & Tires" <?php echo ($part['Category'] == 'Wheels & Tires' ? 'selected' : ''); ?>>Wheels & Tires</option>
                 </select>
             </div>
 
