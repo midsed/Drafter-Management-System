@@ -237,7 +237,7 @@ if (empty($receiptDetails)) {
 
         <div class="no-print button-container">
             <button onclick="window.print();" class="button">Print Receipt</button>
-            <a href="receipts.php" class="button">Back to Receipts</a>
+            <button href="receipts.php" class="button">Back to Receipts</button>
         </div>
     </div>
 
