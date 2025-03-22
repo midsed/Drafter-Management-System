@@ -169,6 +169,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         $log->bind_param("sssiss", $log_username, $log_action, $timestamp, $user_id, $part_id, $role_type);
         $log->execute();
 
+        // After successful login validation
+        $userId = $_SESSION['UserID']; // Assuming UserID is stored in the session
+        $updateLoginTimeQuery = "UPDATE user SET LastLogin = NOW() WHERE UserID = $userId";
+        $conn->query($updateLoginTimeQuery);
+
         $redirect_path = match($user['RoleType']) {
             'Admin' => './admin/dashboard.php',
             'Staff' => './staff/dashboard.php',
