@@ -5,10 +5,8 @@ if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') {
     exit(); 
 } 
 
-// Include database connection
 include('dbconnect.php'); 
 
-// Initialize variables
 $receiptID = 0;
 $errorMessage = '';
 $success = false;
@@ -18,34 +16,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
     $userID = $_SESSION['UserID'];
     $roleType = $_SESSION['RoleType'] ?? 'Staff';
     
-    // Start transaction
     $conn->begin_transaction();
     
     try {
-        // Process each item in cart
         foreach ($_SESSION['cart'] as $partID => $part) {
-            // Add to receipt
             $stmt = $conn->prepare("INSERT INTO receipt (RetrievedBy, RetrievedDate, PartID, DateAdded, Location, Quantity, RoleType, UserID) 
                                   VALUES (?, NOW(), ?, NOW(), ?, ?, ?, ?)");
             $stmt->bind_param("sisssi", $retrievedBy, $partID, $part['Location'], $part['Quantity'], $roleType, $userID);
             $stmt->execute();
             
             if (!$receiptID) {
-                $receiptID = $conn->insert_id; // Get the first receipt ID
+                $receiptID = $conn->insert_id;
             }
             
-            // Update inventory
             $stmt = $conn->prepare("UPDATE part SET Quantity = Quantity - ?, LastUpdated = NOW() WHERE PartID = ?");
             $stmt->bind_param("ii", $part['Quantity'], $partID);
             $stmt->execute();
         }
         
-        // Commit transaction
         $conn->commit();
         $success = true;
         
     } catch (Exception $e) {
-        // Rollback on error
         $conn->rollback();
         $errorMessage = $e->getMessage();
     }
@@ -166,10 +158,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
             transition: background-color 0.3s;
             min-width: 150px;
             text-align: center;
+            font-size: 16px;
         }
         .button:hover {
             background-color: #c20d0d;
         }
+        
+        button.button {
+            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
         .signatures {
             display: flex;
             justify-content: space-between;
@@ -291,7 +291,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
             </div>
             
             <?php
-            // Clear the cart after successful receipt creation
             $_SESSION['cart'] = [];
             ?>
             
@@ -309,7 +308,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
     </div>
     
     <script>
-        // Auto-print if successful
         <?php if ($success): ?>
         window.onload = function() {
             window.print();

@@ -2,17 +2,16 @@
 session_start();
 include('dbconnect.php'); 
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID'])) {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
 
-// Fetch user information
 $userID = $_SESSION['UserID'];
 $userQuery = "SELECT UserName FROM user WHERE UserID = '$userID'";
 $userResult = mysqli_query($conn, $userQuery);
 $user = mysqli_fetch_assoc($userResult);
-$userName = $user['UserName'] ?? 'User '; // Default to 'User ' if not found
+$userName = $user['UserName'] ?? 'User ';
 
 include('navigation/sidebar.php'); 
 include('navigation/topbar.php'); 
@@ -37,13 +36,15 @@ include('navigation/topbar.php');
         <div class="faq-item">
             <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
             <div class="faq-answer">
-                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.</p>
+                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.
+                </p>
             </div>
         </div>
         <div class="faq-item">
             <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
             <div class="faq-answer">
-                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.</p>
+                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.
+                </p>
             </div>
         </div>
         <div class="faq-item">
@@ -61,34 +62,36 @@ include('navigation/topbar.php');
     </div>
 </div>
 
+<footer class="footer">
+    <p>
+        <a href="termsconditions.php">Terms and Conditions</a>
+    </p>
+</footer>
+
 <script>
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
+
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
 
-    // FAQ toggle functionality
     document.querySelectorAll('.faq-question').forEach(question => {
         question.addEventListener('click', () => {
             const answer = question.nextElementSibling;
             const icon = question.querySelector('.icon');
 
-            // Toggle the height & rotate icon
             if (answer.style.maxHeight) {
                 answer.style.maxHeight = null;
-                answer.classList.remove('expanded');
                 icon.classList.remove('rotated');
             } else {
                 answer.style.maxHeight = answer.scrollHeight + "px";
-                answer.classList.add('expanded');
                 icon.classList.add('rotated');
             }
         });
     });
 
-    // Quick search functionality
     document.getElementById("searchInput").addEventListener("keyup", function(event) {
         const filter = event.target.value.toLowerCase();
         const faqItems = document.querySelectorAll('.faq-item');
@@ -105,7 +108,6 @@ include('navigation/topbar.php');
 </script>
 
 <style>
-/* Base styles */
 body {
     font-family: 'Poppins', sans-serif;
 }
@@ -121,9 +123,9 @@ body {
 }
 
 .search-container {
-    margin-top: 10px; 
-    margin-bottom: 20px; 
-    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    text-align: left; 
 }
 
 .search-container input[type="text"] {
@@ -147,63 +149,67 @@ body {
     margin: 20px 0;
 }
 
-/* FAQ items: Add fadeInUp animation */
 .faq-item {
     margin-bottom: 15px;
     border-bottom: 1px solid #ddd;
     padding: 10px 0;
-    /* Here's the fadeInUp animation */
-    animation: fadeInUp 0.5s ease forwards;
 }
 
-/* FAQ questions */
 .faq-question {
     cursor: pointer;
-    color: black; 
+    color: black;
     margin: 0;
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     transition: color 0.3s;
 }
 
-/* Change color on hover */
-.faq-item:hover .faq-question {
-    color: #007bff; 
-}
-
-/* FAQ answers: Add fade transition by toggling opacity */
 .faq-answer {
-    max-height: 0; 
-    opacity: 0;
-    overflow: hidden; 
-    transition: max-height 0.5s ease, opacity 0.5s ease; 
-    color: black; 
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    color: black;
 }
 
-/* When expanded, make the answer fully visible */
-.faq-answer.expanded {
-    opacity: 1;
-}
-
-/* Icon rotation */
 .icon {
-    margin-right: 10px; 
+    margin-right: 10px;
     transition: transform 0.3s;
 }
 
 .icon.rotated {
-    transform: rotate(90deg); 
+    transform: rotate(90deg);
 }
 
-/* Keyframes for fadeInUp */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.faq-item:hover .faq-question {
+    color: #007bff;
+}
+
+.footer {
+    background-color: lightgrey;
+    padding: 10px;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 1;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.footer a {
+    color: black;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.sidebar {
+    z-index: 5;
+}
+
+.topbar {
+    z-index: 10;
 }
 </style>

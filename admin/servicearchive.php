@@ -50,7 +50,7 @@ include('navigation/topbar.php');
                             <th>Customer</th>
                             <th>Staff</th>
                             <th>Part Name</th>
-                            <th>Relist</th>
+                            <th>Re-list</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -2,7 +2,7 @@
 session_start();
 include('dbconnect.php');
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
     header("Location: /Drafter-Management-System/login.php"); 
     exit(); 
 } 
@@ -22,20 +22,20 @@ include('navigation/topbar.php');
     </div>
 
     <?php
-        $sql = "SELECT 
-                    s.ServiceID, 
-                    s.Type, 
-                    s.Price, 
-                    c.FName AS CustomerFName, 
-                    c.LName AS CustomerLName, 
-                    s.ClientEmail, 
-                    c.PhoneNumber, 
-                    s.StaffName, 
-                    COALESCE(p.Name, 'N/A') AS PartName
-                FROM service s
-                LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
-                LEFT JOIN part p ON s.PartID = p.PartID
-                WHERE s.Archived = 1";
+       $sql = "SELECT 
+       s.ServiceID, 
+       s.Type, 
+       s.Price, 
+       c.FName AS CustomerFName, 
+       c.LName AS CustomerLName, 
+       s.ClientEmail, 
+       c.PhoneNumber, 
+       s.StaffName, 
+       s.PartName
+   FROM service s
+   LEFT JOIN client c ON s.ClientEmail = c.ClientEmail
+   WHERE s.Archived = 1";
+
 
         $result = $conn->query($sql);
 
@@ -50,7 +50,7 @@ include('navigation/topbar.php');
                             <th>Customer</th>
                             <th>Staff</th>
                             <th>Part Name</th>
-                            <th>Relist</th>
+                            <th>Re-list</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,7 +72,6 @@ include('navigation/topbar.php');
         <p style="text-align: center; font-size: 18px; padding: 20px;">No archived services found.</p>
     <?php } ?>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
@@ -136,6 +135,7 @@ function relistService(serviceID) {
     });
 }
 </script>
+
 
 <style>
     .btn-relist {

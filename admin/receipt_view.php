@@ -114,10 +114,18 @@ if (empty($receiptDetails)) {
             transition: background-color 0.3s;
             min-width: 150px;
             text-align: center;
+            font-size: 16px;
         }
         .button:hover {
             background-color: #c20d0d;
         }
+        
+        button.button {
+            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
         .signatures {
             display: flex;
             justify-content: space-between;
@@ -234,7 +242,6 @@ if (empty($receiptDetails)) {
     </div>
 
     <script>
-        // Auto-print if successful
         window.onload = function() {
             window.print();
         };

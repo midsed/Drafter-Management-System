@@ -1,7 +1,7 @@
 <?php 
 session_start();
 include('dbconnect.php');
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
     header("Location: /Drafter-Management-System/login.php"); 
     exit(); 
 } 
@@ -67,7 +67,7 @@ include('navigation/topbar.php');
       </div>
     </div>
     <div class="right-actions">
-      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Mode</button>
+      <button id="selectModeBtn" class="select-button"><i class="fas fa-check-square"></i> Select Parts to Re-list</button>
       <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
       <button id="relistSelectedBtn" class="green-button" style="display: none;"><i class="fas fa-archive"></i> Re-list Selected</button>
       <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
@@ -131,9 +131,6 @@ include('navigation/topbar.php');
                     <p><strong>Model:</strong> {$part['Model']}</p>
                     <p><strong>Location:</strong> {$part['Location']}</p>
                     <p><strong>Quantity:</strong> {$part['Quantity']}</p>
-                    <div class='actions'>
-                        <button class='green-button single-relist-btn' onclick='relistPart({$part['PartID']})'>Re-list</button>
-                    </div>
                 </div>
             ";
         }
@@ -158,7 +155,8 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    
+// -- Select Mode for Archived Parts --
+
 let selectMode = false;
 const selectedParts = new Set();
 
@@ -654,6 +652,22 @@ body {
 .selected-card {
     border: 6px solid #FF0000;
     animation: pulse 0.5s ease-out;
+}
+
+.select-button {
+    background: rgb(88, 186, 35);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+.select-button:hover {
+    background: darkgreen;
 }
 @keyframes pulse {
     0% {
