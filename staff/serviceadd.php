@@ -111,6 +111,12 @@ $username = $user['Username'];
     .header h1 {
         margin: 0;
     }
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        display: none;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="main-content">
@@ -129,14 +135,14 @@ $username = $user['Username'];
                 <input type="text" id="partName" name="partName" required maxlength="100" 
                     pattern="^[A-Za-z0-9\s\-\_\.\,\!\?\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\|\:\;\'\">
                 <!-- Span for Part Name error -->
-                <span id="partName-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="partName-error" class="error-message"></span>
             </div>
 
             <div class="form-group">
                 <label for="fName">Customer First Name:</label>
                 <input type="text" id="fName" name="fName" required maxlength="40" 
                        pattern="^[A-Za-z\s]+$" title="Invalid name format.">
-                <span id="fName-error" class="error-message" style="color: red; display: none;">
+                <span id="fName-error" class="error-message">
                     Invalid name format. Only letters and spaces allowed.
                 </span>
             </div>
@@ -145,7 +151,7 @@ $username = $user['Username'];
                 <label for="lName">Customer Last Name:</label>
                 <input type="text" id="lName" name="lName" required maxlength="40" 
                        pattern="^[A-Za-z\s]+$" title="Invalid name format.">
-                <span id="lName-error" class="error-message" style="color: red; display: none;">
+                <span id="lName-error" class="error-message">
                     Invalid name format. Only letters and spaces allowed.
                 </span>
             </div>
@@ -155,7 +161,7 @@ $username = $user['Username'];
                 <input type="email" id="cEmail" name="cEmail" required 
                        pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" 
                        title="Please enter a valid email address (e.g., sample@sample.com).">
-                <span id="cEmail-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="cEmail-error" class="error-message"></span>
             </div>
             
             <div class="form-group">
@@ -164,20 +170,20 @@ $username = $user['Username'];
                        pattern="^09\d{9}$" 
                        title="Invalid phone number format. Must start with 09 and be exactly 11 digits." 
                        value="09" maxlength="11" placeholder="e.g. 09171234567">
-                <span id="pNumber-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="pNumber-error" class="error-message"></span>
             </div>
             
             <div class="form-group">
                 <label for="type">Service Type:</label>
                 <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" title="Invalid format.">
                 <!-- Span for Service Type error -->
-                <span id="type-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="type-error" class="error-message"></span>
             </div>
             
             <div class="form-group">
                 <label for="price">Price:</label>
                 <input type="number" id="price" name="price" placeholder="0.00" required>
-                <span id="price-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="price-error" class="error-message"></span>
             </div>
             
             <div class="actions">
