@@ -361,106 +361,112 @@ function clearError(input) {
     });
 
     document.addEventListener("DOMContentLoaded", function () {
-    const partNameInput = document.getElementById("part_name");
-    const partPriceInput = document.getElementById("part_price");
-    const makeInput = document.getElementById("make");
-    const modelInput = document.getElementById("model");
-    const yearModelInput = document.getElementById("year_model");
-    const submitButton = document.querySelector("button[type='submit']");
+        const partNameInput = document.getElementById("part_name");
+        const partPriceInput = document.getElementById("part_price");
+        const makeInput = document.getElementById("make");
+        const modelInput = document.getElementById("model");
+        const yearModelInput = document.getElementById("year_model");
+        const categoryInput = document.getElementById("category");
+        const authenticityInput = document.getElementById("authenticity");
+        const conditionInput = document.getElementById("condition");
+        const itemStatusInput = document.getElementById("item_status");
+        const locationInput = document.getElementById("location");
+        const partImageInput = document.getElementById("part_image");
 
-    // Validate Part Name
-    function validatePartName() {
-        if (partNameInput.value.trim() === "") {
-            showError(partNameInput, "Part Name is required.");
-            return false;
-        } else {
-            clearError(partNameInput);
-            return true;
+        // Validate Part Name
+        function validatePartName() {
+            if (partNameInput.value.trim() === "") {
+                showError(partNameInput, "Part Name is required.");
+                return false;
+            } else {
+                clearError(partNameInput);
+                return true;
+            }
         }
-    }
 
-    // Validate Part Price (Auto format to .00)
-    function validatePartPrice() {
-    let value = parseFloat(partPriceInput.value);
-    if (isNaN(value) || value <= 0) {
-        showError(partPriceInput, "Price must be greater than 0.00.");
-        partPriceInput.value = '0.00';
-        return false;
-    } else {
-        clearError(partPriceInput);
-        return true;
-    }
-}
-
-    partPriceInput.addEventListener('blur', function () {
-        let value = parseFloat(partPriceInput.value).toFixed(2);
-        if (!isNaN(value)) {
-            partPriceInput.value = value;
-        } else {
-            partPriceInput.value = '0.00';
+        // Validate Part Price
+        function validatePartPrice() {
+            let value = parseFloat(partPriceInput.value);
+            if (isNaN(value) || value <= 0) {
+                showError(partPriceInput, "Price must be greater than 0.00.");
+                partPriceInput.value = '0.00';
+                return false;
+            } else {
+                clearError(partPriceInput);
+                return true;
+            }
         }
+
+        // Validate Make and Model (No special characters)
+        function validateMakeAndModel(input) {
+            let value = input.value;
+            let validValue = value.replace(/[^a-zA-Z0-9\s]/g, "");
+            
+            if (value !== validValue) {
+                input.value = validValue;
+                showError(input, "No special characters allowed.");
+            } else {
+                clearError(input);
+            }
+        }
+
+        // Validate Year Model (Only 4 digits)
+        function validateYearModel() {
+            if (yearModelInput.value.length !== 4) {
+                showError(yearModelInput, "Year must be exactly 4 digits.");
+                return false;
+            } else {
+                clearError(yearModelInput);
+                return true;
+            }
+        }
+
+        // Validate Required Fields
+        function validateRequired(input) {
+            if (input.value.trim() === "") {
+                showError(input, "This field is required.");
+                return false;
+            } else {
+                clearError(input);
+                return true;
+            }
+        }
+
+        // Event Listeners for Blur Events
+        partNameInput.addEventListener("blur", validatePartName);
+        partPriceInput.addEventListener("blur", validatePartPrice);
+        makeInput.addEventListener("blur", () => validateMakeAndModel(makeInput));
+        modelInput.addEventListener("blur", () => validateMakeAndModel(modelInput));
+        yearModelInput.addEventListener("blur", validateYearModel);
+        categoryInput.addEventListener("blur", () => validateRequired(categoryInput));
+        authenticityInput.addEventListener("blur", () => validateRequired(authenticityInput));
+        conditionInput.addEventListener("blur", () => validateRequired(conditionInput));
+        itemStatusInput.addEventListener("blur", () => validateRequired(itemStatusInput));
+        locationInput.addEventListener("blur", () => validateRequired(locationInput));
+        partImageInput.addEventListener("blur", () => validateRequired(partImageInput));
+
+        // Submit Button Validation
+        const submitButton = document.querySelector("button[type='submit']");
+        submitButton.addEventListener("click", function (event) {
+            let isValid = true;
+
+            if (!validatePartName()) isValid = false;
+            if (!validatePartPrice()) isValid = false;
+            if (!validateMakeAndModel(makeInput)) isValid = false;
+            if (!validateMakeAndModel(modelInput)) isValid = false;
+            if (!validateYearModel()) isValid = false;
+            if (!validateRequired(categoryInput)) isValid = false;
+            if (!validateRequired(authenticityInput)) isValid = false;
+            if (!validateRequired(conditionInput)) isValid = false;
+            if (!validateRequired(itemStatusInput)) isValid = false;
+            if (!validateRequired(locationInput)) isValid = false;
+            if (!validateRequired(partImageInput)) isValid = false;
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
     });
-
-    partPriceInput.addEventListener('input', function () {
-        this.value = this.value.replace(/[^0-9.]/g, "");
-        if ((this.value.match(/\./g) || []).length > 1) {
-            this.value = this.value.slice(0, -1); // Allow only one decimal point
-        }
-    });
-
-    // Validate Make and Model (No special characters)
-    function validateMakeAndModel(input) {
-        let value = input.value;
-        let validValue = value.replace(/[^a-zA-Z0-9\s]/g, "");
-        
-        if (value !== validValue) {
-            input.value = validValue;
-            showError(input, "No special characters allowed.");
-        } else {
-            clearError(input);
-        }
-    }
-
-    // Validate Year Model (Only 4 digits)
-    yearModelInput.addEventListener('input', function () {
-        this.value = this.value.replace(/[^0-9]/g, ''); // Only allow numbers
-        if (this.value.length > 4) {
-            this.value = this.value.slice(0, 4); // Limit to 4 digits
-        }
-    });
-
-    // Show and Clear Error Messages
-    function showError(input, message) {
-        let errorSpan = input.nextElementSibling;
-        if (!errorSpan || !errorSpan.classList.contains("error-message")) {
-            errorSpan = document.createElement("span");
-            errorSpan.classList.add("error-message");
-            errorSpan.style.color = "red";
-            errorSpan.style.fontSize = "12px";
-            input.parentNode.appendChild(errorSpan);
-        }
-        errorSpan.textContent = message;
-    }
-
-    function clearError(input) {
-        let errorSpan = input.nextElementSibling;
-        if (errorSpan && errorSpan.classList.contains("error-message")) {
-            errorSpan.remove();
-        }
-    }
-
-    // Event Listeners
-    partNameInput.addEventListener("input", validatePartName);
-    partPriceInput.addEventListener("input", validatePartPrice);
-    makeInput.addEventListener("input", () => validateMakeAndModel(makeInput));
-    modelInput.addEventListener("input", () => validateMakeAndModel(modelInput));
-
-    submitButton.addEventListener("click", function (event) {
-        if (!validatePartName()) {
-            event.preventDefault();
-        }
-    });
-});
 
 document.addEventListener("DOMContentLoaded", function () {
     const supplierNameInput = document.getElementById("supplier_name");
