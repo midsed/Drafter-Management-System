@@ -487,7 +487,7 @@ body {
 #receipt-table th, #receipt-table td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
+    text-align: center;
 }
 #receipt-table th {
     background-color: #f2f2f2;

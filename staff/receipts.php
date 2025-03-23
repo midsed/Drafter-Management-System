@@ -726,6 +726,11 @@ tr:hover {
     background-color: darkred; /* Darker red on hover */
 }
 
+#receipt-table th, #receipt-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
