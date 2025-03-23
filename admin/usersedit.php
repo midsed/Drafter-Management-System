@@ -340,7 +340,7 @@ include('dbconnect.php');
             if (field.value !== cleaned) {
                 field.value = cleaned;
                 errorElem.style.display = "block";
-                errorElem.textContent = "No special character allowed";
+                errorElem.textContent = "No special character and Number allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";

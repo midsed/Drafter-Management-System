@@ -122,7 +122,7 @@ while ($row = mysqli_fetch_assoc($checkoutResult)) {
                                 <td>₱<?php echo number_format($row['PartPrice'], 2); ?></td>
                                 <td>₱<?php echo number_format($totalPrice, 2); ?></td>
                                 <td>
-                                    <a href="receipt_view.php?id=<?php echo $row['ReceiptID']; ?>" target="_blank" class="print-receipt-button">View</a>
+                                    <a href="receipt_view.php?id=<?php echo $row['ReceiptID']; ?>" target="_blank" class="print-receipt-button">Print</a>
                                 </td>
                             </tr>
                         <?php } ?>
