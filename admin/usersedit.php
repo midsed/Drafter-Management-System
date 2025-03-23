@@ -1,15 +1,38 @@
-<?php 
+<?php
 session_start();
+include('dbconnect.php');
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+// Check if user is logged in as Admin
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
+
+// Check if a valid UserID is provided
+if (!isset($_GET['UserID'])) {
+    header("Location: /Drafter-Management-System/admin/users.php");
+    exit();
+}
+
+$userID = $_GET['UserID'];
+$sql = "SELECT UserID, FName, LName, Email, Username, RoleType, Status FROM user WHERE UserID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows <= 0) {
+    header("Location: /Drafter-Management-System/admin/users.php");
+    exit();
+}
+
+$user = $result->fetch_assoc();
+$stmt->close();
 
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
-include('dbconnect.php');
 ?>
+
 
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -107,28 +130,6 @@ include('dbconnect.php');
         </a>
         <h1>Edit User</h1>
     </div>
-
-    <?php
-    if (isset($_GET['UserID'])) {
-        $userID = $_GET['UserID'];
-        $sql = "SELECT UserID, FName, LName, Email, Username, RoleType, Status FROM user WHERE UserID = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $userID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $user = $result->fetch_assoc();
-        } else {
-            echo "<script>Swal.fire('Error', 'User not found.', 'error');</script>";
-            exit;
-        }
-    } else {
-        echo "<script>Swal.fire('Error', 'Invalid request.', 'error');</script>";
-        exit;
-    }
-    ?>
-
     <div class="container">
         <form id="editUserForm" action="process_edit_user.php" method="post">
             <input type="hidden" name="UserID" value="<?php echo $user['UserID']; ?>">

@@ -1,9 +1,9 @@
 <?php
 session_start();
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 require_once "dbconnect.php"; // Include the database connection
 
@@ -162,7 +162,7 @@ $result = $conn->query($sql);
                     <th>Part Name</th>
                     <th>Email</th>
                     <th>Company Name</th>
-                    <th>Phone Number</th>
+                    <th>Phone Number</th>   
                     <th>Edit Supplier</th>
                     <th>Archive</th>
                 </tr>

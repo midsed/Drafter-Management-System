@@ -3,11 +3,10 @@ ob_start();
 session_start();
 require_once "dbconnect.php";
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
-
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
 $user_id = $_SESSION['UserID'];
 $check = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
 $check->bind_param("i", $user_id);
@@ -17,7 +16,7 @@ $user = $result->fetch_assoc();
 $check->close();
 
 if (!$user) {
-    header("Location: /Drafter-Management-System/login.php"); 
+    header("Location: /Drafter-Management-System/staff/service.php"); 
     exit(); 
 }
 

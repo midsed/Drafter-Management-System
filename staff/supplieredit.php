@@ -2,18 +2,19 @@
 session_start();
 require_once "dbconnect.php"; // Include the database connection
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 if (!isset($_GET['id'])) {
-    die("Supplier ID not provided.");
+    header("Location: /Drafter-Management-System/staff/supplier.php");
+    exit();
 }
 
 $supplierID = $_GET['id'];
 
-// Handle form submission
+// Handle form submission   
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve form data
     $companyName = $_POST['supplier'];

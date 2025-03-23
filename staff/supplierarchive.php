@@ -2,10 +2,10 @@
 session_start();
 require_once "dbconnect.php"; // Include the database connection
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
 
 if (!isset($_SESSION['Username'])) {
     $_SESSION['Username'];

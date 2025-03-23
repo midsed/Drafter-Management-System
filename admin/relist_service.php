@@ -3,10 +3,10 @@ session_start();
 include('dbconnect.php');
 
 // Ensure the user is logged in
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 // Get user details from session
 $userID = $_SESSION['UserID'];
 $username = $_SESSION['Username'];

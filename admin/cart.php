@@ -3,10 +3,10 @@ session_start();
 include('dbconnect.php'); 
 
 // Allow only Staff and Admin roles to access the cart page
-if (isset($_SESSION['UserID']) && ($_SESSION['RoleType'] != 'Staff' && $_SESSION['RoleType'] != 'Admin')) { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
