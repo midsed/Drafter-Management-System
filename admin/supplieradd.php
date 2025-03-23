@@ -81,11 +81,11 @@ include('navigation/topbar.php');
         justify-content: center;
     }
     .error-message {
-    color: red;
-    font-size: 0.9em;
-    display: none;
-    margin-top: 5px;
-}
+        color: red;
+        font-size: 0.9em;
+        display: none;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="main-content">
@@ -118,9 +118,11 @@ include('navigation/topbar.php');
             </div>
 
             <div class="form-group">
-                <label for="phone">Phone Number:</label>
-                <input type="number" id="phone" name="phone" required maxlength="11" placeholder="e.g., 09171234567" title="Phone Number is required.">
-                <span id="phone-error" class="error-message"></span>
+                <label for="phone">Supplier Phone Number:</label>
+                <input type="text" id="phone" name="phone" required 
+                       pattern="^09\d{9}$" 
+                       value="09" maxlength="11" placeholder="e.g. 09171234567">
+                <span id="phone-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
             <div class="actions">
@@ -216,17 +218,49 @@ include('navigation/topbar.php');
             const field = document.getElementById(fieldId);
             const errorElem = document.getElementById(errorId);
 
-            field.addEventListener("blur", function() {
-                if (!/^09\d{9}$/.test(field.value.trim())) {
-                    errorElem.style.display = "block";
-                    errorElem.textContent = "Invalid phone number.";
-                } else {
-                    errorElem.style.display = "none";
+            // Enforce digit-only input and "09" prefix while typing.
+            field.addEventListener("keydown", function(e) {
+                if (field.value.startsWith("09")) {
+                    const start = field.selectionStart;
+                    const end = field.selectionEnd;
+                    if ((e.key === "Backspace" && start <= 2) ||
+                        (e.key === "Delete" && start < 2) ||
+                        (start < 2 && end > 0)) {
+                        e.preventDefault();
+                    }
                 }
             });
-
-            field.addEventListener("focus", function() {
+            field.addEventListener("keypress", function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/^\d$/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+            field.addEventListener("input", function() {
+                let value = field.value;
+                if (value === "") {
+                    value = "09";
+                }
+                value = value.replace(/\D/g, "");
+                if (!value.startsWith("09")) {
+                    value = "09" + value;
+                }
+                field.value = value.slice(0, 11); // Limit to 11 digits.
                 errorElem.style.display = "none";
+                errorElem.textContent = "";
+            });
+            field.addEventListener("blur", function() {
+                const value = field.value;
+                if (value.trim() === "" || value === "09") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Phone number is required.";
+                } else if (!/^09\d{9}$/.test(value)) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
+                } else {
+                    errorElem.style.display = "none";
+                    errorElem.textContent = "";
+                }
             });
         }
 

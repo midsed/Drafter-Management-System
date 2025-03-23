@@ -102,6 +102,13 @@ if (!$supplier) {
     .header h1 {
         margin: 0;
     }
+
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        display: none;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="main-content">
@@ -120,6 +127,7 @@ if (!$supplier) {
                 <input type="email" id="email" name="email" 
                        value="<?php echo htmlspecialchars($supplier['Email']); ?>" 
                        required maxlength="64">
+                <span id="email-error" class="error-message"></span>
             </div>
             
             <div class="form-group">
@@ -127,13 +135,15 @@ if (!$supplier) {
                 <input type="text" id="supplier" name="supplier" 
                        value="<?php echo htmlspecialchars($supplier['CompanyName']); ?>" 
                        required>
+                <span id="supplier-error" class="error-message"></span>
             </div>
             
             <div class="form-group">
-                <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" 
-                       value="<?php echo htmlspecialchars($supplier['PhoneNumber']); ?>" 
-                       required>
+                <label for="phone">Supplier Phone Number:</label>
+                <input type="text" id="phone" name="phone" required 
+                       pattern="^09\d{9}$" 
+                       value="<?php echo htmlspecialchars($supplier['PhoneNumber']); ?>" maxlength="11" placeholder="e.g. 09171234567">
+                <span id="phone-error" class="error-message" style="color: red; display: none;"></span>
             </div>
             
             <div class="actions">
@@ -144,43 +154,147 @@ if (!$supplier) {
 </div>
 
 <script>
-        function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
-
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
-    document.getElementById('entryForm').addEventListener('submit', function (e) {
-        e.preventDefault();
 
-        const formData = new FormData(this);
+    document.addEventListener("DOMContentLoaded", function() {
+        validateNameField("supplier", "supplier-error", "Supplier Name");
+        validateEmailField("email", "email-error");
+        validatePhoneField("phone", "phone-error");
+        validateRequiredField("part", "part-error", "Part is required.");
 
-        fetch('update_supplier.php?id=<?php echo $supplierID; ?>', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            Swal.fire({
-                title: data.includes("Success") ? "Success!" : "Error!",
-                text: data,
-                icon: data.includes("Success") ? "success" : "error",
-                confirmButtonText: "OK"
-            }).then(() => {
-                if (data.includes("Success")) {
-                    window.location.href = "supplier.php";
+        document.getElementById("entryForm").addEventListener("submit", function(e) {
+            if (!validateFormSubmission()) e.preventDefault();
+        });
+
+        function validateFormSubmission() {
+            const fields = ["supplier", "email", "phone", "part"];
+            let valid = true;
+
+            fields.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem.value.trim() === "") {
+                    const errorElem = document.getElementById(id + "-error");
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "*";
+                    valid = false;
                 }
             });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                title: "Error!",
-                text: "An error occurred while updating the supplier.",
-                icon: "error",
-                confirmButtonText: "OK"
+
+            return valid;
+        }
+
+        function validateNameField(fieldId, errorId, fieldName) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+            const pattern = /^[A-Za-z\s]+$/;
+
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = fieldName + " is required.";
+                } else if (!pattern.test(field.value.trim())) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Only letters and spaces allowed.";
+                } else {
+                    errorElem.style.display = "none";
+                }
             });
-        });
+
+            field.addEventListener("focus", function() {
+                errorElem.style.display = "none";
+            });
+        }
+
+        function validateEmailField(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            field.addEventListener("focus", function() {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            });
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Email is required.";
+                } else if (!emailRegex.test(field.value.trim())) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Please enter a valid email address (e.g., sample@sample.com).";
+                } else {
+                    errorElem.style.display = "none";
+                    errorElem.textContent = "";
+                }
+            });
+        }
+
+        function validatePhoneField(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+
+            // Enforce digit-only input and "09" prefix while typing.
+            field.addEventListener("keydown", function(e) {
+                if (field.value.startsWith("09")) {
+                    const start = field.selectionStart;
+                    const end = field.selectionEnd;
+                    if ((e.key === "Backspace" && start <= 2) ||
+                        (e.key === "Delete" && start < 2) ||
+                        (start < 2 && end > 0)) {
+                        e.preventDefault();
+                    }
+                }
+            });
+            field.addEventListener("keypress", function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/^\d$/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+            field.addEventListener("input", function() {
+                let value = field.value;
+                if (value === "") {
+                    value = "09";
+                }
+                value = value.replace(/\D/g, "");
+                if (!value.startsWith("09")) {
+                    value = "09" + value;
+                }
+                field.value = value.slice(0, 11); // Limit to 11 digits.
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            });
+            field.addEventListener("blur", function() {
+                const value = field.value;
+                if (value.trim() === "" || value === "09") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Phone number is required.";
+                } else if (!/^09\d{9}$/.test(value)) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Invalid phone number. Must be exactly 11 digits.";
+                } else {
+                    errorElem.style.display = "none";
+                    errorElem.textContent = "";
+                }
+            });
+        }
+
+        function validateRequiredField(fieldId, errorId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = message;
+                } else {
+                    errorElem.style.display = "none";
+                }
+            });
+        }
     });
 </script>
