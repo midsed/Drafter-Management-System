@@ -325,6 +325,144 @@ if (!is_dir($uploadDir)) {
 </div>
 
 <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const partNameInput = document.getElementById("part_name");
+        const partPriceInput = document.getElementById("part_price");
+        const makeInput = document.getElementById("make");
+        const modelInput = document.getElementById("model");
+        const yearModelInput = document.getElementById("year_model");
+        const categoryInput = document.getElementById("category");
+        const authenticityInput = document.getElementById("authenticity");
+        const conditionInput = document.getElementById("part_condition");
+        const itemStatusInput = document.getElementById("item_status");
+        const locationInput = document.getElementById("location");
+        const partImageInput = document.getElementById("part_image");
+
+        // Validate Part Name
+        function validatePartName() {
+            if (partNameInput.value.trim() === "") {
+                showError(partNameInput, "Part Name is required.");
+                return false;
+            } else {
+                clearError(partNameInput);
+                return true;
+            }
+        }
+
+        // Validate Part Price
+        function validatePartPrice() {
+            let value = parseFloat(partPriceInput.value);
+            if (isNaN(value) || value <= 0) {
+                showError(partPriceInput, "Price must be greater than 0.00.");
+                partPriceInput.value = '0.00';
+                return false;
+            } else {
+                clearError(partPriceInput);
+                return true;
+            }
+        }
+
+        // Validate Make (Required)
+        function validateMake() {
+            if (makeInput.value.trim() === "") {
+                showError(makeInput, "Make is required.");
+                return false;
+            } else {
+                clearError(makeInput);
+                return true;
+            }
+        }
+
+        // Validate Model (Required)
+        function validateModel() {
+            if (modelInput.value.trim() === "") {
+                showError(modelInput, "Model is required.");
+                return false;
+            } else {
+                clearError(modelInput);
+                return true;
+            }
+        }
+
+        // Validate Year Model (Only 4 digits)
+        function validateYearModel() {
+            if (yearModelInput.value.length !== 4) {
+                showError(yearModelInput, "Year must be exactly 4 digits.");
+                return false;
+            } else {
+                clearError(yearModelInput);
+                return true;
+            }
+        }
+
+        // Validate Required Fields
+        function validateRequired(input) {
+            if (input.value.trim() === "") {
+                showError(input, "This field is required.");
+                return false;
+            } else {
+                clearError(input);
+                return true;
+            }
+        }
+
+        // Show and Clear Error Functions
+        function showError(input, message) {
+            let errorSpan = input.nextElementSibling;
+            if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+                errorSpan = document.createElement("span");
+                errorSpan.classList.add("error-message");
+                errorSpan.style.color = "red";
+                errorSpan.style.fontSize = "12px";
+                input.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.textContent = message;
+        }
+
+        function clearError(input) {
+            let errorSpan = input.nextElementSibling;
+            if (errorSpan && errorSpan.classList.contains("error-message")) {
+                errorSpan.remove();
+            }
+        }
+
+        // Event Listeners for Blur Events
+        partNameInput.addEventListener("blur", validatePartName);
+        partPriceInput.addEventListener("blur", validatePartPrice);
+        makeInput.addEventListener("blur", validateMake); // Validate Make on blur
+        modelInput.addEventListener("blur", validateModel); // Validate Model on blur
+        yearModelInput.addEventListener("blur", validateYearModel);
+        categoryInput.addEventListener("blur", () => validateRequired(categoryInput));
+        authenticityInput.addEventListener("blur", () => validateRequired(authenticityInput));
+        conditionInput.addEventListener("blur", () => validateRequired(conditionInput));
+        itemStatusInput.addEventListener("blur", () => validateRequired(itemStatusInput));
+        locationInput.addEventListener("blur", () => validateRequired(locationInput));
+        partImageInput.addEventListener("blur", () => validateRequired(partImageInput));
+
+        // Submit Button Validation
+        const submitButton = document.querySelector("button[type='submit']");
+        submitButton.addEventListener("click", function (event) {
+            let isValid = true;
+
+            if (!validatePartName()) isValid = false;
+            if (!validatePartPrice()) isValid = false;
+            if (!validateMake()) isValid = false; // Validate Make
+            if (!validateModel()) isValid = false; // Validate Model
+            if (!validateYearModel()) isValid = false;
+            if (!validateRequired(categoryInput)) isValid = false;
+            if (!validateRequired(authenticityInput)) isValid = false;
+            if (!validateRequired(conditionInput)) isValid = false;
+            if (!validateRequired(itemStatusInput)) isValid = false;
+            if (!validateRequired(locationInput)) isValid = false;
+            if (!validateRequired(partImageInput)) isValid = false;
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+
     function increaseQuantity() {
         let quantity = document.getElementById('quantity');
         quantity.value = parseInt(quantity.value) + 1;
