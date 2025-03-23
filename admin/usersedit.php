@@ -259,7 +259,7 @@ include('dbconnect.php');
                 errorElem.textContent = fieldName + " is required.";
             } else if (!pattern.test(field.value)) {
                 errorElem.style.display = "block";
-                errorElem.textContent = "Please match the requested format, No special character allowed";
+                errorElem.textContent = "Please match the requested format, No special character and Number allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
@@ -340,7 +340,7 @@ include('dbconnect.php');
             if (field.value !== cleaned) {
                 field.value = cleaned;
                 errorElem.style.display = "block";
-                errorElem.textContent = "No special character and Number allowed.";
+                errorElem.textContent = "No special character allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";

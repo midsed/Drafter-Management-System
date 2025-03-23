@@ -192,7 +192,7 @@ $username = $user['Username'];
                 errorElem.textContent = fieldName + " is required.";
             } else if (!pattern.test(field.value)) {
                 errorElem.style.display = "block";
-                errorElem.textContent = "Invalid name format. Only letters and spaces allowed.";
+                errorElem.textContent = "Please match the requested format, No special character and Number allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
@@ -273,7 +273,7 @@ $username = $user['Username'];
             if (field.value !== cleaned) {
                 field.value = cleaned;
                 errorElem.style.display = "block";
-                errorElem.textContent = "No special character and Number allowed.";
+                errorElem.textContent = "No spaces or special characters allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
