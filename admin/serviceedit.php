@@ -132,6 +132,12 @@ if (!$service) {
     .header h1 {
         margin: 0;
     }
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        display: none;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="main-content">
@@ -151,9 +157,10 @@ if (!$service) {
             <div class="form-group">
                 <label for="part_name">Part Name:</label>
                 <input type="text" id="part_name" name="part_name" required maxlength="100" 
-                    pattern=".*" 
+                    pattern="^[A-Za-z0-9\s\-\_\.\,\!\?\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\|\:\;\'\"
                     title="Enter a valid part name. Special characters and numbers are allowed."
                     value="<?php echo htmlspecialchars($service['PartName'] ?? ''); ?>">
+                    <span id="part_name-error" class="error-message"></span>
             </div>
 
             <!-- Customer First Name Field -->
@@ -162,7 +169,7 @@ if (!$service) {
                 <input type="text" id="fName" name="fName" required maxlength="40" 
                        pattern="^[A-Za-z\s]+$" title="Invalid name format."
                        value="<?php echo htmlspecialchars($service['FName'] ?? ''); ?>">
-                <span id="fName-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="fName-error" class="error-message"></span>
             </div>
 
             <!-- Customer Last Name Field -->
@@ -171,7 +178,7 @@ if (!$service) {
                 <input type="text" id="lName" name="lName" required maxlength="40" 
                        pattern="^[A-Za-z\s]+$" title="Invalid name format."
                        value="<?php echo htmlspecialchars($service['LName'] ?? ''); ?>">
-                <span id="lName-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="lName-error" class="error-message"></span>
             </div>
             
             <!-- Customer Email Field (Any valid email ending with .com) -->
@@ -181,7 +188,7 @@ if (!$service) {
                     pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" 
                     title="Please enter a valid email address (e.g., sample@sample.com)." 
                     value="<?php echo htmlspecialchars($service['ClientEmail']); ?>">
-                <span id="client_email-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="client_email-error" class="error-message"></span>
             </div>
             
             <!-- Customer Phone Number Field -->
@@ -191,7 +198,7 @@ if (!$service) {
                 <input type="text" id="pNumber" name="pNumber" required 
                        value="<?php echo htmlspecialchars($service['PhoneNumber'] ?? '09'); ?>" 
                        maxlength="11" placeholder="e.g., 09171234567">
-                <span id="pNumber-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="pNumber-error" class="error-message"></span>
             </div>
             
             <!-- Service Type Field -->
@@ -200,14 +207,16 @@ if (!$service) {
                 <input type="text" id="type" name="type" required pattern="^[A-Za-z\s]+$" 
                        title="Invalid format. Only letters and spaces allowed."
                        value="<?php echo htmlspecialchars($service['Type']); ?>">
+                <span id="type-error" class="error-message"></span>
             </div>
             
             <!-- Price Field -->
             <div class="form-group">
                 <label for="price">Service Price:</label>
                 <input type="number" id="price" name="price" placeholder="0.00" required
+                    title=""
                        value="<?php echo htmlspecialchars($service['Price']); ?>">
-                    <span id="price-error" class="error-message" style="color: red; display: none;"></span>
+                <span id="price-error" class="error-message"></span>
             </div>
             
             <!-- Hidden Part ID Field (if needed) -->
@@ -403,7 +412,7 @@ if (!$service) {
         // Validate phone field.
         validatePhoneField("pNumber", "pNumber-error");
         // Validate required for Part Name and Service Type.
-        validateRequiredField("partName", "partName-error", "Part Name is required.");
+        validateRequiredField("part_name", "part_name-error", "Part Name is required.");
         validateRequiredField("type", "type-error", "Service Type is required.");
         // Validate required for Price.
         validateRequiredField("price", "price-error", "Price is required.");

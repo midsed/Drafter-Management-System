@@ -456,25 +456,18 @@ function clearError(input) {
 
         // Submit Button Validation
         const submitButton = document.querySelector("button[type='submit']");
-        submitButton.addEventListener("click", function (event) {
-            let isValid = true;
-
-            if (!validatePartName()) isValid = false;
-            if (!validatePartPrice()) isValid = false;
-            if (!validateMake()) isValid = false; // Validate Make
-            if (!validateModel()) isValid = false; // Validate Model
-            if (!validateYearModel()) isValid = false;
-            if (!validateRequired(categoryInput)) isValid = false;
-            if (!validateRequired(authenticityInput)) isValid = false;
-            if (!validateRequired(conditionInput)) isValid = false;
-            if (!validateRequired(itemStatusInput)) isValid = false;
-            if (!validateRequired(locationInput)) isValid = false;
-            if (!validateRequired(partImageInput)) isValid = false;
-
-            if (!isValid) {
-                event.preventDefault();
-            }
-        });
+            submitButton.addEventListener("click", function (event) {
+                if (!validateAllFields()) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Please fill out all required fields.",
+                        icon: "error",
+                        confirmButtonText: "Ok",
+                        confirmButtonColor: "#d63031"
+                    });
+                }
+            });
     });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -542,6 +535,24 @@ document.addEventListener("DOMContentLoaded", function () {
         return regex.test(email);
     }
 });
+
+function validateAllFields() {
+    let isValid = true;
+
+    if (!validatePartName()) isValid = false;
+    if (!validatePartPrice()) isValid = false;
+    if (!validateMake()) isValid = false;
+    if (!validateModel()) isValid = false;
+    if (!validateYearModel()) isValid = false;
+    if (!validateRequired(categoryInput)) isValid = false;
+    if (!validateRequired(authenticityInput)) isValid = false;
+    if (!validateRequired(conditionInput)) isValid = false;
+    if (!validateRequired(itemStatusInput)) isValid = false;
+    if (!validateRequired(locationInput)) isValid = false;
+    if (!validateRequired(partImageInput)) isValid = false;
+
+    return isValid;
+}
 
 </script>
 

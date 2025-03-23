@@ -342,7 +342,7 @@ if (!is_dir($uploadDir)) {
         // Validate Part Name
         function validatePartName() {
             if (partNameInput.value.trim() === "") {
-                showError(partNameInput, "Part Name is required.");
+                showError(partNameInput, "Please fill out this field.");
                 return false;
             } else {
                 clearError(partNameInput);
@@ -366,7 +366,7 @@ if (!is_dir($uploadDir)) {
         // Validate Make (Required)
         function validateMake() {
             if (makeInput.value.trim() === "") {
-                showError(makeInput, "Make is required.");
+                showError(makeInput, "Please fill out this field.");
                 return false;
             } else {
                 clearError(makeInput);
@@ -377,7 +377,7 @@ if (!is_dir($uploadDir)) {
         // Validate Model (Required)
         function validateModel() {
             if (modelInput.value.trim() === "") {
-                showError(modelInput, "Model is required.");
+                showError(modelInput, "Please fill out this field.");
                 return false;
             } else {
                 clearError(modelInput);
@@ -399,7 +399,7 @@ if (!is_dir($uploadDir)) {
         // Validate Required Fields
         function validateRequired(input) {
             if (input.value.trim() === "") {
-                showError(input, "This field is required.");
+                showError(input, "Please fill out this field.");
                 return false;
             } else {
                 clearError(input);
@@ -407,31 +407,11 @@ if (!is_dir($uploadDir)) {
             }
         }
 
-        // Show and Clear Error Functions
-        function showError(input, message) {
-            let errorSpan = input.nextElementSibling;
-            if (!errorSpan || !errorSpan.classList.contains("error-message")) {
-                errorSpan = document.createElement("span");
-                errorSpan.classList.add("error-message");
-                errorSpan.style.color = "red";
-                errorSpan.style.fontSize = "12px";
-                input.parentNode.appendChild(errorSpan);
-            }
-            errorSpan.textContent = message;
-        }
-
-        function clearError(input) {
-            let errorSpan = input.nextElementSibling;
-            if (errorSpan && errorSpan.classList.contains("error-message")) {
-                errorSpan.remove();
-            }
-        }
-
         // Event Listeners for Blur Events
         partNameInput.addEventListener("blur", validatePartName);
         partPriceInput.addEventListener("blur", validatePartPrice);
-        makeInput.addEventListener("blur", validateMake); // Validate Make on blur
-        modelInput.addEventListener("blur", validateModel); // Validate Model on blur
+        makeInput.addEventListener("blur", validateMake);
+        modelInput.addEventListener("blur", validateModel);
         yearModelInput.addEventListener("blur", validateYearModel);
         categoryInput.addEventListener("blur", () => validateRequired(categoryInput));
         authenticityInput.addEventListener("blur", () => validateRequired(authenticityInput));
@@ -443,25 +423,38 @@ if (!is_dir($uploadDir)) {
         // Submit Button Validation
         const submitButton = document.querySelector("button[type='submit']");
         submitButton.addEventListener("click", function (event) {
-            let isValid = true;
-
-            if (!validatePartName()) isValid = false;
-            if (!validatePartPrice()) isValid = false;
-            if (!validateMake()) isValid = false; // Validate Make
-            if (!validateModel()) isValid = false; // Validate Model
-            if (!validateYearModel()) isValid = false;
-            if (!validateRequired(categoryInput)) isValid = false;
-            if (!validateRequired(authenticityInput)) isValid = false;
-            if (!validateRequired(conditionInput)) isValid = false;
-            if (!validateRequired(itemStatusInput)) isValid = false;
-            if (!validateRequired(locationInput)) isValid = false;
-            if (!validateRequired(partImageInput)) isValid = false;
+            let isValid = validateAllFields();
 
             if (!isValid) {
-                event.preventDefault();
+                event.preventDefault(); // Prevent form submission
+                Swal.fire({
+                    title: "Error!",
+                    text: "Please fill out all required fields.",
+                    icon: "error",
+                    confirmButtonText: "Ok",
+                    confirmButtonColor: "#d63031"
+                });
             }
         });
     });
+
+    function validateAllFields() {
+        let isValid = true;
+
+        if (!validatePartName()) isValid = false;
+        if (!validatePartPrice()) isValid = false;
+        if (!validateMake()) isValid = false;
+        if (!validateModel()) isValid = false;
+        if (!validateYearModel()) isValid = false;
+        if (!validateRequired(categoryInput)) isValid = false;
+        if (!validateRequired(authenticityInput)) isValid = false;
+        if (!validateRequired(conditionInput)) isValid = false;
+        if (!validateRequired(itemStatusInput)) isValid = false;
+        if (!validateRequired(locationInput)) isValid = false;
+        if (!validateRequired(partImageInput)) isValid = false;
+
+        return isValid;
+    }
 
     function increaseQuantity() {
         let quantity = document.getElementById('quantity');
@@ -579,5 +572,24 @@ if (!is_dir($uploadDir)) {
 
     function cancelEdit() {
         window.history.back(); // Go back to the previous page
+    }
+
+    function showError(input, message) {
+        let errorSpan = input.nextElementSibling;
+        if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+            errorSpan = document.createElement("span");
+            errorSpan.classList.add("error-message");
+            errorSpan.style.color = "red";
+            errorSpan.style.fontSize = "12px";
+            input.parentNode.appendChild(errorSpan);
+        }
+        errorSpan.textContent = message;
+    }
+
+    function clearError(input) {
+        let errorSpan = input.nextElementSibling;
+        if (errorSpan && errorSpan.classList.contains("error-message")) {
+            errorSpan.remove();
+        }
     }
 </script>
