@@ -463,92 +463,103 @@ function clearError(input) {
 
         // Submit Button Validation
         const submitButton = document.querySelector("button[type='submit']");
-        submitButton.addEventListener("click", function (event) {
-            let isValid = true;
+            submitButton.addEventListener("click", function (event) {
+                if (!validateAllFields()) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Please fill out all required fields.",
+                        icon: "error",
+                        confirmButtonText: "Ok",
+                        confirmButtonColor: "#d63031"
+                    });
+                }
+            });
+    });
 
-            if (!validatePartName()) isValid = false;
-            if (!validatePartPrice()) isValid = false;
-            if (!validateMake()) isValid = false; // Validate Make
-            if (!validateModel()) isValid = false; // Validate Model
-            if (!validateYearModel()) isValid = false;
-            if (!validateRequired(categoryInput)) isValid = false;
-            if (!validateRequired(authenticityInput)) isValid = false;
-            if (!validateRequired(conditionInput)) isValid = false;
-            if (!validateRequired(itemStatusInput)) isValid = false;
-            if (!validateRequired(locationInput)) isValid = false;
-            if (!validateRequired(partImageInput)) isValid = false;
+    documentaddEventListener("DOMContentLoaded", function () {
+        const supplierNameInput = document.getElementById("supplier_name");
+        const supplierEmailInput = document.getElementById("supplier_email");
+        const supplierPhoneInput = document.getElementById("supplier_phone");
+        const supplierAddressInput = document.getElementById("supplier_address");
 
-            if (!isValid) {
-                event.preventDefault();
+        // Validate Supplier Name (only when input is provided)
+        supplierNameInput.addEventListener("input", function () {
+            let value = supplierNameInput.value.trim();
+            if (value !== "") {
+                // Validate characters (only letters and spaces allowed)
+                let validValue = value.replace(/[^a-zA-Z\s]/g, "");
+                if (value !== validValue) {
+                    supplierNameInput.value = validValue;
+                    showError(supplierNameInput, "Only letters and spaces are allowed.");
+                } else {
+                    clearError(supplierNameInput);
+                }
+
+                // Make other fields required
+                supplierEmailInput.setAttribute("required", "required");
+                supplierPhoneInput.setAttribute("required", "required");
+                supplierAddressInput.setAttribute("required", "required");
+            } else {
+                // Clear errors and remove required attributes
+                clearError(supplierNameInput);
+                supplierEmailInput.removeAttribute("required");
+                supplierPhoneInput.removeAttribute("required");
+                supplierAddressInput.removeAttribute("required");
             }
         });
-    });
 
-documentaddEventListener("DOMContentLoaded", function () {
-    const supplierNameInput = document.getElementById("supplier_name");
-    const supplierEmailInput = document.getElementById("supplier_email");
-    const supplierPhoneInput = document.getElementById("supplier_phone");
-    const supplierAddressInput = document.getElementById("supplier_address");
-
-    // Validate Supplier Name (only when input is provided)
-    supplierNameInput.addEventListener("input", function () {
-        let value = supplierNameInput.value.trim();
-        if (value !== "") {
-            // Validate characters (only letters and spaces allowed)
-            let validValue = value.replace(/[^a-zA-Z\s]/g, "");
-            if (value !== validValue) {
-                supplierNameInput.value = validValue;
-                showError(supplierNameInput, "Only letters and spaces are allowed.");
-            } else {
-                clearError(supplierNameInput);
-            }
-
-            // Make other fields required
-            supplierEmailInput.setAttribute("required", "required");
-            supplierPhoneInput.setAttribute("required", "required");
-            supplierAddressInput.setAttribute("required", "required");
-        } else {
-            // Clear errors and remove required attributes
-            clearError(supplierNameInput);
-            supplierEmailInput.removeAttribute("required");
-            supplierPhoneInput.removeAttribute("required");
-            supplierAddressInput.removeAttribute("required");
-        }
-    });
-
-    // Validate Supplier Email (only when input is provided)
-    supplierEmailInput.addEventListener("input", function () {
-        if (supplierEmailInput.value.trim() !== "") {
-            if (!validateEmail(supplierEmailInput.value)) {
-                showError(supplierEmailInput, "Invalid email format.");
+        // Validate Supplier Email (only when input is provided)
+        supplierEmailInput.addEventListener("input", function () {
+            if (supplierEmailInput.value.trim() !== "") {
+                if (!validateEmail(supplierEmailInput.value)) {
+                    showError(supplierEmailInput, "Invalid email format.");
+                } else {
+                    clearError(supplierEmailInput);
+                }
             } else {
                 clearError(supplierEmailInput);
             }
-        } else {
-            clearError(supplierEmailInput);
-        }
-    });
+        });
 
-    // Validate Supplier Phone (only when input is provided)
-    supplierPhoneInput.addEventListener("input", function () {
-        if (supplierPhoneInput.value.trim() !== "") {
-            let value = supplierPhoneInput.value.replace(/[^0-9]/g, "");
-            if (value.length !== 11) {
-                showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+        // Validate Supplier Phone (only when input is provided)
+        supplierPhoneInput.addEventListener("input", function () {
+            if (supplierPhoneInput.value.trim() !== "") {
+                let value = supplierPhoneInput.value.replace(/[^0-9]/g, "");
+                if (value.length !== 11) {
+                    showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+                } else {
+                    clearError(supplierPhoneInput);
+                }
             } else {
                 clearError(supplierPhoneInput);
             }
-        } else {
-            clearError(supplierPhoneInput);
+        });
+
+        // Helper function to validate email format
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
         }
     });
 
-    // Helper function to validate email format
-    function validateEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
+    function validateAllFields() {
+        let isValid = true;
+
+        if (!validatePartName()) isValid = false;
+        if (!validatePartPrice()) isValid = false;
+        if (!validateMake()) isValid = false;
+        if (!validateModel()) isValid = false;
+        if (!validateYearModel()) isValid = false;
+        if (!validateRequired(categoryInput)) isValid = false;
+        if (!validateRequired(authenticityInput)) isValid = false;
+        if (!validateRequired(conditionInput)) isValid = false;
+        if (!validateRequired(itemStatusInput)) isValid = false;
+        if (!validateRequired(locationInput)) isValid = false;
+        if (!validateRequired(partImageInput)) isValid = false;
+
+        return isValid;
     }
-});
 
 </script>
 
