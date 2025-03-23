@@ -90,6 +90,14 @@ include('dbconnect.php');
         display: none;
         margin-top: 3px;
     }
+
+    body {
+        font-family: 'Poppins', sans-serif; /* Set the font family for the entire body */
+    }
+
+    .container, .header, .form-group, label, input, select, .btn, .error-message {
+        font-family: 'Poppins', sans-serif; /* Ensure all relevant elements use the same font */
+    }
 </style>
 
 <div class="main-content">
@@ -391,7 +399,7 @@ include('dbconnect.php');
             showCancelButton: true,
             confirmButtonText: "Yes, reset it!",
             cancelButtonText: "Cancel",
-            confirmButtonColor: "#d63031",
+            confirmButtonColor: "#32CD32",
             cancelButtonColor: "#6c757d"
         }).then((result) => {
             if (result.isConfirmed) {
@@ -401,7 +409,7 @@ include('dbconnect.php');
                     title: "Reset!",
                     text: "The form has been reset.",
                     icon: "success",
-                    confirmButtonColor: "#6c5ce7"
+                    confirmButtonColor: "#32CD32"
                 });
             }
         });

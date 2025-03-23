@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 .swal2-popup { font-family: "Inter", sans-serif !important; }
                 .swal2-title { font-weight: 700 !important; }
                 .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-                .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+                .swal2-confirm { font-weight: bold !important; background-color: #32CD32 !important; color: white !important; }
             </style>';
             echo '<script>
                 document.addEventListener("DOMContentLoaded", function() {
@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         text: "Invalid file type. Only JPG, JPEG, & PNG allowed.",
                         icon: "error",
                         confirmButtonText: "OK",
-                        confirmButtonColor: "#6c5ce7"
+                        confirmButtonColor: "#32CD32"
                     }).then(() => {
                         window.history.back(); // Redirect back to the previous page
                     });
@@ -159,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .swal2-popup { font-family: "Inter", sans-serif !important; }
             .swal2-title { font-weight: 700 !important; }
             .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+            .swal2-confirm { font-weight: bold !important; background-color: #32CD32 !important; color: white !important; }
         </style>';
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -168,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     text: "Part details updated successfully!",
                     icon: "success",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#6c5ce7"
+                    confirmButtonColor: "#32CD32"
                 }).then(() => {
                     window.location = "parts.php";
                 });

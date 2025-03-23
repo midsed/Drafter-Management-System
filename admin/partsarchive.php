@@ -241,7 +241,7 @@ document.getElementById("relistSelectedBtn").addEventListener("click", function(
             title: "No parts selected",
             text: "Please select at least one part to re-list.",
             icon: "warning",
-            confirmButtonColor: "#6c5ce7"
+            confirmButtonColor: "#32CD32"
         });
         return;
     }
@@ -250,7 +250,7 @@ document.getElementById("relistSelectedBtn").addEventListener("click", function(
         text: `Do you want to re-list ${selectedPartsArray.length} selected part${selectedPartsArray.length !== 1 ? 's' : ''}?`,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#6c5ce7",
+        confirmButtonColor: "#32CD32",
         cancelButtonColor: "#d63031",
         confirmButtonText: "Yes, re-list them!",
         cancelButtonText: "Cancel"
@@ -267,7 +267,7 @@ document.getElementById("relistSelectedBtn").addEventListener("click", function(
                     title: "Success!",
                     text: `${data.count} parts have been re-listed successfully.`,
                     icon: "success",
-                    confirmButtonColor: "#6c5ce7"
+                    confirmButtonColor: "#32CD32"
                 }).then(() => {
                     selectedParts.clear();
                     toggleSelectMode();
@@ -280,7 +280,7 @@ document.getElementById("relistSelectedBtn").addEventListener("click", function(
                     title: "Error",
                     text: "Something went wrong!",
                     icon: "error",
-                    confirmButtonColor: "#d63031"
+                    confirmButtonColor: "#32CD32"
                 });
             });
         }
