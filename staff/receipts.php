@@ -2,10 +2,10 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
 include('dbconnect.php');

@@ -2,10 +2,10 @@
 session_start();
 include('dbconnect.php'); 
 
-if (!isset($_SESSION['UserID'])) {
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
-}
+}   
 
 $userID = $_SESSION['UserID'];
 $userQuery = "SELECT UserName FROM user WHERE UserID = '$userID'";

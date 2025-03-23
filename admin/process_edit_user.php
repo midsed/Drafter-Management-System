@@ -2,10 +2,10 @@
 session_start();
 include('dbconnect.php');
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $userID = $_POST['UserID'];

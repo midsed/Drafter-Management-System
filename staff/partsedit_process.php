@@ -2,10 +2,10 @@
 session_start();
 require_once "dbconnect.php";
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 $userID = $_SESSION['UserID'];
 $userQuery = $conn->prepare("SELECT Username, RoleType FROM user WHERE UserID = ?");

@@ -2,10 +2,10 @@
 include('dbconnect.php');
 session_start();
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 $userID = $_SESSION['UserID'];
 $username = $_SESSION['Username'];
 $roleType = $_SESSION['RoleType'];
