@@ -147,7 +147,6 @@ $result = $conn->query($sql);
         <!-- Right Group: Action Buttons (Archives, + Add Supplier) -->
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
-            <a href="supplieradd.php" class="btn btn-add">+ Add Supplier</a>
         </div>
     </div>
 
