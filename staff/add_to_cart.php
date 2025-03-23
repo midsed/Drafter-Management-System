@@ -3,13 +3,10 @@ session_start();
 include('dbconnect.php');
 
 // Check if the user is logged in
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') {
-    echo "<script>
-            alert('Unauthorized access.');
-            window.location.href = '/Drafter-Management-System/login.php';
-          </script>";
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
     exit();
-}
+}   
 
 // Check if the part ID is set in the POST request
 if (isset($_POST['id'])) {

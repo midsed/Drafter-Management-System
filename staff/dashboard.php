@@ -1,10 +1,10 @@
 <?php session_start(); 
 include('dbconnect.php'); 
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2"; 
 $lowStockResult = mysqli_query($conn, $lowStockQuery); 

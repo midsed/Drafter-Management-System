@@ -2,10 +2,10 @@
 session_start();
 require_once "dbconnect.php";
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
-    header("Location: /Drafter-Management-System/login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}   
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $supplierID = $_POST['id'];
