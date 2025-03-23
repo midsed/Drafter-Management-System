@@ -429,11 +429,9 @@ document.addEventListener("DOMContentLoaded", function() {
         text-align: right;
         width: 100%;
     }
-    .actions a.btn,
-    .actions button.btn {
-        color: white !important;
-        text-decoration: none !important;
-        margin-right: 30px;
+    .actions .btn {
+        margin-left: 10px;
+        text-decoration: none;
     }
 
     .header {

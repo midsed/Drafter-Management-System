@@ -393,8 +393,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .actions a.btn,
     .actions button.btn {
         color: white !important;
-        text-decoration: none !important;
-        margin-right: 30px;
+        text-decoration: none !important
     }
     .btn {
         font-family: 'Poppins', sans-serif;
