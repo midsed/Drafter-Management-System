@@ -13,6 +13,38 @@ if (!isset($_GET['id'])) {
 
 $supplierID = $_GET['id'];
 
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Retrieve form data
+    $companyName = $_POST['supplier'];
+    $email = $_POST['email'];
+    $phoneNumber = $_POST['phone'];
+
+    // Validate input
+    if (empty($companyName) || empty($email) || empty($phoneNumber)) {
+        die("All fields are required.");
+    }
+
+    // Update the supplier in the database
+    $updateSql = "UPDATE supplier SET CompanyName = ?, Email = ?, PhoneNumber = ? WHERE SupplierID = ?";
+    $updateStmt = $conn->prepare($updateSql);
+    if ($updateStmt === false) {
+        die("Error preparing the update query: " . $conn->error);
+    }
+    $updateStmt->bind_param("sssi", $companyName, $email, $phoneNumber, $supplierID);
+    $updateStmt->execute();
+
+    if ($updateStmt->affected_rows > 0) {
+        // Redirect to supplier.php after successful update
+        header("Location: supplier.php");
+        exit();
+    } else {
+        die("Failed to update supplier.");
+    }
+
+    $updateStmt->close();
+}
+
 // Fetch supplier details from the database
 $sql = "SELECT SupplierID, CompanyName, Email, PhoneNumber FROM supplier WHERE SupplierID = ?";
 $stmt = $conn->prepare($sql);
@@ -121,7 +153,8 @@ if (!$supplier) {
     </div>
 
     <div class="center-container">
-        <form id="entryForm" method="POST">
+        <form id="entryForm" method="POST" action="supplieredit.php?id=<?php echo $supplierID; ?>">
+            <input type="hidden" name="supplierID" value="<?php echo $supplierID; ?>">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" 
