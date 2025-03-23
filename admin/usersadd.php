@@ -134,16 +134,19 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required maxlength="64">
+                <span id="email-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
             <div class="form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
+                <span id="password-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
+                <span id="username-error" class="error-message" style="color: red; display: none;"></span>
             </div>
 
             <div class="form-group">
@@ -164,77 +167,202 @@ $username = $user['Username'];
 </div>
 
 <script>
-    // Real-time validation for name fields to prevent numbers and special characters
-    function validateNameField(fieldId, errorId) {
-        const field = document.getElementById(fieldId);
-        const errorElem = document.getElementById(errorId);
-
-        // Block invalid keystrokes
-        field.addEventListener("keypress", function(e) {
-            let char = String.fromCharCode(e.which);
-            if (!/^[A-Za-z\s]$/.test(char)) {
-                e.preventDefault();
-                errorElem.style.display = "block";
-                return false;
-            }
-        });
-
-        // Remove invalid characters from pasted text
-        field.addEventListener("input", function() {
-            let cleaned = field.value.replace(/[^A-Za-z\s]/g, "");
-            if (field.value !== cleaned) {
-                field.value = cleaned;
-                errorElem.style.display = "block";
-            } else {
-                errorElem.style.display = "none";
-            }
-        });
-    }
-
-    // Attach real-time validations after DOM loads
-    document.addEventListener("DOMContentLoaded", function() {
-        validateNameField("firstname", "firstname-error");
-        validateNameField("lastname", "lastname-error");
-    });
-
-    // Existing form validation for email and password
-    function validateForm() {
-        let password = document.getElementById("password").value;
-        let email = document.getElementById("email").value;
-        
-        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-        let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!passwordRegex.test(password)) {
-            Swal.fire({
-                title: "Invalid Password!",
-                text: "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.",
-                icon: "error",
-                confirmButtonText: "Ok"
-            });
-            return false;
-        }
-
-        if (!emailRegex.test(email)) {
-            Swal.fire({
-                title: "Invalid Email!",
-                text: "Please enter a valid email address.",
-                icon: "error",
-                confirmButtonText: "Ok"
-            });
-            return false;
-        }
-
-        return true;
-    }
-
+    // Toggle sidebar
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
         mainContent.classList.toggle('collapsed');
     }
+
+    // Modified validateNameField to check for empty value as well as pattern match.
+    function validateNameField(fieldId, errorId, fieldName) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const pattern = /^[A-Za-z\s]+$/; // one or more letters/spaces
+
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = fieldName + " is required.";
+            } else if (!pattern.test(field.value)) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Invalid name format. Only letters and spaces allowed.";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    // Modified validateEmailField to check for required value.
+    function validateEmailField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Email is required.";
+            } else if (!emailRegex.test(field.value.trim())) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Please enter a valid email address (e.g., sample@sample.com).";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    // Generic function to check that a required field is not empty.
+    function validateRequiredField(fieldId, errorId, message) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = message;
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    // Validate form submission (additional checks can be added as needed)
+    function validateFormSubmission() {
+        const emailField = document.getElementById("email");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailField.value.trim())) {    
+            document.getElementById("email-error").style.display = "block";
+            document.getElementById("email-error").textContent = "Please enter a valid email address.";
+            return false;
+        }
+        // Additional required checks could be performed here if desired.
+        return true;
+    }
+
+    function validateUsernameField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const usernamePattern = /^[A-Za-z0-9]+$/;  // only letters and numbers allowed
+
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+
+        // Real-time validation (remove invalid characters immediately)
+        field.addEventListener("input", function() {
+            const cleaned = field.value.replace(/[^A-Za-z0-9]/g, '');
+            if (field.value !== cleaned) {
+                field.value = cleaned;
+                errorElem.style.display = "block";
+                errorElem.textContent = "No spaces or special characters allowed.";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+
+        // Final validation on blur
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Username is required.";
+            } else if (!usernamePattern.test(field.value.trim())) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Username must not contain spaces or special characters.";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+
+    function validatePasswordField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const errorElem = document.getElementById(errorId);
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+        field.addEventListener("focus", function() {
+            errorElem.style.display = "none";
+            errorElem.textContent = "";
+        });
+
+        field.addEventListener("blur", function() {
+            if (field.value.trim() === "") {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Password is required.";
+            } else if (!passwordPattern.test(field.value.trim())) {
+                errorElem.style.display = "block";
+                errorElem.textContent = "Password must be at least 8 characters with uppercase, lowercase, number, and special character.";
+            } else {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            }
+        });
+    }
+
+    function resetForm() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will reset all informations.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, reset it!",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#d63031",
+            cancelButtonColor: "#6c757d"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelector("form").reset();
+                document.querySelectorAll("input").forEach(input => input.value = "");
+                Swal.fire({
+                    title: "Reset!",
+                    text: "The form has been reset.",
+                    icon: "success",
+                    confirmButtonColor: "#6c5ce7"
+                });
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Validate name fields with required check
+        validateNameField("firstname", "firstname-error", "First name");
+        validateNameField("lastname", "lastname-error", "Last name");
+        // Validate email field
+        validateEmailField("email", "email-error");
+        // Validate username field
+        validateUsernameField("username", "username-error");
+        // Validate password field
+        validatePasswordField("password", "password-error");
+        
+        document.getElementById("user-form").addEventListener("submit", function(e) {
+            if (!validateFormSubmission()) {
+                e.preventDefault();
+            }
+        });
+    });
 </script>
+
 
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
