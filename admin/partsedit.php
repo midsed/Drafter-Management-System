@@ -17,7 +17,8 @@ $user = $result->fetch_assoc();
 $check->close();
 
 if (!$user) {
-    die("Access Denied: Invalid user session. Please log in again.");
+    header("Location: /Drafter-Management-System//admin/parts.php");
+    exit();
 }
 
 $_SESSION['UserID'] = $user['UserID'];
@@ -26,7 +27,8 @@ $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
 if (!isset($_GET['id'])) {
-    die("Error: No part ID provided.");
+    header("Location: /Drafter-Management-System/admin/parts.php");
+    exit();
 }
 
 $part_id = $_GET['id'];

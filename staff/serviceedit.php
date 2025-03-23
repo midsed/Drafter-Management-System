@@ -16,7 +16,7 @@ $user = $result->fetch_assoc();
 $check->close();
 
 if (!$user) {
-    header("Location: /Drafter-Management-System/login.php"); 
+    header("Location: /Drafter-Management-System/staff/service.php"); 
     exit(); 
 }
 

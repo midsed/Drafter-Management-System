@@ -8,12 +8,13 @@ if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
 }   
 
 if (!isset($_GET['id'])) {
-    die("Supplier ID not provided.");
+    header("Location: /Drafter-Management-System/staff/supplier.php");
+    exit();
 }
 
 $supplierID = $_GET['id'];
 
-// Handle form submission
+// Handle form submission   
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve form data
     $companyName = $_POST['supplier'];

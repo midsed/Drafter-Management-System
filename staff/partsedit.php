@@ -8,25 +8,14 @@ if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     exit();
 }   
 
-$user_id = $_SESSION['UserID'];
-$check = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
-$check->bind_param("i", $user_id);
-$check->execute();
-$result = $check->get_result();
-$user = $result->fetch_assoc();
-$check->close();
-
-if (!$user) {
-    die("Access Denied: Invalid user session. Please log in again.");
-}
-
 $_SESSION['UserID'] = $user['UserID'];
 $_SESSION['RoleType'] = $user['RoleType'];
 $_SESSION['Username'] = $user['Username'];
 $username = $user['Username'];
 
 if (!isset($_GET['id'])) {
-    die("Error: No part ID provided.");
+    header("Location: /Drafter-Management-System/staff/parts.php");
+    exit();
 }
 
 $part_id = $_GET['id'];
@@ -45,7 +34,8 @@ $part = $result->fetch_assoc();
 $query->close();
 
 if (!$part) {
-    die("Error: Part not found.");
+    header("Location: /Drafter-Management-System/staff/parts.php");
+    exit();
 }
 
 // Define the upload directory
