@@ -404,16 +404,25 @@ function clearError(input) {
             }
         }
 
-        // Validate Make and Model (No special characters)
-        function validateMakeAndModel(input) {
-            let value = input.value;
-            let validValue = value.replace(/[^a-zA-Z0-9\s]/g, "");
-            
-            if (value !== validValue) {
-                input.value = validValue;
-                showError(input, "No special characters allowed.");
+        // Validate Make (Required)
+        function validateMake() {
+            if (makeInput.value.trim() === "") {
+                showError(makeInput, "Make is required.");
+                return false;
             } else {
-                clearError(input);
+                clearError(makeInput);
+                return true;
+            }
+        }
+
+        // Validate Model (Required)
+        function validateModel() {
+            if (modelInput.value.trim() === "") {
+                showError(modelInput, "Model is required.");
+                return false;
+            } else {
+                clearError(modelInput);
+                return true;
             }
         }
 
@@ -442,8 +451,8 @@ function clearError(input) {
         // Event Listeners for Blur Events
         partNameInput.addEventListener("blur", validatePartName);
         partPriceInput.addEventListener("blur", validatePartPrice);
-        makeInput.addEventListener("blur", () => validateMakeAndModel(makeInput));
-        modelInput.addEventListener("blur", () => validateMakeAndModel(modelInput));
+        makeInput.addEventListener("blur", validateMake); // Validate Make on blur
+        modelInput.addEventListener("blur", validateModel); // Validate Model on blur
         yearModelInput.addEventListener("blur", validateYearModel);
         categoryInput.addEventListener("blur", () => validateRequired(categoryInput));
         authenticityInput.addEventListener("blur", () => validateRequired(authenticityInput));
@@ -459,8 +468,8 @@ function clearError(input) {
 
             if (!validatePartName()) isValid = false;
             if (!validatePartPrice()) isValid = false;
-            if (!validateMakeAndModel(makeInput)) isValid = false;
-            if (!validateMakeAndModel(modelInput)) isValid = false;
+            if (!validateMake()) isValid = false; // Validate Make
+            if (!validateModel()) isValid = false; // Validate Model
             if (!validateYearModel()) isValid = false;
             if (!validateRequired(categoryInput)) isValid = false;
             if (!validateRequired(authenticityInput)) isValid = false;
