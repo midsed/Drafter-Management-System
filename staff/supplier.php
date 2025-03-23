@@ -384,6 +384,25 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<script>
+        // Check for the success flag in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+
+        if (success === '1') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Supplier updated successfully.',
+                showConfirmButton: false,
+                timer: 1500 // Auto-close after 1.5 seconds
+            }).then(() => {
+                // Remove the success flag from the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        }
+    </script>
+
 <!-- STYLES -->
 <style>
     body {
