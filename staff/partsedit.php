@@ -580,7 +580,7 @@ if (!is_dir($uploadDir)) {
             errorSpan = document.createElement("span");
             errorSpan.classList.add("error-message");
             errorSpan.style.color = "red";
-            errorSpan.style.fontSize = "12px";
+            errorSpan.style.fontSize = "0.9em";
             input.parentNode.appendChild(errorSpan);
         }
         errorSpan.textContent = message;
