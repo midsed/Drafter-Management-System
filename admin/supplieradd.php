@@ -80,53 +80,168 @@ include('navigation/topbar.php');
         gap: 15px;
         justify-content: center;
     }
+    .error-message {
+    color: red;
+    font-size: 0.9em;
+    display: none;
+    margin-top: 5px;
+}
 </style>
 
 <div class="main-content">
     <div class="header">
-        <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back"
-                 style="width: 35px; height: 35px; margin-right: 20px;">
+        <a href="javascript:void(0);" onclick="window.history.back();">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1>Add Supplier</h1>
     </div>
 
-    <!-- Centered container for the form, matching serviceedit.php style -->
     <div class="center-container">
         <form id="entryForm">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required maxlength="64">
-            </div>
 
             <div class="form-group">
-                <label for="part">Part:</label>
-                <input type="text" id="part" name="part" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required maxlength="64" title="Please enter a valid email address (e.g., sample@sample.com).">
+                <span id="email-error" class="error-message"></span>
             </div>
 
             <div class="form-group">
                 <label for="supplier">Supplier Name:</label>
-                <input type="text" id="supplier" name="supplier" required>
+                <input type="text" id="supplier" name="supplier" required maxlength="40" title="Service is Required.">
+                <span id="supplier-error" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="part">Part:</label>
+                <input type="text" id="part" name="part" required title="Part is required.">
+                <span id="part-error" class="error-message"></span>
             </div>
 
             <div class="form-group">
                 <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" required>
+                <input type="number" id="phone" name="phone" required maxlength="11" placeholder="e.g., 09171234567" title="Phone Number is required.">
+                <span id="phone-error" class="error-message"></span>
             </div>
 
             <div class="actions">
                 <button type="submit" class="btn">Add</button>
                 <button type="reset" class="btn" style="background-color: red;">Reset</button>
             </div>
+
         </form>
     </div>
 </div>
 
 <script>
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
-}
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        validateNameField("supplier", "supplier-error", "Supplier Name");
+        validateEmailField("email", "email-error");
+        validatePhoneField("phone", "phone-error");
+        validateRequiredField("part", "part-error", "Part is required.");
+
+        document.getElementById("entryForm").addEventListener("submit", function(e) {
+            if (!validateFormSubmission()) e.preventDefault();
+        });
+
+        function validateFormSubmission() {
+            const fields = ["supplier", "email", "phone", "part"];
+            let valid = true;
+
+            fields.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem.value.trim() === "") {
+                    const errorElem = document.getElementById(id + "-error");
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "*";
+                    valid = false;
+                }
+            });
+
+            return valid;
+        }
+
+        function validateNameField(fieldId, errorId, fieldName) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+            const pattern = /^[A-Za-z\s]+$/;
+
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = fieldName + " is required.";
+                } else if (!pattern.test(field.value.trim())) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Only letters and spaces allowed.";
+                } else {
+                    errorElem.style.display = "none";
+                }
+            });
+
+            field.addEventListener("focus", function() {
+                errorElem.style.display = "none";
+            });
+        }
+
+        function validateEmailField(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            field.addEventListener("focus", function() {
+                errorElem.style.display = "none";
+                errorElem.textContent = "";
+            });
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Email is required.";
+                } else if (!emailRegex.test(field.value.trim())) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Please enter a valid email address (e.g., sample@sample.com).";
+                } else {
+                    errorElem.style.display = "none";
+                    errorElem.textContent = "";
+                }
+            });
+        }
+
+        function validatePhoneField(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+
+            field.addEventListener("blur", function() {
+                if (!/^09\d{9}$/.test(field.value.trim())) {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = "Invalid phone number.";
+                } else {
+                    errorElem.style.display = "none";
+                }
+            });
+
+            field.addEventListener("focus", function() {
+                errorElem.style.display = "none";
+            });
+        }
+
+        function validateRequiredField(fieldId, errorId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElem = document.getElementById(errorId);
+
+            field.addEventListener("blur", function() {
+                if (field.value.trim() === "") {
+                    errorElem.style.display = "block";
+                    errorElem.textContent = message;
+                } else {
+                    errorElem.style.display = "none";
+                }
+            });
+        }
+    });
 </script>
