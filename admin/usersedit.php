@@ -142,7 +142,7 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['FName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="Please match the requested format, No special character and Number allowed." 
+                    title="No special character and Number allowed." 
                     required
                 >
                 <span id="firstname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
@@ -157,7 +157,7 @@ include('dbconnect.php');
                     value="<?php echo htmlspecialchars($user['LName']); ?>" 
                     maxlength="40" 
                     pattern="^[A-Za-z\s]+$" 
-                    title="Please match the requested format, No special character and Number allowed." 
+                    title="No special character and Number allowed." 
                     required
                 >
                 <span id="lastname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
@@ -259,7 +259,7 @@ include('dbconnect.php');
                 errorElem.textContent = fieldName + " is required.";
             } else if (!pattern.test(field.value)) {
                 errorElem.style.display = "block";
-                errorElem.textContent = "Invalid name format. Only letters and spaces allowed.";
+                errorElem.textContent = "Please match the requested format, No special character allowed";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
@@ -340,7 +340,7 @@ include('dbconnect.php');
             if (field.value !== cleaned) {
                 field.value = cleaned;
                 errorElem.style.display = "block";
-                errorElem.textContent = "No spaces or special characters allowed.";
+                errorElem.textContent = "No special character allowed";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
