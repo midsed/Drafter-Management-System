@@ -120,14 +120,14 @@ $username = $user['Username'];
             <div class="form-group">
                 <label for="firstname">First Name:</label>
                 <input type="text" id="firstname" name="firstname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                       pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
                 <span id="firstname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
             </div>
 
             <div class="form-group">
                 <label for="lastname">Last Name:</label>
                 <input type="text" id="lastname" name="lastname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="Please match the requested format, No special character and Number allowed.">
+                       pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
                 <span id="lastname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
             </div>
 
@@ -273,7 +273,7 @@ $username = $user['Username'];
             if (field.value !== cleaned) {
                 field.value = cleaned;
                 errorElem.style.display = "block";
-                errorElem.textContent = "No spaces or special characters allowed.";
+                errorElem.textContent = "No special character and Number allowed.";
             } else {
                 errorElem.style.display = "none";
                 errorElem.textContent = "";
