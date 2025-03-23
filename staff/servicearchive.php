@@ -2,7 +2,7 @@
 session_start();
 include('dbconnect.php');
 
-if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
+if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
     header("Location: /Drafter-Management-System/login.php"); 
     exit(); 
 } 
