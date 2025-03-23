@@ -355,7 +355,7 @@ function clearError(input) {
                     showCancelButton: true,
                     confirmButtonText: "Yes, clear it!",
                     cancelButtonText: "Cancel",
-                    confirmButtonColor: "#d63031",
+                    confirmButtonColor: "#32CD32",
                     cancelButtonColor: "#6c5ce7"
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -708,7 +708,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             .swal2-popup { font-family: "Inter", sans-serif !important; }
             .swal2-title { font-weight: 700 !important; !important; }
             .swal2-content { font-weight: 500 !important; font-size: 18px !important; }
-            .swal2-confirm { font-weight: bold !important; background-color: #6c5ce7 !important; color: white !important; }
+            .swal2-confirm { font-weight: bold !important; background-color: #32CD32 !important; color: white !important; }
         </style>';
         
         echo "<script>
@@ -717,7 +717,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 text: 'Part added successfully!',
                 icon: 'success',
                 confirmButtonText: 'Ok',
-                confirmButtonColor: '#6c5ce7'
+                confirmButtonColor: '#32CD32'
             }).then(() => {
                 window.location = 'parts.php';
             });
@@ -729,7 +729,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     text: 'Error adding part: " . addslashes($part_stmt->error) . "',
                     icon: 'error',
                     confirmButtonText: 'Ok',
-                    confirmButtonColor: '#d63031'
+                    confirmButtonColor: '#32CD32'
                 });
             </script>";
         }

@@ -184,4 +184,23 @@ if (!isset($_SESSION['Username'])) {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+.search-container {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        text-align: left; 
+    }
+
+    .search-container input[type="text"] {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .search-container input[type="text"]:focus {
+        outline: none;
+        border-color: #007bff;
+    }
 </style>

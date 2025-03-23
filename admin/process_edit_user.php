@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     text: "User updated successfully!",
                     icon: "success",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#6c5ce7"
+                    confirmButtonColor: "#32CD32"
                 }).then(() => {
                     window.location = "users.php";
                 });
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     text: "' . addslashes($e->getMessage()) . '",
                     icon: "error",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#d63031"
+                    confirmButtonColor: "#32CD32"
                 });
             });
         </script>';
@@ -104,3 +104,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->close();
 }
 ?>
+
