@@ -3,31 +3,33 @@ ob_start();
 session_start();
 require_once "dbconnect.php"; 
 
+// Redirect if not logged in or not a staff member
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }   
 
+// Fetch user data from the database
 $user_id = $_SESSION['UserID'];
-$check = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
-$check->bind_param("i", $user_id);
-$check->execute();
-$result = $check->get_result();
-$user = $result->fetch_assoc();
-$check->close();
+$user_query = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
+$user_query->bind_param("i", $user_id);
+$user_query->execute();
+$user_result = $user_query->get_result();
+$user = $user_result->fetch_assoc();
+$user_query->close();
 
+// If user data is not found, redirect to login
 if (!$user) {
-    header("Location: /Drafter-Management-System//admin/parts.php");
+    header("Location: /Drafter-Management-System/login.php");
     exit();
 }
 
-$_SESSION['UserID'] = $user['UserID'];
-$_SESSION['RoleType'] = $user['RoleType'];
-$_SESSION['Username'] = $user['Username'];
+// Set the username for use in the template
 $username = $user['Username'];
 
+// Redirect if no part ID is provided
 if (!isset($_GET['id'])) {
-    header("Location: /Drafter-Management-System/admin/parts.php");
+    header("Location: /Drafter-Management-System/staff/parts.php");
     exit();
 }
 
@@ -47,7 +49,8 @@ $part = $result->fetch_assoc();
 $query->close();
 
 if (!$part) {
-    die("Error: Part not found.");
+    header("Location: /Drafter-Management-System/staff/parts.php");
+    exit();
 }
 
 // Define the upload directory
@@ -225,7 +228,7 @@ if (!is_dir($uploadDir)) {
                     <option value="Wheels & Tires" <?php echo ($part['Category'] == 'Wheels & Tires' ? 'selected' : ''); ?>>Wheels & Tires</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="authenticity">Authenticity:</label>
                 <select id="authenticity" name="authenticity" required>
@@ -309,7 +312,7 @@ if (!is_dir($uploadDir)) {
 
             <div class="form-group">
                 <label for="supplier_phone">Supplier Phone Number:</label>
-                <input type="text" id="supplier_phone" name="supplier_phone" maxlength="11" value="09" value="<?php echo htmlspecialchars($part['PhoneNumber'] ?? ''); ?>">
+                <input type="text" id="supplier_phone" name="supplier_phone" value="<?php echo htmlspecialchars($part['PhoneNumber'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
@@ -469,7 +472,13 @@ if (!is_dir($uploadDir)) {
             quantity.value = parseInt(quantity.value) - 1;
         }
     }
-    
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
+    }
 
     function clearForm() {
         document.querySelectorAll("input, select, textarea").forEach(element => {
@@ -524,35 +533,12 @@ if (!is_dir($uploadDir)) {
     }
 
     function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
 
-    // Save the sidebar state to localStorage
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('sidebarCollapsed', isCollapsed);
-}
-
-function checkSidebarState() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-    // Apply the saved state on page load
-    if (isCollapsed) {
-        sidebar.classList.add('collapsed');
-        mainContent.classList.add('collapsed');
-    } else {
-        sidebar.classList.remove('collapsed');
-        mainContent.classList.remove('collapsed');
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
     }
-}
-
-// Check the sidebar state when the page loads
-document.addEventListener("DOMContentLoaded", function () {
-    checkSidebarState();
-});f
 
     function clearForm() {
         document.querySelectorAll("input, select, textarea").forEach(element => {
@@ -611,29 +597,4 @@ document.addEventListener("DOMContentLoaded", function () {
             errorSpan.remove();
         }
     }
-    document.addEventListener("DOMContentLoaded", function () {
-    const phoneInput = document.getElementById("supplier_phone");
-
-    // Always ensure it starts with 09
-    phoneInput.addEventListener("input", function () {
-        // Remove non-digits and enforce max length
-        let digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
-
-        // Enforce starting with "09"
-        if (!digits.startsWith("09")) {
-            digits = "09" + digits.slice(2);
-        }
-
-        this.value = digits;
-    });
-
-    // Prevent backspacing or deleting the "09"
-    phoneInput.addEventListener("keydown", function (e) {
-        const caretPos = this.selectionStart;
-
-        if ((e.key === "Backspace" || e.key === "Delete") && caretPos <= 2) {
-            e.preventDefault();
-        }
-    });
-});
 </script>
