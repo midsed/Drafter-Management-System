@@ -325,8 +325,6 @@ tr:hover {
                 <label><input type="checkbox" name="reportSection" value="partsAdded" checked> Parts Added Over Time</label>
                 <label><input type="checkbox" name="reportSection" value="checkoutTrend" checked> Recent Checkouts</label>
                 <label><input type="checkbox" name="reportSection" value="valueByCategory" checked> Inventory Value by Category</label>
-                <label><input type="checkbox" name="reportSection" value="lowStock" checked> Low Stock Alerts</label>
-                <label><input type="checkbox" name="reportSection" value="recentUpdates" checked> Recently Updated Parts</label>
                 <label><input type="checkbox" name="reportSection" value="monthlySummary" checked> Monthly Transaction Summary</label>
             </div>
         </div>
@@ -336,13 +334,6 @@ tr:hover {
                 <div class="form-group">
                     <label for="reportTitle">Report Title:</label>
                     <input type="text" id="reportTitle" value="Inventory Dashboard Report">
-                </div>
-                <div class="form-group">
-                    <label for="reportLayout">Page Layout:</label>
-                    <select id="reportLayout">
-                        <option value="landscape">Landscape</option>
-                        <option value="portrait">Portrait</option>
-                    </select>
                 </div>
                 <div class="form-group">
                     <label for="reportPrimaryColor">Primary Color:</label>
@@ -368,14 +359,6 @@ tr:hover {
                         <option value="180">Last 6 Months</option>
                         <option value="365">Last Year</option>
                         <option value="all">All Time</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="chartStyle">Chart Style:</label>
-                    <select id="chartStyle">
-                        <option value="modern">Modern</option>
-                        <option value="classic">Classic</option>
-                        <option value="minimal">Minimal</option>
                     </select>
                 </div>
                 <div class="form-group">
