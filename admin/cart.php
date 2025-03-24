@@ -135,26 +135,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
     }
 
     function printReceipt() {
-        const retrievedBy = prompt("Please enter the name of the person retrieving these parts:", "");
-        
-        if (retrievedBy === null || retrievedBy.trim() === "") {
-            swal("Error!", "Retriever name is required to print receipt", "error");
-            return;
-        }
-        
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'process_receipt.php';
-        form.style.display = 'none';
-        
-        const retrievedByInput = document.createElement('input');
-        retrievedByInput.type = 'hidden';
-        retrievedByInput.name = 'retrievedBy';
-        retrievedByInput.value = retrievedBy;
-        form.appendChild(retrievedByInput);
-        
-        document.body.appendChild(form);
-        form.submit();
+        Swal.fire({
+            title: 'Retriever Name',
+            text: 'Please enter the name of the person retrieving these parts:',
+            input: 'text', // This creates an input field
+            inputPlaceholder: 'Enter name here...',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Retriever name is required!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const retrievedBy = result.value;
+
+                // Create and submit the form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'process_receipt.php';
+                form.style.display = 'none';
+
+                const retrievedByInput = document.createElement('input');
+                retrievedByInput.type = 'hidden';
+                retrievedByInput.name = 'retrievedBy';
+                retrievedByInput.value = retrievedBy;
+                form.appendChild(retrievedByInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
     }
 
     function removeFromCart(partID) {
