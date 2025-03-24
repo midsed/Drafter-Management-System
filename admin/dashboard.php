@@ -1410,23 +1410,52 @@ body {
     color: #666;
     margin-top: 0;
 }
-.report-button {
-    background-color: rgb(230, 37, 37);
-    color: white;
+
+#generateReportBtn {
+    display: block;
+    margin: 0 auto;
+    margin-right: 0;
+    background: linear-gradient(135deg, #9c0b0b,rgb(190, 74, 74));
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
     border: none;
-    padding: 20px 15px;
-    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     margin-bottom: 10px;
     margin-top: 60px;
-    border-radius: 4px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-family: 'Poppins', sans-serif;
 }
-.report-button:hover {
-    background-color: rgb(116, 11, 11);
+#generateReportBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    animation: pulsate 1.5s infinite;
 }
+#generateReportBtn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skewX(-45deg);
+    transition: left 0.5s ease;
+}
+#generateReportBtn:hover::after {
+    left: 100%;
+}
+@keyframes pulsate {
+    0% { box-shadow: 0 0 0 0 rgba(225, 57, 57, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(225, 57, 57, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(225, 57, 57, 0); }
+}
+
 .chart-container {
     display: flex;
     justify-content: space-between;
@@ -1615,7 +1644,6 @@ tr:hover {
     justify-content: center;
     transition: all 0.2s;
     font-family: 'Poppins', sans-serif;
-
 }
 .action-button:hover {
     transform: translateY(-2px);
@@ -1630,10 +1658,9 @@ tr:hover {
     color: white;
 }
 .pdf-button {
-    background-color:     #E10F0F;
+    background-color: #E10F0F;
     color: white;
 }
-
 .close {
     color: #aaa;
     float: right;
