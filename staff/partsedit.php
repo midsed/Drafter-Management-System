@@ -3,16 +3,31 @@ ob_start();
 session_start();
 require_once "dbconnect.php"; 
 
+// Redirect if not logged in or not a staff member
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }   
 
-$_SESSION['UserID'] = $user['UserID'];
-$_SESSION['RoleType'] = $user['RoleType'];
-$_SESSION['Username'] = $user['Username'];
+// Fetch user data from the database
+$user_id = $_SESSION['UserID'];
+$user_query = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
+$user_query->bind_param("i", $user_id);
+$user_query->execute();
+$user_result = $user_query->get_result();
+$user = $user_result->fetch_assoc();
+$user_query->close();
+
+// If user data is not found, redirect to login
+if (!$user) {
+    header("Location: /Drafter-Management-System/login.php");
+    exit();
+}
+
+// Set the username for use in the template
 $username = $user['Username'];
 
+// Redirect if no part ID is provided
 if (!isset($_GET['id'])) {
     header("Location: /Drafter-Management-System/staff/parts.php");
     exit();
