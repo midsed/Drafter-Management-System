@@ -618,9 +618,6 @@ document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
 });
 
-
-
-
 </script>
 
 <style>

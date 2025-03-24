@@ -1369,6 +1369,38 @@ function getTimeRangeText(range) {
     };
     return rangeMap[range] || 'Last 30 Days';
 }
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+
+    // Save the sidebar state to localStorage
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+}
+
+function checkSidebarState() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    // Apply the saved state on page load
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('collapsed');
+    }
+}
+
+// Check the sidebar state when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
+});
+
 </script>
 
 <style>
