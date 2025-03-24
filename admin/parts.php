@@ -413,7 +413,8 @@ document.getElementById("searchInput").addEventListener("keyup", function(event)
     }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("search");
     if (searchTerm) {
@@ -483,6 +484,7 @@ function addToCart(partID) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
     const filterDropdown = document.getElementById("filterDropdown");
     const sortDropdown = document.getElementById("sortDropdown");
     const filterButton = document.getElementById("filterButton");
@@ -559,6 +561,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
     const urlParams = new URLSearchParams(window.location.search);
     const currentSort = urlParams.get("sort");
 
@@ -589,7 +592,35 @@ function toggleSidebar() {
     const mainContent = document.querySelector('.main-content');
     sidebar.classList.toggle('collapsed');
     mainContent.classList.toggle('collapsed');
+
+    // Save the sidebar state to localStorage
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
 }
+
+function checkSidebarState() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    // Apply the saved state on page load
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('collapsed');
+    }
+}
+
+// Check the sidebar state when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
+});
+
+
+
+
 </script>
 
 <style>
