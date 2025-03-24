@@ -467,80 +467,94 @@ tr:hover {
     });
 
     function createStockLevelChart() {
-        const stockCanvas = document.getElementById('stockLevelChart');
-        if (!stockCanvas) return;
-        
-        // Get stock levels from PHP or use sample data
-        let stockLevels = {};
-        try {
-            stockLevels = <?php echo json_encode($stockLevels); ?>;
-        } catch (e) {
-            // Sample data if PHP variables aren't available
-            stockLevels = {
-                "Processor": 15,
-                "Memory": 28,
-                "SSD": 12,
-                "HDD": 8,
-                "Power Supply": 5,
-                "Motherboard": 3,
-                "Graphics Card": 6,
-                "Case": 10,
-                "Monitor": 7,
-                "Keyboard": 25
-            };
-        }
-        
-        const stockLabels = Object.keys(stockLevels);
-        const stockDataValues = Object.values(stockLevels);
+    const stockCanvas = document.getElementById('stockLevelChart');
+    if (!stockCanvas) return;
 
-        const backgroundColors = stockDataValues.map(qty => qty < 5 ? colors.lowStock : colors.normal);
-
-        const stockData = {
-            labels: stockLabels,
-            datasets: [{
-                label: 'Stock Levels',
-                data: stockDataValues,
-                backgroundColor: backgroundColors,
-                borderColor: 'rgba(0, 0, 0, 0.2)',
-                borderWidth: 1
-            }]
+    // Get stock levels from PHP or use sample data
+    let stockLevels = {};
+    try {
+        stockLevels = <?php echo json_encode($stockLevels); ?>;
+    } catch (e) {
+        // Sample data if PHP variables aren't available
+        stockLevels = {
+            "Processor": 15,
+            "Memory": 28,
+            "SSD": 12,
+            "HDD": 8,
+            "Power Supply": 5,
+            "Motherboard": 3,
+            "Graphics Card": 6,
+            "Case": 10,
+            "Monitor": 7,
+            "Keyboard": 25
         };
-        
-        stockChart = new Chart(stockCanvas.getContext('2d'), {
-            type: 'bar',
-            data: stockData,
-            options: {
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Quantity'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            autoSkip: true,
-                            maxRotation: 45,
-                            minRotation: 45
-                        }
+    }
+
+    const stockLabels = Object.keys(stockLevels);
+    const stockDataValues = Object.values(stockLevels);
+
+    // Prepare data for low stock and normal stock
+    const lowStockData = stockDataValues.map(qty => qty < 2 ? qty : 0); // Low stock values
+    const normalStockData = stockDataValues.map(qty => qty >= 2 ? qty : 0); // Normal stock values
+
+    const stockData = {
+        labels: stockLabels,
+        datasets: [
+            {
+                label: 'Low Stock',
+                data: lowStockData,
+                backgroundColor: colors.lowStock, // Red for low stock
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+                borderWidth: 1,
+                stack: 'combined' // Stack this dataset
+            },
+            {
+                label: 'Normal Stock',
+                data: normalStockData,
+                backgroundColor: colors.normal, // Blue for normal stock
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+                borderWidth: 1,
+                stack: 'combined' // Stack this dataset
+            }
+        ]
+    };
+
+    stockChart = new Chart(stockCanvas.getContext('2d'), {
+        type: 'bar',
+        data: stockData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity'
                     }
                 },
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: true, position: 'top' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Quantity: ${context.raw}`;
-                            }
+                x: {
+                    stacked: true, // Stack bars on the x-axis
+                    ticks: {
+                        autoSkip: true,
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
                         }
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
 
     function updateLineChart() {
         const updatesCanvas = document.getElementById('recentUpdatesChart');
