@@ -259,7 +259,7 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="supplier_phone">Supplier Phone Number:</label>
-                <input type="text" id="supplier_phone" name="supplier_phone" maxlength="11" value="09">
+                <input type="text" id="supplier_phone" name="supplier_phone">
             </div>
 
             <div class="form-group">
@@ -591,32 +591,6 @@ function clearError(input) {
 
         return isValid;
     }
-
-    document.addEventListener("DOMContentLoaded", function () {
-    const phoneInput = document.getElementById("supplier_phone");
-
-    // Always ensure it starts with 09
-    phoneInput.addEventListener("input", function () {
-        // Remove non-digits and enforce max length
-        let digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
-
-        // Enforce starting with "09"
-        if (!digits.startsWith("09")) {
-            digits = "09" + digits.slice(2);
-        }
-
-        this.value = digits;
-    });
-
-    // Prevent backspacing or deleting the "09"
-    phoneInput.addEventListener("keydown", function (e) {
-        const caretPos = this.selectionStart;
-
-        if ((e.key === "Backspace" || e.key === "Delete") && caretPos <= 2) {
-            e.preventDefault();
-        }
-    });
-});
 
 </script>
 
