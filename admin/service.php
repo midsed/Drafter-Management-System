@@ -400,9 +400,35 @@ $result = $conn->query($sql);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function toggleSidebar() {
-    document.querySelector('.sidebar')?.classList.toggle('collapsed');
-    document.querySelector('.main-content')?.classList.toggle('collapsed');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+
+    // Save the sidebar state to localStorage
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
 }
+
+function checkSidebarState() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    // Apply the saved state on page load
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('collapsed');
+    }
+}
+
+// Check the sidebar state when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
+});
 
 document.getElementById("searchInput").addEventListener("input", function () {
     const searchValue = this.value.trim();
