@@ -95,172 +95,221 @@ $categories = $resultCategory->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Ensure full height and remove default margins */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        /* Wrap content to push pagination to the bottom */
+        .content-wrapper {
+            min-height: calc(100vh - 80px); /* Adjust 80px to match the pagination height */
+            padding-bottom: 80px;
+        }
+        /* Fixed pagination styling */
+        .pagination {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding: 10px 0;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+            background: none !important;  /* Removes the white background */
+            border-top: none !important;  /* Removes the top border line */
+        }
+        .pagination-button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: white;
+            border: 1px solid black;
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .pagination-button:hover {
+            background: #f0f0f0;
+        }
+        .active-page {
+            background: black;
+            color: white;
+            font-weight: bold;
+        }
+        .pagination-ellipsis {
+            color: #777;
+            display: flex;
+            align-items: center;
+        }
+    </style>
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
-<div class="main-content">
-    <div class="header">
-        <a href="javascript:void(0);" onclick="window.history.back();">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" style="width: 35px; height: 35px;">
-        </a>
-        <h1>Receipts</h1>
-    </div>
-    
-    <div class="search-actions">
-        <div class="search-container">
-            <input type="text" placeholder="Search by name or retrieved by..." id="searchInput" value="<?= htmlspecialchars($search) ?>">
-            
-            <div class="filter-container">
-                <span>Filter</span>
-                <div class="dropdown">
-                    <button id="filterButton" class="filter-icon" title="Filter">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <div class="filter-section">
-                            <h4>Category</h4>
-                            <div class="filter-options" id="categoryFilter">
-                                <?php foreach ($categories as $category): ?>
-                                    <label>
-                                        <input type="checkbox" class="filter-option" data-filter="category" 
-                                               value="<?= htmlspecialchars($category['Category']) ?>"
-                                               <?= ($filterCategory === $category['Category']) ? 'checked' : '' ?>>
-                                        <?= htmlspecialchars($category['Category']) ?>
-                                    </label>
-                                <?php endforeach; ?>
-                                <?php if (empty($categories)): ?>
-                                    <p>No categories found.</p>
-                                <?php endif; ?>
+<!-- Content wrapper starts here -->
+<div class="content-wrapper">
+    <div class="main-content">
+        <div class="header">
+            <a href="javascript:void(0);" onclick="window.history.back();">
+                <img src="https://i.ibb.co/M68249k/go-back-arrow.png" style="width: 35px; height: 35px;">
+            </a>
+            <h1>Receipts</h1>
+        </div>
+        
+        <div class="search-actions">
+            <div class="search-container">
+                <input type="text" placeholder="Search by name or retrieved by..." id="searchInput" value="<?= htmlspecialchars($search) ?>">
+                
+                <div class="filter-container">
+                    <span>Filter</span>
+                    <div class="dropdown">
+                        <button id="filterButton" class="filter-icon" title="Filter">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <div id="filterDropdown" class="dropdown-content">
+                            <div class="filter-section">
+                                <h4>Category</h4>
+                                <div class="filter-options" id="categoryFilter">
+                                    <?php foreach ($categories as $category): ?>
+                                        <label>
+                                            <input type="checkbox" class="filter-option" data-filter="category" 
+                                                   value="<?= htmlspecialchars($category['Category']) ?>"
+                                                   <?= ($filterCategory === $category['Category']) ? 'checked' : '' ?>>
+                                            <?= htmlspecialchars($category['Category']) ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                    <?php if (empty($categories)): ?>
+                                        <p>No categories found.</p>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>
-                        <div class="filter-actions">
-                            <button id="applyFilter" class="red-button">Apply</button>
-                            <button id="clearFilter" class="red-button">Clear</button>
+                            <div class="filter-actions">
+                                <button id="applyFilter" class="red-button">Apply</button>
+                                <button id="clearFilter" class="red-button">Clear</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="sort-container">
-                <span>Sort By</span>
-                <div class="dropdown">
-                    <button id="sortButton" class="sort-icon" title="Sort">
-                        <i class="fas fa-sort-alpha-down"></i>
-                    </button>
-                    <!-- Premium style for this dropdown -->
-                    <div id="sortDropdown" class="dropdown-content">
-                        <h4>Sort By:</h4>
-                        <!-- Keep the native arrow, but style the select nicely -->
-                        <select id="sortField">
-                            <option value="ReceiptID">Receipt ID</option>
-                            <option value="RetrievedBy">Retrieved By</option>
-                            <option value="PartName">Part Name</option>
-                            <option value="RetrievedDate">Retrieved Date</option>
-                        </select>
-                        <div class="sort-options">
-                            <button class="sort-option red-button" data-sort="asc">Ascending</button>
-                            <button class="sort-option red-button" data-sort="desc">Descending</button>
+                
+                <div class="sort-container">
+                    <span>Sort By</span>
+                    <div class="dropdown">
+                        <button id="sortButton" class="sort-icon" title="Sort">
+                            <i class="fas fa-sort-alpha-down"></i>
+                        </button>
+                        <!-- Premium style for this dropdown -->
+                        <div id="sortDropdown" class="dropdown-content">
+                            <h4>Sort By:</h4>
+                            <select id="sortField">
+                                <option value="ReceiptID">Receipt ID</option>
+                                <option value="RetrievedBy">Retrieved By</option>
+                                <option value="PartName">Part Name</option>
+                                <option value="RetrievedDate">Retrieved Date</option>
+                            </select>
+                            <div class="sort-options">
+                                <button class="sort-option red-button" data-sort="asc">Ascending</button>
+                                <button class="sort-option red-button" data-sort="desc">Descending</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Table only, no .receipt-container or .receipt-card wrappers -->
-    <table id="receipt-table">
-        <thead>
-            <tr>
-                <th>Receipt ID</th>
-                <th>Retrieved By</th>
-                <th>Retrieved Date</th>
-                <th>Part Name</th>
-                <th>Quantity</th>
-                <th>Location</th>
-                <th>Part Price</th>
-                <th>Total Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (empty($receipts)): ?>
+        <!-- Table only, no additional wrappers -->
+        <table id="receipt-table">
+            <thead>
                 <tr>
-                    <td colspan="9" class="no-results">No receipts found matching your criteria.</td>
+                    <th>Receipt ID</th>
+                    <th>Retrieved By</th>
+                    <th>Retrieved Date</th>
+                    <th>Part Name</th>
+                    <th>Quantity</th>
+                    <th>Location</th>
+                    <th>Part Price</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
                 </tr>
-            <?php else: ?>
-                <?php foreach ($receipts as $receipt): ?>
-                <tr data-category="<?= htmlspecialchars($receipt['Category']) ?>">
-                    <td>#<?= $receipt['ReceiptID'] ?></td>
-                    <td><?= htmlspecialchars($receipt['RetrievedBy']) ?></td>
-                    <td><?= date('F d, Y h:i A', strtotime($receipt['RetrievedDate'])) ?></td>
-                    <td><?= htmlspecialchars($receipt['PartName']) ?></td>
-                    <td><?= $receipt['Quantity'] ?></td>
-                    <td><?= htmlspecialchars($receipt['Location']) ?></td>
-                    <td>₱<?= number_format($receipt['PartPrice'], 2) ?></td>
-                    <td>₱<?= number_format($receipt['TotalPrice'], 2) ?></td>
-                    <td>
-                        <button class="view-receipt-button" data-receipt-id="<?= $receipt['ReceiptID'] ?>">
-                            View
-                        </button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-
-    <div class="pagination">
-        <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">Previous</a>
-        <?php endif; ?>
-        
-        <?php 
-        $maxPagesToShow = 5;
-        $startPage = max(1, min($page - floor($maxPagesToShow / 2), $totalPages - $maxPagesToShow + 1));
-        $endPage = min($startPage + $maxPagesToShow - 1, $totalPages);
-        
-        if ($startPage > 1): ?>
-            <a href="?page=1&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">1</a>
-            <?php if ($startPage > 2): ?>
-                <span class="pagination-ellipsis">...</span>
-            <?php endif; ?>
-        <?php endif; ?>
-        
-        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-            <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
-        <?php endfor; ?>
-        
-        <?php if ($endPage < $totalPages): ?>
-            <?php if ($endPage < $totalPages - 1): ?>
-                <span class="pagination-ellipsis">...</span>
-            <?php endif; ?>
-            <a href="?page=<?= $totalPages ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button"><?= $totalPages ?></a>
-        <?php endif; ?>
-        
-        <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">Next</a>
-        <?php endif; ?>
+            </thead>
+            <tbody>
+                <?php if (empty($receipts)): ?>
+                    <tr>
+                        <td colspan="9" class="no-results">No receipts found matching your criteria.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($receipts as $receipt): ?>
+                    <tr data-category="<?= htmlspecialchars($receipt['Category']) ?>">
+                        <td>#<?= $receipt['ReceiptID'] ?></td>
+                        <td><?= htmlspecialchars($receipt['RetrievedBy']) ?></td>
+                        <td><?= date('F d, Y h:i A', strtotime($receipt['RetrievedDate'])) ?></td>
+                        <td><?= htmlspecialchars($receipt['PartName']) ?></td>
+                        <td><?= $receipt['Quantity'] ?></td>
+                        <td><?= htmlspecialchars($receipt['Location']) ?></td>
+                        <td>₱<?= number_format($receipt['PartPrice'], 2) ?></td>
+                        <td>₱<?= number_format($receipt['TotalPrice'], 2) ?></td>
+                        <td>
+                            <button class="view-receipt-button" data-receipt-id="<?= $receipt['ReceiptID'] ?>">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
+</div>
+<!-- Fixed pagination placed outside the content wrapper -->
+<div class="pagination">
+    <?php if ($page > 1): ?>
+        <a href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">Previous</a>
+    <?php endif; ?>
+    
+    <?php 
+    $maxPagesToShow = 5;
+    $startPage = max(1, min($page - floor($maxPagesToShow / 2), $totalPages - $maxPagesToShow + 1));
+    $endPage = min($startPage + $maxPagesToShow - 1, $totalPages);
+    
+    if ($startPage > 1): ?>
+        <a href="?page=1&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">1</a>
+        <?php if ($startPage > 2): ?>
+            <span class="pagination-ellipsis">...</span>
+        <?php endif; ?>
+    <?php endif; ?>
+    
+    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+        <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+    <?php endfor; ?>
+    
+    <?php if ($endPage < $totalPages): ?>
+        <?php if ($endPage < $totalPages - 1): ?>
+            <span class="pagination-ellipsis">...</span>
+        <?php endif; ?>
+        <a href="?page=<?= $totalPages ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button"><?= $totalPages ?></a>
+    <?php endif; ?>
+    
+    <?php if ($page < $totalPages): ?>
+        <a href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filterCategory) ?>&sort=<?= $sortOrder ?>&sort_field=<?= $sortField ?>" class="pagination-button">Next</a>
+    <?php endif; ?>
 </div>
 
 <script>
-
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     sidebar.classList.toggle('collapsed');
     mainContent.classList.toggle('collapsed');
-
-    // Save the sidebar state to localStorage
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
 }
 
 function checkSidebarState() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-    // Apply the saved state on page load
     if (isCollapsed) {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('collapsed');
@@ -270,7 +319,6 @@ function checkSidebarState() {
     }
 }
 
-// Check the sidebar state when the page loads
 document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
 });
@@ -285,21 +333,16 @@ document.querySelectorAll('.view-receipt-button').forEach(button => {
 function searchReceipts() {
     const input = document.getElementById("searchInput").value.trim().toLowerCase();
     const receipts = document.querySelectorAll("#receipt-table tbody tr");
-
     if (input === "") {
         window.location.href = window.location.pathname;
         return;
     }
-
     receipts.forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(input) ? "" : "none";
     });
 }
-
-document.getElementById("searchInput").addEventListener("input", function() {
-    searchReceipts();
-});
+document.getElementById("searchInput").addEventListener("input", searchReceipts);
 
 document.addEventListener("DOMContentLoaded", function () {
     const filterDropdown = document.getElementById("filterDropdown");
@@ -310,21 +353,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const clearFilterButton  = document.getElementById("clearFilter");
     const sortOptions        = document.querySelectorAll(".sort-option");
 
-    // Toggle filter dropdown
     filterButton.addEventListener("click", function (event) {
         event.stopPropagation();
         filterDropdown.classList.toggle("show");
         sortDropdown.classList.remove("show");
     });
 
-    // Toggle sort dropdown
     sortButton.addEventListener("click", function (event) {
         event.stopPropagation();
         sortDropdown.classList.toggle("show");
         filterDropdown.classList.remove("show");
     });
 
-    // Close dropdowns when clicking outside
     window.addEventListener("click", function (event) {
         if (!event.target.closest(".dropdown-content") && 
             !event.target.closest(".filter-icon") && 
@@ -334,25 +374,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Prevent filter dropdown from closing when clicking inside it
     filterDropdown.addEventListener("click", function (event) {
         event.stopPropagation();
     });
 
-    // Apply filter
     applyFilterButton.addEventListener("click", function () {
         const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
                                         .map(checkbox => checkbox.value);
         filterParts(selectedCategories);
     });
 
-    // Clear filter
     clearFilterButton.addEventListener("click", function () {
         document.querySelectorAll('.filter-option').forEach(checkbox => checkbox.checked = false);
         filterParts([]);
     });
 
-    // Sort options
     sortOptions.forEach(option => {
         option.addEventListener("click", function () {
             sortParts(option.dataset.sort);
@@ -360,7 +396,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Preserve the selected sort field after reload
     const urlParams = new URLSearchParams(window.location.search);
     const selectedSortField = urlParams.get('sort_field');
     if (selectedSortField) {
@@ -372,11 +407,7 @@ function filterParts(selectedCategories) {
     const receipts = document.querySelectorAll("#receipt-table tbody tr");
     receipts.forEach(row => {
         const category = row.getAttribute("data-category");
-        if (selectedCategories.length === 0) {
-            row.style.display = "";
-        } else {
-            row.style.display = selectedCategories.includes(category) ? "" : "none";
-        }
+        row.style.display = selectedCategories.length === 0 || selectedCategories.includes(category) ? "" : "none";
     });
 }
 
@@ -494,9 +525,8 @@ body {
     gap: 10px;
     justify-content: center;
 }
-
 .sort-option {
-    background-color: #E10F0F; /* Red background */
+    background-color: #E10F0F;
     color: white;
     border: none;
     border-radius: 4px; 
@@ -505,12 +535,10 @@ body {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-
 .sort-option:hover {
-    background-color: darkred; /* Darker red on hover */
+    background-color: darkred;
 }
-
-/* The table (no .receipt-container or .receipt-card) */
+/* The table */
 #receipt-table {
     width: 100%;
     border-collapse: collapse;
@@ -529,7 +557,7 @@ body {
     background-color: rgb(218, 218, 218);
 }
 .no-results {
-    text-align: center; /* Center the "No receipts found..." message */
+    text-align: center;
     font-style: italic;
 }
 .view-receipt-button {
@@ -546,35 +574,6 @@ body {
 }
 .view-receipt-button:hover {
     background: darkred;
-}
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-}
-.pagination-button {
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: white;
-    border: 1px solid black;
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-.pagination-button:hover {
-    background: #f0f0f0;
-}
-.active-page {
-    background: black;
-    color: white;
-    font-weight: bold;
-}
-.pagination-ellipsis {
-    color: #777;
 }
 </style>
 </body>
