@@ -7,6 +7,7 @@ if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
 }   
+
 $user_id = $_SESSION['UserID'];
 $check = $conn->prepare("SELECT UserID, RoleType, Username FROM user WHERE UserID = ?");
 $check->bind_param("i", $user_id);
@@ -33,6 +34,13 @@ $username = $user['Username'];
     .form-group {
         margin-bottom: 15px;
     }
+
+    .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
 
     label {
         display: block;
@@ -190,7 +198,6 @@ $username = $user['Username'];
                 </select>
             </div>
 
-
             <div class="form-group">
                 <label for="authenticity">Authenticity:</label>
                 <select id="authenticity" name="authenticity" required>
@@ -252,7 +259,7 @@ $username = $user['Username'];
 
             <div class="form-group">
                 <label for="supplier_phone">Supplier Phone Number:</label>
-                <input type="text" id="supplier_phone" name="supplier_phone">
+                <input type="text" id="supplier_phone" name="supplier_phone" maxlength="11" value="09">
             </div>
 
             <div class="form-group">
@@ -269,8 +276,7 @@ $username = $user['Username'];
 </div>
 
 <script>
-
-function toggleSidebar() {
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
@@ -300,7 +306,7 @@ function toggleSidebar() {
     document.addEventListener("DOMContentLoaded", function () {
         checkSidebarState();
     });
-    
+
     function increaseQuantity() {
         let quantity = document.getElementById('quantity');
         quantity.value = parseInt(quantity.value) + 1;
@@ -502,89 +508,115 @@ function clearError(input) {
             });
     });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const supplierNameInput = document.getElementById("supplier_name");
-    const supplierEmailInput = document.getElementById("supplier_email");
-    const supplierPhoneInput = document.getElementById("supplier_phone");
-    const supplierAddressInput = document.getElementById("supplier_address");
+    documentaddEventListener("DOMContentLoaded", function () {
+        const supplierNameInput = document.getElementById("supplier_name");
+        const supplierEmailInput = document.getElementById("supplier_email");
+        const supplierPhoneInput = document.getElementById("supplier_phone");
+        const supplierAddressInput = document.getElementById("supplier_address");
 
-    // Validate Supplier Name (only when input is provided)
-    supplierNameInput.addEventListener("input", function () {
-        let value = supplierNameInput.value.trim();
-        if (value !== "") {
-            // Validate characters (only letters and spaces allowed)
-            let validValue = value.replace(/[^a-zA-Z\s]/g, "");
-            if (value !== validValue) {
-                supplierNameInput.value = validValue;
-                showError(supplierNameInput, "Only letters and spaces are allowed.");
+        // Validate Supplier Name (only when input is provided)
+        supplierNameInput.addEventListener("input", function () {
+            let value = supplierNameInput.value.trim();
+            if (value !== "") {
+                // Validate characters (only letters and spaces allowed)
+                let validValue = value.replace(/[^a-zA-Z\s]/g, "");
+                if (value !== validValue) {
+                    supplierNameInput.value = validValue;
+                    showError(supplierNameInput, "Only letters and spaces are allowed.");
+                } else {
+                    clearError(supplierNameInput);
+                }
+
+                // Make other fields required
+                supplierEmailInput.setAttribute("required", "required");
+                supplierPhoneInput.setAttribute("required", "required");
+                supplierAddressInput.setAttribute("required", "required");
             } else {
+                // Clear errors and remove required attributes
                 clearError(supplierNameInput);
+                supplierEmailInput.removeAttribute("required");
+                supplierPhoneInput.removeAttribute("required");
+                supplierAddressInput.removeAttribute("required");
             }
+        });
 
-            // Make other fields required
-            supplierEmailInput.setAttribute("required", "required");
-            supplierPhoneInput.setAttribute("required", "required");
-            supplierAddressInput.setAttribute("required", "required");
-        } else {
-            // Clear errors and remove required attributes
-            clearError(supplierNameInput);
-            supplierEmailInput.removeAttribute("required");
-            supplierPhoneInput.removeAttribute("required");
-            supplierAddressInput.removeAttribute("required");
-        }
-    });
-
-    // Validate Supplier Email (only when input is provided)
-    supplierEmailInput.addEventListener("input", function () {
-        if (supplierEmailInput.value.trim() !== "") {
-            if (!validateEmail(supplierEmailInput.value)) {
-                showError(supplierEmailInput, "Invalid email format.");
+        // Validate Supplier Email (only when input is provided)
+        supplierEmailInput.addEventListener("input", function () {
+            if (supplierEmailInput.value.trim() !== "") {
+                if (!validateEmail(supplierEmailInput.value)) {
+                    showError(supplierEmailInput, "Invalid email format.");
+                } else {
+                    clearError(supplierEmailInput);
+                }
             } else {
                 clearError(supplierEmailInput);
             }
-        } else {
-            clearError(supplierEmailInput);
-        }
-    });
+        });
 
-    // Validate Supplier Phone (only when input is provided)
-    supplierPhoneInput.addEventListener("input", function () {
-        if (supplierPhoneInput.value.trim() !== "") {
-            let value = supplierPhoneInput.value.replace(/[^0-9]/g, "");
-            if (value.length !== 11) {
-                showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+        // Validate Supplier Phone (only when input is provided)
+        supplierPhoneInput.addEventListener("input", function () {
+            if (supplierPhoneInput.value.trim() !== "") {
+                let value = supplierPhoneInput.value.replace(/[^0-9]/g, "");
+                if (value.length !== 11) {
+                    showError(supplierPhoneInput, "Phone number must be exactly 11 digits.");
+                } else {
+                    clearError(supplierPhoneInput);
+                }
             } else {
                 clearError(supplierPhoneInput);
             }
-        } else {
-            clearError(supplierPhoneInput);
+        });
+
+        // Helper function to validate email format
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
         }
     });
 
-    // Helper function to validate email format
-    function validateEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
+    function validateAllFields() {
+        let isValid = true;
+
+        if (!validatePartName()) isValid = false;
+        if (!validatePartPrice()) isValid = false;
+        if (!validateMake()) isValid = false;
+        if (!validateModel()) isValid = false;
+        if (!validateYearModel()) isValid = false;
+        if (!validateRequired(categoryInput)) isValid = false;
+        if (!validateRequired(authenticityInput)) isValid = false;
+        if (!validateRequired(conditionInput)) isValid = false;
+        if (!validateRequired(itemStatusInput)) isValid = false;
+        if (!validateRequired(locationInput)) isValid = false;
+        if (!validateRequired(partImageInput)) isValid = false;
+
+        return isValid;
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.getElementById("supplier_phone");
+
+    // Always ensure it starts with 09
+    phoneInput.addEventListener("input", function () {
+        // Remove non-digits and enforce max length
+        let digits = this.value.replace(/[^0-9]/g, '').slice(0, 11);
+
+        // Enforce starting with "09"
+        if (!digits.startsWith("09")) {
+            digits = "09" + digits.slice(2);
+        }
+
+        this.value = digits;
+    });
+
+    // Prevent backspacing or deleting the "09"
+    phoneInput.addEventListener("keydown", function (e) {
+        const caretPos = this.selectionStart;
+
+        if ((e.key === "Backspace" || e.key === "Delete") && caretPos <= 2) {
+            e.preventDefault();
+        }
+    });
 });
-
-function validateAllFields() {
-    let isValid = true;
-
-    if (!validatePartName()) isValid = false;
-    if (!validatePartPrice()) isValid = false;
-    if (!validateMake()) isValid = false;
-    if (!validateModel()) isValid = false;
-    if (!validateYearModel()) isValid = false;
-    if (!validateRequired(categoryInput)) isValid = false;
-    if (!validateRequired(authenticityInput)) isValid = false;
-    if (!validateRequired(conditionInput)) isValid = false;
-    if (!validateRequired(itemStatusInput)) isValid = false;
-    if (!validateRequired(locationInput)) isValid = false;
-    if (!validateRequired(partImageInput)) isValid = false;
-
-    return isValid;
-}
 
 </script>
 
@@ -639,9 +671,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Handle Image Upload
-    $upload_dir = 'C:/xampp/htdocs/Drafter-Management-System/partimages/'; // Correct directory
+    $upload_dir = '../partimages/'; 
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true); // Create the directory if it doesn't exist
+        mkdir($upload_dir, 0777, true); 
     }
 
     if (!empty($_FILES['part_image']['name'])) {
@@ -649,8 +681,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_type = $_FILES['part_image']['type'];
         if (in_array($file_type, $allowed_types)) {
             $file_name = basename($_FILES['part_image']['name']);
-            $target_file = $upload_dir . time() . "_" . $file_name; // Correct path
-
+            $target_file = 'C:/xampp/htdocs/Drafter-Management-System/partimages/' . time() . "_" . $file_name; // Correct path
+    
             // Move the uploaded file to the correct directory
             if (move_uploaded_file($_FILES['part_image']['tmp_name'], $target_file)) {
                 $media = 'partimages/' . time() . "_" . $file_name; // Relative path for database
