@@ -95,9 +95,7 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
 <link rel="icon" type="image/x-icon" href="images/New Drafter Logo Cropped.png">
 
 <div class="main-content">
-    <div class="header">
         <button id="generateReportBtn" class="report-button">Generate Report</button>
-    </div>
     <div class="content">
         <div class="chart-container">
             <div class="chart-box">
@@ -236,6 +234,86 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
     </div>
 </div>
 
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+.main-content {
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+.header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.header h1 {
+    margin: 0;
+    color:rgb(231, 37, 37);
+    font-size: 24px;
+}
+.report-button {
+    background-color: #00A300;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.report-button:hover {
+    background-color: rgb(156, 197, 109);
+}
+.chart-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+.chart-box {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    position: relative;
+    height: 300px;
+}
+.chart-box h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+    color: #333;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+th, td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #f4f4f4;
+    font-weight: 600;
+}
+tr:hover {
+    background-color: #f8f8f8;
+}
+</style>
+
 <div id="reportModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -327,8 +405,8 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.11/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
@@ -1058,6 +1136,11 @@ document.getElementById('exportPDF').onclick = function() {
     const reportLayout = document.getElementById('reportLayout')?.value || "portrait";
     const primaryColor = document.getElementById('reportPrimaryColor')?.value || "#4A90E2";
     
+    if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+        alert('PDF generation library not loaded. Please check your jsPDF inclusion.');
+        return;
+    }
+    
     const doc = new jspdf.jsPDF({
         orientation: reportLayout,
         unit: 'mm',
@@ -1065,215 +1148,241 @@ document.getElementById('exportPDF').onclick = function() {
     });
     
     let yPos = 15;
+    const rgbColor = hexToRgb(primaryColor);
     
-    doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-    doc.setFontSize(18);
-    doc.text(reportTitle, 15, yPos);
-    
-    yPos += 10;
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, yPos);
-    
-    yPos += 15;
-    
-    if (selectedSections.includes('stockLevels')) {
-        let stockLevels = {};
-        try {
-            stockLevels = JSON.parse('<?php echo json_encode($stockLevels); ?>');
-        } catch (e) {
-            stockLevels = {
-                "Processor": 15,
-                "Memory": 28,
-                "SSD": 12,
-                "HDD": 8,
-                "Power Supply": 5,
-                "Motherboard": 3,
-                "Graphics Card": 6,
-                "Case": 10,
-                "Monitor": 7,
-                "Keyboard": 25
-            };
-        }
+    const logoImg = new Image();
+    logoImg.src = '../images/Drafter Black.png'; 
+    logoImg.onload = function() {
+        doc.addImage(logoImg, 'PNG', 120, yPos, 45, 45); 
+        yPos += 50; 
         
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Stock Levels", 15, yPos);
-        yPos += 8;
+        doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+        doc.setFontSize(18);
+        doc.text(reportTitle, 15, yPos);
         
-        const stockData = Object.entries(stockLevels).map(([name, qty]) => [name, qty.toString()]);
-        doc.autoTable({
-            head: [['Part Name', 'Quantity']],
-            body: stockData,
-            startY: yPos,
-            theme: 'grid',
-            headStyles: { fillColor: [hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b] },
-            margin: { top: yPos }
-        });
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, yPos);
         
-        yPos = doc.lastAutoTable.finalY + 15;
-    }
-    
-    if (selectedSections.includes('lowStock')) {
-        let lowStockResult = [];
-        try {
-            lowStockResult = JSON.parse('<?php echo mysqli_num_rows($lowStockResult) > 0 ? json_encode(mysqli_fetch_all($lowStockResult, MYSQLI_ASSOC)) : "[]"; ?>');
-        } catch (e) {
-            lowStockResult = [
-                { PartID: "101", Name: "Graphics Card", Category: "Components", PartCondition: "New", Quantity: 1 },
-                { PartID: "203", Name: "Power Supply", Category: "Components", PartCondition: "New", Quantity: 2 },
-                { PartID: "305", Name: "Motherboard", Category: "Components", PartCondition: "Refurbished", Quantity: 1 }
-            ];
-        }
-        
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Low Stock Alerts", 15, yPos);
-        yPos += 8;
-        
-        const lowStockData = lowStockResult.map(row => [
-            '#' + row.PartID,
-            row.Name,
-            row.Category,
-            row.PartCondition,
-            row.Quantity.toString()
-        ]);
-        
-        doc.autoTable({
-            head: [['Part ID', 'Name', 'Category', 'Condition', 'Quantity']],
-            body: lowStockData.length > 0 ? lowStockData : [['No low stock items found.', '', '', '', '']],
-            startY: yPos,
-            theme: 'grid',
-            headStyles: { fillColor: [hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b] },
-            margin: { top: yPos }
-        });
-        
-        yPos = doc.lastAutoTable.finalY + 15;
-    }
-    
-    if (yPos > 270 && selectedSections.some(section => ['recentUpdates', 'checkoutTrend', 'valueByCategory', 'monthlySummary'].includes(section))) {
-        doc.addPage();
-        yPos = 15;
-    }
-    
-    if (selectedSections.includes('recentUpdates')) {
-        let recentPartsResult = [];
-        try {
-            recentPartsResult = JSON.parse('<?php echo mysqli_num_rows($recentPartsResult) > 0 ? json_encode(mysqli_fetch_all($recentPartsResult, MYSQLI_ASSOC)) : "[]"; ?>');
-        } catch (e) {
-            recentPartsResult = [
-                { PartID: "567", Name: "SSD 1TB", Category: "Storage", PartCondition: "New", Quantity: 8 },
-                { PartID: "621", Name: "Memory 16GB", Category: "Memory", PartCondition: "New", Quantity: 15 },
-                { PartID: "489", Name: "Processor i7", Category: "Processor", PartCondition: "New", Quantity: 5 }
-            ];
-        }
-        
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Recently Updated Parts", 15, yPos);
-        yPos += 8;
-        
-        const recentUpdatesData = recentPartsResult.map(row => [
-            '#' + row.PartID,
-            row.Name,
-            row.Category,
-            row.PartCondition,
-            row.Quantity.toString()
-        ]);
-        
-        doc.autoTable({
-            head: [['Part ID', 'Name', 'Category', 'Condition', 'Quantity']],
-            body: recentUpdatesData.length > 0 ? recentUpdatesData : [['No recent updates found.', '', '', '', '']],
-            startY: yPos,
-            theme: 'grid',
-            headStyles: { fillColor: [hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b] },
-            margin: { top: yPos }
-        });
-        
-        yPos = doc.lastAutoTable.finalY + 15;
-    }
-    
-    if (selectedSections.includes('monthlySummary')) {
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Monthly Summary", 15, yPos);
-        yPos += 8;
-        
-        const monthlySummaryData = Object.entries(monthlySummary).map(([month, data]) => [
-            month,
-            data.count.toString(),
-            data.quantity.toString()
-        ]);
-        
-        doc.autoTable({
-            head: [['Month', 'Transaction Count', 'Total Quantity']],
-            body: monthlySummaryData,
-            startY: yPos,
-            theme: 'grid',
-            headStyles: { fillColor: [hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b] },
-            margin: { top: yPos }
-        });
-        
-        yPos = doc.lastAutoTable.finalY + 15;
-    }
-    
-    if (selectedSections.includes('partsAdded') && partsAddedChart) {
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 15;
-        }
-        
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Parts Added Trend", 15, yPos);
-        yPos += 8;
-        
-        const chartImg = partsAddedChart.toBase64Image();
-        doc.addImage(chartImg, 'PNG', 15, yPos, 180, 80);
-        yPos += 90;
-    }
-    
-    if (selectedSections.includes('checkoutTrend') && checkoutChart) {
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 15;
-        }
-        
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Checkout Trend", 15, yPos);
-        yPos += 8;
-        
-        const chartImg = checkoutChart.toBase64Image();
-        doc.addImage(chartImg, 'PNG', 15, yPos, 180, 80);
-        yPos += 90;
-    }
-    
-    if (selectedSections.includes('valueByCategory') && valueChart) {
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 15;
-        }
-        
-        doc.setFontSize(14);
-        doc.setTextColor(hexToRgb(primaryColor).r, hexToRgb(primaryColor).g, hexToRgb(primaryColor).b);
-        doc.text("Value by Category", 15, yPos);
-        yPos += 8;
-        
-        const chartImg = valueChart.toBase64Image();
-        doc.addImage(chartImg, 'PNG', 15, yPos, 180, 80);
-    }
-    
-    doc.save(`${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
-};
+        yPos += 15;
 
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
+        function checkPageBreak(neededSpace = 30) {
+            const pageHeight = doc.internal.pageSize.height;
+            if (yPos + neededSpace > pageHeight - 15) {
+                doc.addPage();
+                yPos = 15;
+                return true;
+            }
+            return false;
+        }
+
+        if (selectedSections.includes('stockLevels')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Stock Levels", 15, yPos);
+            yPos += 8;
+
+            const stockLevels = <?php echo json_encode($stockLevels); ?>;
+            const stockData = Object.entries(stockLevels).map(([name, qty]) => [name, qty.toString()]);
+            doc.autoTable({
+                head: [['Part Name', 'Quantity']],
+                body: stockData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        if (selectedSections.includes('partsAdded')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Parts Added Over Time", 15, yPos);
+            yPos += 8;
+
+            const partsAddedData = <?php echo json_encode($partsAddedData); ?>;
+            const partsData = Object.entries(partsAddedData).map(([date, count]) => [date, count.toString()]);
+            doc.autoTable({
+                head: [['Date', 'Parts Added']],
+                body: partsData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+
+            try {
+                const partsAddedChartImg = partsAddedChart.toBase64Image();
+                checkPageBreak(90);
+                doc.addImage(partsAddedChartImg, 'PNG', 15, yPos, 180, 80);
+                yPos += 90;
+            } catch (e) {
+                console.error('Error adding Parts Added chart:', e);
+            }
+        }
+
+        if (selectedSections.includes('checkoutTrend')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Checkout Trend", 15, yPos);
+            yPos += 8;
+
+            const checkoutData = <?php echo json_encode($checkoutData); ?>;
+            const checkoutTrendData = Object.entries(checkoutData).map(([date, total]) => [date, total.toString()]);
+            doc.autoTable({
+                head: [['Date', 'Total Checked Out']],
+                body: checkoutTrendData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+
+            try {
+                const checkoutChartImg = checkoutChart.toBase64Image();
+                checkPageBreak(90);
+                doc.addImage(checkoutChartImg, 'PNG', 15, yPos, 180, 80);
+                yPos += 90;
+            } catch (e) {
+                console.error('Error adding Checkout Trend chart:', e);
+            }
+        }
+
+        if (selectedSections.includes('valueByCategory')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Inventory Value by Category", 15, yPos);
+            yPos += 8;
+
+            const valueByCategory = <?php echo json_encode($categoryBreakdown); ?>;
+            const valueByCategoryData = Object.entries(valueByCategory).map(([category, count]) => [category, count.toString()]);
+            doc.autoTable({
+                head: [['Category', 'Count']],
+                body: valueByCategoryData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        if (selectedSections.includes('lowStock')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Low Stock Alerts", 15, yPos);
+            yPos += 8;
+
+            let lowStockResult = <?php echo mysqli_num_rows($lowStockResult) > 0 ? json_encode(mysqli_fetch_all($lowStockResult, MYSQLI_ASSOC)) : '[]'; ?>;
+            const lowStockData = lowStockResult.map(row => [
+                '#' + row.PartID,
+                row.Name,
+                row.Category,
+                row.PartCondition,
+                row.Quantity.toString()
+            ]);
+            doc.autoTable({
+                head: [['Part ID', 'Name', 'Category', 'Condition', 'Quantity']],
+                body: lowStockData.length > 0 ? lowStockData : [['No low stock items found.', '', '', '', '']],
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        if (selectedSections.includes('recentUpdates')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Recently Updated Parts", 15, yPos);
+            yPos += 8;
+
+            let recentPartsResult = <?php echo mysqli_num_rows($recentPartsResult) > 0 ? json_encode(mysqli_fetch_all($recentPartsResult, MYSQLI_ASSOC)) : '[]'; ?>;
+            const recentUpdatesData = recentPartsResult.map(row => [
+                '#' + row.PartID,
+                row.Name,
+                row.Category,
+                row.PartCondition,
+                row.Quantity.toString()
+            ]);
+            doc.autoTable({
+                head: [['Part ID', 'Name', 'Category', 'Condition', 'Quantity']],
+                body: recentUpdatesData.length > 0 ? recentUpdatesData : [['No recent updates found.', '', '', '', '']],
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        if (selectedSections.includes('monthlySummary')) {
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
+            doc.text("Monthly Summary", 15, yPos);
+            yPos += 8;
+
+            let monthlySummary = <?php echo json_encode($monthlySummary); ?>;
+            const monthlySummaryData = Object.entries(monthlySummary).map(([month, data]) => [
+                month,
+                data.count.toString(),
+                data.quantity.toString()
+            ]);
+            doc.autoTable({
+                head: [['Month', 'Transaction Count', 'Total Quantity']],
+                body: monthlySummaryData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
+                margin: { top: yPos }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+                align: 'center'
+            });
+        }
+
+        doc.save(`${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+    };
+
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+    }
+};
+function getTimeRangeText(range) {
+    const rangeMap = {
+        '7': 'Last 7 Days',
+        '30': 'Last 30 Days',
+        '90': 'Last 90 Days',
+        '180': 'Last 6 Months',
+        '365': 'Last Year',
+        'all': 'All Time'
+    };
+    return rangeMap[range] || 'Last 30 Days';
 }
 </script>
 
@@ -1309,6 +1418,8 @@ body {
     border-radius: 5px;
     margin-bottom: 10px;
     margin-top: 60px;
+    border-radius: 4px;
+    text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s;
 }
