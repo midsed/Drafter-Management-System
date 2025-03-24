@@ -155,6 +155,39 @@ include('navigation/topbar.php');
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// -- Sidebar Toggle and State Persistence --
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed');
+
+    // Save the sidebar state to localStorage
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+}
+
+function checkSidebarState() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    // Apply the saved state on page load
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('collapsed');
+    }
+}
+
+// Check the sidebar state when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    checkSidebarState();
+});
+
 // -- Select Mode for Archived Parts --
 
 let selectMode = false;
@@ -167,7 +200,6 @@ function toggleSelectMode() {
     document.getElementById('cancelSelectBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
-
 
     if (!selectMode) {
         selectedParts.clear();
@@ -287,6 +319,8 @@ document.getElementById("relistSelectedBtn").addEventListener("click", function(
     });
 });
 
+// -- Filter and Sort Functionality --
+
 document.getElementById("applyFilter").addEventListener("click", function() {
     const selectedCategories = Array.from(document.querySelectorAll('.filter-option:checked')).map(checkbox => checkbox.value);
     const searchQuery = document.getElementById("searchInput").value.trim();
@@ -318,6 +352,8 @@ document.querySelectorAll(".sort-option").forEach(option => {
         window.location.search = queryParams.toString();
     });
 });
+
+// -- Dropdown Functionality --
 
 document.addEventListener("DOMContentLoaded", function () {
     const filterDropdown = document.getElementById("filterDropdown");
