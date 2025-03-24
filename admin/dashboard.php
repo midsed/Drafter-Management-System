@@ -1422,6 +1422,7 @@ body {
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-family: 'Poppins', sans-serif;
 }
 .report-button:hover {
     background-color: rgb(116, 11, 11);
@@ -1613,6 +1614,8 @@ tr:hover {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+
 }
 .action-button:hover {
     transform: translateY(-2px);

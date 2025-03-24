@@ -136,13 +136,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                 icon: 'error',
                 title: 'Invalid Username!',
                 text: 'This username does not exist.',
-                                showConfirmButton: true
+                showConfirmButton: true
             });
         </script>";
         exit();
     }
 
     $user = $result->fetch_assoc();
+
+    // Check if the user is inactive
+    if ($user['Status'] === 'Inactive') {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Inactive!',
+                text: 'Your account is inactive. Please contact the administrator.',
+                showConfirmButton: true
+            });
+        </script>";
+        exit();
+    }
+
     $stored_password = $user['Password'];
 
     if (password_verify($password, $stored_password) || $password === $stored_password) {
