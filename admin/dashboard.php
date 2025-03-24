@@ -1112,7 +1112,6 @@ document.getElementById('exportExcel').onclick = function() {
     
     XLSX.writeFile(workbook, `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
 };
-
 document.getElementById('exportPDF').onclick = function() {
     const selectedSections = Array.from(document.querySelectorAll('input[name="reportSection"]:checked')).map(checkbox => checkbox.value);
     const reportTitle = document.getElementById('reportTitle').value || "Inventory Report";
@@ -1136,8 +1135,11 @@ document.getElementById('exportPDF').onclick = function() {
     const logoImg = new Image();
     logoImg.src = '../images/Drafter Black.png'; 
     logoImg.onload = function() {
-        doc.addImage(logoImg, 'PNG', 120, yPos, 45, 45); 
-        yPos += 50; 
+        const logoWidth = 50; 
+        const logoHeight = 50; 
+        const xPos = (doc.internal.pageSize.width - logoWidth) / 2; 
+        doc.addImage(logoImg, 'PNG', xPos, yPos, logoWidth, logoHeight); 
+        yPos += logoHeight + 10; 
         
         doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
         doc.setFontSize(18);
