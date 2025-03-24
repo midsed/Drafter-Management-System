@@ -144,7 +144,7 @@ $result = $conn->query($sql);
             </div>
         </div>
 
-        <!-- Right Group: Action Buttons (Archives, + Add Supplier) -->
+        <!-- Right Group: Action Buttons (Archives) -->
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
         </div>
@@ -160,7 +160,6 @@ $result = $conn->query($sql);
                     <th>Email</th>
                     <th>Company Name</th>
                     <th>Phone Number</th>
-                    <th>Edit Supplier</th>
                     <th>Archive</th>
                 </tr>
             </thead>
@@ -174,12 +173,11 @@ $result = $conn->query($sql);
                         echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['CompanyName']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['PhoneNumber']) . "</td>";
-                        echo "<td><a href='supplieredit.php?id=" . $row['SupplierID'] . "' class='btn btn-edit'>Edit</a></td>";
                         echo "<td><button class='btn btn-archive' onclick='archiveSupplier(" . $row['SupplierID'] . ")'>Archive</button></td>";
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='7'>No suppliers with associated parts found.</td></tr>";
+                    echo "<tr><td colspan='6'>No suppliers with associated parts found.</td></tr>";
                 }
                 ?>
             </tbody>
@@ -428,7 +426,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 window.history.replaceState({}, document.title, window.location.pathname);
             });
         }
-    </script>
+</script>
 
 <!-- STYLES -->
 <style>
@@ -649,7 +647,6 @@ document.addEventListener("DOMContentLoaded", function() {
         text-align: center !important;
     }
 
-    /* Revert to older light gray color for table headers */
     .supplier-table th {
         background-color: #f2f2f2; /* Light gray header background */
     }

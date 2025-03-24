@@ -361,7 +361,7 @@ $result = $conn->query($sql);
         display: flex;
         justify-content: center;
         gap: 10px;
-        margin-top: 20px;
+        margin-top: 350px;
     }
     .pagination-button {
         padding: 6px 12px;
