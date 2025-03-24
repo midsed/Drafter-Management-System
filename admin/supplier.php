@@ -18,14 +18,14 @@ include('navigation/topbar.php');
 $search    = isset($_GET['search']) ? $conn->real_escape_string(trim($_GET['search'])) : '';
 $partIDs   = isset($_GET['part']) ? explode(',', $_GET['part']) : [];
 $companies = isset($_GET['company']) ? explode(',', $_GET['company']) : [];
-$sort      = isset($_GET['sort']) ? $_GET['sort'] : '';
 
+$sort    = isset($_GET['sort']) ? $_GET['sort'] : '';
 $limit   = 10; // pagination limit
 $page    = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset  = ($page - 1) * $limit;
 
 // ----- BASE QUERIES -----
-$sql = "SELECT 
+$sql = "SELECT
             s.SupplierID,
             s.CompanyName,
             s.Email,
@@ -36,12 +36,13 @@ $sql = "SELECT
         LEFT JOIN part p ON s.SupplierID = p.SupplierID
         WHERE s.archived = 0 AND p.PartID IS NOT NULL";
 
-$countSql = "SELECT COUNT(*) AS total 
+$countSql = "SELECT COUNT(*) AS total
              FROM supplier s
              LEFT JOIN part p ON s.SupplierID = p.SupplierID
              WHERE s.archived = 0 AND p.PartID IS NOT NULL";
 
 // ----- APPLY FILTERS -----
+// (For this example, filtering is done by Company Name.)
 if (!empty($companies)) {
     $escapedCompanies = array_map([$conn, 'real_escape_string'], $companies);
     $sql      .= " AND s.CompanyName IN ('" . implode("','", $escapedCompanies) . "')";
@@ -50,16 +51,17 @@ if (!empty($companies)) {
 
 // ----- QUICK SEARCH -----
 if (!empty($search)) {
-    $sql      .= " AND (s.CompanyName LIKE '%$search%' 
-                  OR s.Email LIKE '%$search%' 
+    $sql .= " AND (s.CompanyName LIKE '%$search%'
+                  OR s.Email LIKE '%$search%'
                   OR s.PhoneNumber LIKE '%$search%'
                   OR p.PartID LIKE '%$search%')";
-    $countSql .= " AND (s.CompanyName LIKE '%$search%' 
-                        OR s.Email LIKE '%$search%' 
+    $countSql .= " AND (s.CompanyName LIKE '%$search%'
+                        OR s.Email LIKE '%$search%'
                         OR s.PhoneNumber LIKE '%$search%'
                         OR p.PartID LIKE '%$search%')";
 }
 
+// ----- SORTING -----
 if ($sort === 'asc') {
     $sql .= " ORDER BY s.CompanyName ASC";
 } elseif ($sort === 'desc') {
@@ -79,20 +81,17 @@ $result = $conn->query($sql);
 ?>
 
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="main-content">
-    <!-- Header with Back Arrow & Title -->
+    <!-- Header with Back Arrow & Title ONLY -->
     <div class="header">
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
-            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
+            <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back"
+                 style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
         <h1 style="margin: 0;">Supplier</h1>
-        <div class="actions">
-          
-        </div>
     </div>
 
     <!-- Combined Toolbar: Left = Search, Filter, Sort; Right = Actions -->
@@ -108,12 +107,11 @@ $result = $conn->query($sql);
                         <i class="fas fa-filter"></i>
                     </button>
                     <div id="filterDropdown" class="dropdown-content">
-                        <!-- Filter by Company Name -->
                         <div class="filter-section">
                             <h4>Company Name</h4>
                             <div class="filter-options">
                                 <?php
-                                $companyQuery = "SELECT DISTINCT s.CompanyName 
+                                $companyQuery = "SELECT DISTINCT s.CompanyName
                                                  FROM supplier s
                                                  WHERE s.archived = 0
                                                  ORDER BY s.CompanyName";
@@ -132,8 +130,6 @@ $result = $conn->query($sql);
                     </div>
                 </div>
             </div>
-
-            <!-- Sort -->
             <div class="sort-container">
                 <span>Sort By</span>
                 <div class="dropdown">
@@ -147,7 +143,8 @@ $result = $conn->query($sql);
                 </div>
             </div>
         </div>
-        <!-- Right Group: Action Buttons; pushed down with a top margin -->
+
+        <!-- Right Group: Action Buttons (Archives) -->
         <div class="actions">
             <a href="supplierarchive.php" class="btn btn-archive">Archives</a>
         </div>
@@ -162,8 +159,7 @@ $result = $conn->query($sql);
                     <th>Part Name</th>
                     <th>Email</th>
                     <th>Company Name</th>
-                    <th>Phone Number</th>   
-                    <th>Edit Supplier</th>
+                    <th>Phone Number</th>
                     <th>Archive</th>
                 </tr>
             </thead>
@@ -177,12 +173,11 @@ $result = $conn->query($sql);
                         echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['CompanyName']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['PhoneNumber']) . "</td>";
-                        echo "<td><a href='supplieredit.php?id=" . $row['SupplierID'] . "' class='btn btn-edit'>Edit</a></td>";
                         echo "<td><button class='btn btn-archive' onclick='archiveSupplier(" . $row['SupplierID'] . ")'>Archive</button></td>";
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='7'>No suppliers with associated parts found.</td></tr>";
+                    echo "<tr><td colspan='6'>No suppliers with associated parts found.</td></tr>";
                 }
                 ?>
             </tbody>
@@ -191,7 +186,7 @@ $result = $conn->query($sql);
 
     <!-- Pagination -->
     <div class="pagination">
-        <?php 
+        <?php
         $queryParams = $_GET;
         unset($queryParams['page']);
         $queryString = http_build_query($queryParams);
@@ -203,26 +198,26 @@ $result = $conn->query($sql);
         if ($endPage - $startPage < $visiblePages - 1) {
             $startPage = max(1, $endPage - $visiblePages + 1);
         }
-
-        if ($page > 1) {
-            echo "<a href='?$queryString&page=1' class='pagination-button'>First</a>";
-            echo "<a href='?$queryString&page=" . ($page - 1) . "' class='pagination-button'>Previous</a>";
-        }
-
-        for ($i = $startPage; $i <= $endPage; $i++) {
-            $activeClass = ($i == $page) ? 'active-page' : '';
-            echo "<a href='?$queryString&page=$i' class='pagination-button $activeClass'>$i</a>";
-        }
-
-        if ($page < $totalPages) {
-            echo "<a href='?$queryString&page=" . ($page + 1) . "' class='pagination-button'>Next</a>";
-            echo "<a href='?$queryString&page=$totalPages' class='pagination-button'>Last</a>";
-        }
         ?>
+
+        <?php if ($page > 1): ?>
+            <a href="?<?= $queryString ?>&page=1" class="pagination-button">First</a>
+            <a href="?<?= $queryString ?>&page=<?= $page - 1 ?>" class="pagination-button">Previous</a>
+        <?php endif; ?>
+
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <a href="?<?= $queryString ?>&page=<?= $i ?>"
+               class="pagination-button <?= ($i == $page) ? 'active-page' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?<?= $queryString ?>&page=<?= ($page + 1) ?>" class="pagination-button">Next</a>
+            <a href="?<?= $queryString ?>&page=<?= $totalPages ?>" class="pagination-button">Last</a>
+        <?php endif; ?>
     </div>
 </div>
 
-<!-- JS for Live Search, Filter, Sort, and Archive -->
+<!-- JS for Filter, Sort, Live Search, and Archive -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 <script>
 function toggleSidebar() {
@@ -256,26 +251,33 @@ document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
 });
 
+// Real-time search
 document.getElementById("searchInput").addEventListener("input", function() {
     const searchValue = this.value.trim();
     const currentUrl  = new URL(window.location.href);
+
     if (searchValue) {
         currentUrl.searchParams.set("search", searchValue);
     } else {
         currentUrl.searchParams.delete("search");
     }
     currentUrl.searchParams.set("page", "1");
+
+    // Fetch updated content
     fetch(currentUrl.toString())
         .then(response => response.text())
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            document.getElementById("supplierTableBody").innerHTML = doc.getElementById("supplierTableBody").innerHTML;
-            document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML || "";
+            document.getElementById("supplierTableBody").innerHTML =
+                doc.getElementById("supplierTableBody").innerHTML;
+            document.querySelector(".pagination").innerHTML =
+                doc.querySelector(".pagination").innerHTML;
         })
         .catch(error => console.error("Error updating search results:", error));
 });
 
+// Archive supplier with SweetAlert
 function archiveSupplier(supplierID) {
     Swal.fire({
         title: 'Are you sure?',
@@ -301,7 +303,9 @@ function archiveSupplier(supplierID) {
                         icon: 'success',
                         confirmButtonColor: '#32CD32',
                         confirmButtonText: 'OK'
-                    }).then(() => { location.reload(); });
+                    }).then(() => {
+                        location.reload();
+                    });
                 } else {
                     Swal.fire({
                         title: 'Error!',
@@ -318,7 +322,6 @@ function archiveSupplier(supplierID) {
                     title: 'Error!',
                     text: 'An error occurred while archiving the supplier.',
                     icon: 'error',
-                    confirmButtonColor: '#32CD32',
                     confirmButtonText: 'OK'
                 });
             });
@@ -357,13 +360,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Apply Filters
+    // Apply Filter
     applyFilterBtn.addEventListener("click", function() {
+        const selectedParts = Array.from(document.querySelectorAll('.filter-option[data-filter="part"]:checked'))
+            .map(checkbox => checkbox.value);
         const selectedCompanies = Array.from(document.querySelectorAll('.filter-option[data-filter="company"]:checked'))
             .map(checkbox => checkbox.value);
+
         const searchQuery = searchInput.value.trim();
         const queryParams = new URLSearchParams(window.location.search);
+
         queryParams.set("page", "1");
+        if (selectedParts.length > 0) {
+            queryParams.set("part", selectedParts.join(","));
+        } else {
+            queryParams.delete("part");
+        }
         if (selectedCompanies.length > 0) {
             queryParams.set("company", selectedCompanies.join(","));
         } else {
@@ -374,6 +386,7 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             queryParams.delete("search");
         }
+
         window.location.search = queryParams.toString();
     });
 
@@ -387,6 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
         option.addEventListener("click", function() {
             const selectedSort = this.dataset.sort;
             const queryParams  = new URLSearchParams(window.location.search);
+
             queryParams.set("sort", selectedSort);
             queryParams.set("page", "1");
             window.location.search = queryParams.toString();
@@ -395,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-    <script>
+<script>
         // Check for the success flag in the URL
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
@@ -412,18 +426,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 window.history.replaceState({}, document.title, window.location.pathname);
             });
         }
-    </script>
+</script>
 
+<!-- STYLES -->
 <style>
-    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
     body {
         font-family: 'Poppins', sans-serif;
     }
-    .actions a.btn,
-    .actions button.btn {
-        color: white !important;
-        text-decoration: none !important
-    }
+
+    /* BUTTONS */
     .btn {
         font-family: 'Poppins', sans-serif;
         padding: 8px 12px;
@@ -439,32 +450,37 @@ document.addEventListener("DOMContentLoaded", function() {
     .btn-add {
         background-color: #00A300 !important;
     }
+
     .actions {
         text-align: right;
         width: 100%;
     }
     .actions .btn {
         margin-left: 10px;
+        text-decoration: none;
     }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
     .search-actions {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
         margin-bottom: 20px;
     }
-    .left-group,
-    .search-container,
-    .filter-container,
-    .sort-container {
+
+    .left-group {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        white-space: nowrap;
     }
-    /* Right group: push down with top margin */
-    .actions {
-        margin-top: 15px;
-    }
+
     .search-container input[type="text"] {
         width: 300px;
         padding: 10px;
@@ -473,18 +489,26 @@ document.addEventListener("DOMContentLoaded", function() {
         font-size: 14px;
         font-family: 'Poppins', sans-serif;
     }
+
     .search-container input[type="text"]:focus {
         outline: none;
         border-color: #007bff;
     }
+
+    /* FILTER / SORT STYLES */
     .filter-container, .sort-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
         cursor: pointer;
+        white-space: nowrap;
     }
+
     .filter-container span, .sort-container span {
         font-size: 14px;
-        font-family: 'Poppins', sans-serif;
         color: #333;
     }
+
     .filter-icon, .sort-icon {
         color: #E10F0F;
         font-size: 20px;
@@ -493,9 +517,16 @@ document.addEventListener("DOMContentLoaded", function() {
         border: none;
         cursor: pointer;
     }
+
     .filter-icon:hover, .sort-icon:hover {
         color: darkred;
     }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
     .dropdown-content {
         display: none;
         position: absolute;
@@ -508,22 +539,27 @@ document.addEventListener("DOMContentLoaded", function() {
         padding: 15px;
         border-radius: 8px;
     }
+
     .dropdown-content.show {
         display: block;
     }
+
     .filter-section {
         margin-bottom: 15px;
     }
+
     .filter-section h4 {
         margin: 0 0 10px 0;
         font-size: 16px;
         color: #333;
     }
+
     .filter-options {
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
+
     .filter-options label {
         display: flex;
         align-items: center;
@@ -532,10 +568,12 @@ document.addEventListener("DOMContentLoaded", function() {
         color: #555;
         cursor: pointer;
     }
+
     .filter-options input[type="checkbox"] {
         margin: 0;
         cursor: pointer;
     }
+
     .filter-actions {
         display: flex;
         gap: 10px;
@@ -545,6 +583,7 @@ document.addEventListener("DOMContentLoaded", function() {
         background: white;
         padding: 10px 0;
     }
+
     .filter-actions button {
         padding: 8px 12px;
         border: none;
@@ -555,74 +594,27 @@ document.addEventListener("DOMContentLoaded", function() {
         cursor: pointer;
         transition: background 0.3s ease;
     }
+
     .filter-actions button:hover {
         background-color: darkred;
     }
-    .filter-actions #clearFilter {
+
+    #clearFilter {
         background-color: #ccc;
         color: #333;
     }
-    .filter-actions #clearFilter:hover {
+
+    #clearFilter:hover {
         background-color: #bbb;
     }
-    .red-button {
-        background: #E10F0F;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        font-family: 'Poppins', sans-serif;
-        transition: background 0.3s ease;
-        text-decoration: none;
-    }
-    .red-button:hover {
-        background: darkred;
-    }
-    .table-container {
-        margin-top: 20px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    th, td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
-    }
-    th {
-        background-color: rgb(255, 255, 255);
-    }
-    tr:hover {
-        background-color: rgb(218, 218, 218);
-    }
-    .pagination {
+
+    /* SORT OPTIONS */
+    .sort-options {
         display: flex;
-        justify-content: center;
         gap: 10px;
-        margin-top: 20px;
+        justify-content: center;
     }
-    .pagination-button {
-        padding: 6px 12px;
-        border-radius: 4px;
-        background: white;
-        border: 1px solid black;
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-        font-size: 14px;
-    }
-    .pagination-button:hover {
-        background: #f0f0f0;
-    }
-    .active-page {
-        background: black;
-        color: white;
-        font-weight: bold;
-    }
+
     .sort-option {
         background-color: #E10F0F;
         color: white;
@@ -634,7 +626,60 @@ document.addEventListener("DOMContentLoaded", function() {
         cursor: pointer;
         transition: background 0.3s ease;
     }
+
     .sort-option:hover {
         background-color: darkred;
+    }
+
+    .table-container {
+        margin-top: 10px;
+    }
+
+    .supplier-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .supplier-table th, .supplier-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: center !important;
+    }
+
+    .supplier-table th {
+        background-color: #f2f2f2; /* Light gray header background */
+    }
+
+    tr:hover {
+        background-color: rgb(218, 218, 218);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .pagination-button {
+        padding: 6px 12px;
+        border-radius: 4px;
+        background: white;
+        border: 1px solid black;
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .pagination-button:hover {
+        background: #f0f0f0;
+    }
+
+    .active-page {
+        background: black;
+        color: white;
+        font-weight: bold;
     }
 </style>
