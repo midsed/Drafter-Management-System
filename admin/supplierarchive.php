@@ -86,57 +86,57 @@ if (!isset($_SESSION['Username'])) {
 
     // Re-list supplier functionality with SweetAlert
     function relistSupplier(supplierID) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You are about to re-list this supplier!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745', // Green color for re-list
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, re-list it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('relist_supplier.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=${supplierID}`
-                })
-                .then(response => response.json()) // Parse the response as JSON
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Re-listed!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            // Remove the re-listed supplier row from the table
-                            const row = document.querySelector(`tr[data-supplier-id="${supplierID}"]`);
-                            if (row) {
-                                row.remove();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to re-list this supplier!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#32CD32', // Green color for re-list
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, re-list it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('relist_supplier.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${supplierID}`
+            })
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Re-listed!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#32CD32',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload the page to reflect changes
+                        location.reload();
+                    });
+                } else {
                     Swal.fire({
                         title: 'Error!',
-                        text: 'An error occurred while re-listing the supplier.',
+                        text: data.message,
                         icon: 'error',
+                        confirmButtonColor: '#32CD32',
                         confirmButtonText: 'OK'
                     });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while re-listing the supplier.',
+                    icon: 'error',
+                    confirmButtonColor: '#32CD32',
+                    confirmButtonText: 'OK'
                 });
-            }
-        });
-    }
+            });
+        }
+    });
+}
     function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');

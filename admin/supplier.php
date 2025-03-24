@@ -299,6 +299,7 @@ function archiveSupplier(supplierID) {
                         title: 'Archived!',
                         text: data.message,
                         icon: 'success',
+                        confirmButtonColor: '#32CD32',
                         confirmButtonText: 'OK'
                     }).then(() => { location.reload(); });
                 } else {
@@ -306,6 +307,7 @@ function archiveSupplier(supplierID) {
                         title: 'Error!',
                         text: data.message,
                         icon: 'error',
+                        confirmButtonColor: '#32CD32',
                         confirmButtonText: 'OK'
                     });
                 }
@@ -316,6 +318,7 @@ function archiveSupplier(supplierID) {
                     title: 'Error!',
                     text: 'An error occurred while archiving the supplier.',
                     icon: 'error',
+                    confirmButtonColor: '#32CD32',
                     confirmButtonText: 'OK'
                 });
             });
