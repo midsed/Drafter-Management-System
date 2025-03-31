@@ -184,6 +184,11 @@ $username = $user['Username'];
             </div>
 
             <div class="form-group">
+                <label for="chassis_number">Chassis Number:</label>
+                <input type="text" id="chassis_number" name="chassis_number" maxlength="20" required>
+            </div>
+
+            <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
                     <option value="" selected disabled>Select Category</option>
@@ -404,6 +409,8 @@ function clearError(input) {
         const makeInput = document.getElementById("make");
         const modelInput = document.getElementById("model");
         const yearModelInput = document.getElementById("year_model");
+        const chassisNumberInput = document.getElementById("chassis_number");
+            chassisNumberInput.addEventListener("blur", validateChassisNumber);
         const categoryInput = document.getElementById("category");
         const authenticityInput = document.getElementById("authenticity");
         const conditionInput = document.getElementById("condition");
@@ -464,6 +471,21 @@ function clearError(input) {
                 return false;
             } else {
                 clearError(yearModelInput);
+                return true;
+            }
+        }
+
+        // Validate Chassis Number (Required, max 20 characters)
+        function validateChassisNumber() {
+            const chassisNumberInput = document.getElementById("chassis_number");
+            if (chassisNumberInput.value.trim() === "") {
+                showError(chassisNumberInput, "Chassis Number is required.");
+                return false;
+            } else if (chassisNumberInput.value.length > 20) {
+                showError(chassisNumberInput, "Chassis Number must not exceed 20 characters.");
+                return false;
+            } else {
+                clearError(chassisNumberInput);
                 return true;
             }
         }
@@ -582,6 +604,7 @@ function clearError(input) {
         if (!validateMake()) isValid = false;
         if (!validateModel()) isValid = false;
         if (!validateYearModel()) isValid = false;
+        if (!validateChassisNumber()) isValid = false; // Add this line
         if (!validateRequired(categoryInput)) isValid = false;
         if (!validateRequired(authenticityInput)) isValid = false;
         if (!validateRequired(conditionInput)) isValid = false;
@@ -603,6 +626,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
+    $chassis_number = $_POST['chassis_number'];
     $category = $_POST['category'];
     $authenticity = $_POST['authenticity'];
     $condition = $_POST['condition'];
@@ -706,16 +730,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Insert Part
-    $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel, SupplierID)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $part_stmt = $conn->prepare($part_sql);
-    if ($part_stmt === false) {
-        die("Error preparing part query: " . $conn->error);
-    }
-    $part_stmt->bind_param("sssssssssssssssi", 
-        $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
-        $name, $price, $quantity, $category, $make, $model, $year_model, $supplier_id
-    );
+    $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel, ChassisNumber, SupplierID)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $part_stmt = $conn->prepare($part_sql);
+        if ($part_stmt === false) {
+            die("Error preparing part query: " . $conn->error);
+        }
+        $part_stmt->bind_param("ssssssssssssssssi", 
+            $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
+            $name, $price, $quantity, $category, $make, $model, $year_model, $chassis_number, $supplier_id
+        );
 
     if ($part_stmt->execute()) {
         $partID = $conn->insert_id; 
