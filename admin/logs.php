@@ -32,8 +32,9 @@ if (!empty($search)) {
                    OR l.Timestamp LIKE '%$search%')";
 }
 
-if (!empty($actionType)) {
-    $sql .= " AND l.ActionType = '$actionType'";
+// If an Action Type filter is chosen and not "All", filter by logs starting with that keyword.
+if (!empty($actionType) && $actionType !== "All") {
+    $sql .= " AND l.ActionType LIKE '$actionType%'";
 }
 
 if (!empty($startDate) && !empty($endDate)) {
@@ -90,6 +91,16 @@ $result = $conn->query($sql);
                         <input type="date" id="start_date" value="<?= htmlspecialchars($startDate) ?>">
                         <input type="date" id="end_date" value="<?= htmlspecialchars($endDate) ?>">
                     </div>
+                    <h4>Action Type</h4>
+                    <div class="action-type-filter">
+                        <select id="action_type">
+                            <option value="">All</option>
+                            <option value="Add" <?= ($actionType=="Add") ? "selected" : "" ?>>Add</option>
+                            <option value="Update" <?= ($actionType=="Update") ? "selected" : "" ?>>Update</option>
+                            <option value="Archive" <?= ($actionType=="Archive") ? "selected" : "" ?>>Archive</option>
+                            <option value="Re-list" <?= ($actionType=="Re-list") ? "selected" : "" ?>>Re-list</option>
+                        </select>
+                    </div>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
                         <button id="clearFilter" class="clear-button">Clear</button>
@@ -120,7 +131,7 @@ $result = $conn->query($sql);
         </div>
     </div>
     <div class="download-container">
-    <a href="download_logs.php?<?= http_build_query($_GET) ?>" class="red-button">Download Logs (Excel)</a>
+        <a href="download_logs.php?<?= http_build_query($_GET) ?>" class="red-button">Download Logs (Excel)</a>
     </div>
     <div class="table-container">
         <table class="logs-table">
@@ -165,8 +176,6 @@ $result = $conn->query($sql);
 
         if ($page > 1) {
             echo '<a href="?' . $queryString . '&page=1" class="pagination-button">First</a>';
-        }
-        if ($page > 1) {
             echo '<a href="?' . $queryString . '&page=' . ($page - 1) . '" class="pagination-button">Previous</a>';
         }
 
@@ -177,8 +186,6 @@ $result = $conn->query($sql);
 
         if ($page < $totalPages) {
             echo '<a href="?' . $queryString . '&page=' . ($page + 1) . '" class="pagination-button">Next</a>';
-        }
-        if ($page < $totalPages) {
             echo '<a href="?' . $queryString . '&page=' . $totalPages . '" class="pagination-button">Last</a>';
         }
         ?>
@@ -186,14 +193,11 @@ $result = $conn->query($sql);
 </div>
 
 <script>
-
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     sidebar.classList.toggle('collapsed');
     mainContent.classList.toggle('collapsed');
-
-    // Save the sidebar state to localStorage
     const isCollapsed = sidebar.classList.contains('collapsed');
     localStorage.setItem('sidebarCollapsed', isCollapsed);
 }
@@ -202,8 +206,6 @@ function checkSidebarState() {
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-    // Apply the saved state on page load
     if (isCollapsed) {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('collapsed');
@@ -213,7 +215,6 @@ function checkSidebarState() {
     }
 }
 
-// Check the sidebar state when the page loads
 document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
 });
@@ -228,7 +229,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
     }
     currentUrl.searchParams.set("page", "1");
     currentUrl.searchParams.set("ajax", "1");
-
     fetch(currentUrl.toString())
         .then(response => response.text())
         .then(html => {
@@ -267,14 +267,20 @@ document.getElementById("filterButton").addEventListener("click", function(e) {
 document.getElementById("applyFilter").addEventListener("click", function() {
     const startDate = document.getElementById("start_date").value;
     const endDate   = document.getElementById("end_date").value;
+    const actionType = document.getElementById("action_type").value;
     const currentUrl = new URL(window.location.href);
-
+    
     if (startDate && endDate) {
         currentUrl.searchParams.set("start_date", startDate);
         currentUrl.searchParams.set("end_date", endDate);
     } else {
         currentUrl.searchParams.delete("start_date");
         currentUrl.searchParams.delete("end_date");
+    }
+    if (actionType) {
+        currentUrl.searchParams.set("action_type", actionType);
+    } else {
+        currentUrl.searchParams.delete("action_type");
     }
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
@@ -283,10 +289,11 @@ document.getElementById("applyFilter").addEventListener("click", function() {
 document.getElementById("clearFilter").addEventListener("click", function() {
     document.getElementById("start_date").value = "";
     document.getElementById("end_date").value   = "";
-    
+    document.getElementById("action_type").value = "";
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.delete("start_date");
     currentUrl.searchParams.delete("end_date");
+    currentUrl.searchParams.delete("action_type");
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
 });
