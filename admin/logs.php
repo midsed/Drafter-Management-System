@@ -11,6 +11,7 @@ include('navigation/sidebar.php');
 include('navigation/topbar.php');
 include('logging.php');
 
+// Retrieve filter parameters
 $search     = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
 $limit      = 10;
 $page       = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -20,21 +21,27 @@ $sortOrder  = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort
 $startDate  = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $endDate    = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 $actionType = isset($_GET['action_type']) ? $conn->real_escape_string($_GET['action_type']) : '';
+$roleFilter = isset($_GET['role']) ? $conn->real_escape_string($_GET['role']) : '';
 
-$sql = "SELECT l.LogsID, u.Username AS ActionBy, l.ActionType, l.Timestamp
+$sql = "SELECT l.LogsID, CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy, l.ActionType, l.Timestamp
         FROM logs l
         JOIN user u ON l.UserID = u.UserID
         WHERE 1=1";
 
 if (!empty($search)) {
-    $sql .= " AND (u.Username LIKE '%$search%'
+    $sql .= " AND (CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') LIKE '%$search%'
                    OR l.ActionType LIKE '%$search%'
                    OR l.Timestamp LIKE '%$search%')";
 }
 
-// If an Action Type filter is chosen and not "All", filter by logs starting with that keyword.
+// Filter by Action Type if chosen and not "All"
 if (!empty($actionType) && $actionType !== "All") {
     $sql .= " AND l.ActionType LIKE '$actionType%'";
+}
+
+// Filter by Role Type if chosen and not "All"
+if (!empty($roleFilter) && $roleFilter !== "All") {
+    $sql .= " AND u.RoleType = '$roleFilter'";
 }
 
 if (!empty($startDate) && !empty($endDate)) {
@@ -99,6 +106,14 @@ $result = $conn->query($sql);
                             <option value="Update" <?= ($actionType=="Update") ? "selected" : "" ?>>Update</option>
                             <option value="Archive" <?= ($actionType=="Archive") ? "selected" : "" ?>>Archive</option>
                             <option value="Re-list" <?= ($actionType=="Re-list") ? "selected" : "" ?>>Re-list</option>
+                        </select>
+                    </div>
+                    <h4>User Role</h4>
+                    <div class="role-filter">
+                        <select id="role_filter">
+                            <option value="">All</option>
+                            <option value="admin" <?= ($roleFilter=="admin") ? "selected" : "" ?>>Admin</option>
+                            <option value="staff" <?= ($roleFilter=="staff") ? "selected" : "" ?>>Staff</option>
                         </select>
                     </div>
                     <div class="filter-actions">
@@ -268,6 +283,7 @@ document.getElementById("applyFilter").addEventListener("click", function() {
     const startDate = document.getElementById("start_date").value;
     const endDate   = document.getElementById("end_date").value;
     const actionType = document.getElementById("action_type").value;
+    const roleFilter = document.getElementById("role_filter").value;
     const currentUrl = new URL(window.location.href);
     
     if (startDate && endDate) {
@@ -282,6 +298,11 @@ document.getElementById("applyFilter").addEventListener("click", function() {
     } else {
         currentUrl.searchParams.delete("action_type");
     }
+    if (roleFilter) {
+        currentUrl.searchParams.set("role", roleFilter);
+    } else {
+        currentUrl.searchParams.delete("role");
+    }
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
 });
@@ -290,10 +311,12 @@ document.getElementById("clearFilter").addEventListener("click", function() {
     document.getElementById("start_date").value = "";
     document.getElementById("end_date").value   = "";
     document.getElementById("action_type").value = "";
+    document.getElementById("role_filter").value = "";
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.delete("start_date");
     currentUrl.searchParams.delete("end_date");
     currentUrl.searchParams.delete("action_type");
+    currentUrl.searchParams.delete("role");
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
 });
