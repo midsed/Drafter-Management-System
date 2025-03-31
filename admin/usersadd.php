@@ -1,6 +1,7 @@
 <?php 
 ob_start();
 session_start();
+date_default_timezone_set('Asia/Manila');
 require_once "dbconnect.php"; 
 
 if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Admin') { 
@@ -443,7 +444,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $adminId = $_SESSION['UserID'];
 
             $actionBy = $_SESSION['Username'];
-            $actionType = "Added new user";
+            $actionType = "Added new user: " . $firstname . " " . $lastname;
             $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID) VALUES (?, ?, ?, ?)");
             $log->bind_param("sssi", $actionBy, $actionType, $timestamp, $adminId);
             $log->execute();
