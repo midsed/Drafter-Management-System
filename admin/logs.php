@@ -1,5 +1,6 @@
 <?php
 session_start();
+date_default_timezone_set('Asia/Manila');
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
