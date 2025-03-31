@@ -137,12 +137,7 @@ include('navigation/topbar.php');
                     <p><strong>Model:</strong> {$part['Model']}</p>
                     <p><strong>Category:</strong> {$part['Category']}</p>
                     <p><strong>Location:</strong> {$part['Location']}</p>
-                    <p><strong>Quantity:</strong></p>
-                    <div class='actions'>
-                        <button class='qty-btn' onclick='decreaseQuantity({$part['PartID']})'>-</button>
-                        <input type='text' id='quantity_{$part['PartID']}' value='{$part['Quantity']}'" . ($isOutOfStock ? " class='quantity-input zero-quantity'" : " class='quantity-input'") . " readonly>
-                        <button class='qty-btn' onclick='increaseQuantity({$part['PartID']})'>+</button>
-                    </div>
+                    <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                     <div class='actions card-actions'>
                         <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                         <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
