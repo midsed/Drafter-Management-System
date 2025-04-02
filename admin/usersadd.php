@@ -105,6 +105,58 @@ $username = $user['Username'];
         margin-top: 5px;
         display: none;
     }
+
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px; /* Space between fields */
+    }
+
+    .form-group {
+        flex: 1 1 calc(50% - 10px); /* Two fields per row with some margin */
+        min-width: 250px; /* Minimum width for responsiveness */
+    }
+
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input, select {
+        width: 100%; /* Full width of the parent */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn {
+        background-color: #272727;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background-color: #444;
+    }
 </style>
 
 <div class="main-content">
@@ -118,44 +170,50 @@ $username = $user['Username'];
     <!-- Centered container for the form -->
     <div class="center-container">
         <form id="userForm" method="POST" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="firstname">First Name:</label>
-                <input type="text" id="firstname" name="firstname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
-                <span id="firstname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstname">First Name:</label>
+                    <input type="text" id="firstname" name="firstname" required maxlength="40" 
+                           pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
+                    <span id="firstname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastname">Last Name:</label>
+                    <input type="text" id="lastname" name="lastname" required maxlength="40" 
+                           pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
+                    <span id="lastname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="lastname">Last Name:</label>
-                <input type="text" id="lastname" name="lastname" required maxlength="40" 
-                       pattern="^[A-Za-z\s]+$" title="No special character and Number allowed.">
-                <span id="lastname-error" class="error-message">Please match the requested format, No special character and Number allowed.</span>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required maxlength="64">
+                    <span id="email-error" class="error-message" style="color: red; display: none;"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    <span id="password-error" class="error-message" style="color: red; display: none;"></span>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required maxlength="64">
-                <span id="email-error" class="error-message" style="color: red; display: none;"></span>
-            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                    <span id="username-error" class="error-message" style="color: red; display: none;"></span>
+                </div>
 
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <span id="password-error" class="error-message" style="color: red; display: none;"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <span id="username-error" class="error-message" style="color: red; display: none;"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="user_role">User Role:</label>
-                <select id="user_role" name="user_role" required>
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
-                </select>
+                <div class="form-group">
+                    <label for="user_role">User  Role:</label>
+                    <select id="user_role" name="user_role" required>
+                        <option value="admin">Admin</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Actions container for buttons -->

@@ -1255,4 +1255,16 @@ body {
     max-height: 500px;
     overflow-y: auto;
 }
+
+.part-card .part-link {
+    color: white;
+}
+
+.parts-list-container a {
+    color: white;
+}
+
+.parts-list-container a:hover {
+    text-decoration: underline;
+}
 </style>

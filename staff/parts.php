@@ -199,6 +199,7 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions card-actions'>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                             <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
                         </div>
                     </div>
@@ -1253,5 +1254,17 @@ body {
 .dropdown-content {
     max-height: 500px;
     overflow-y: auto;
+}
+
+.part-card .part-link {
+    color: white;
+}
+
+.parts-list-container a {
+    color: white;
+}
+
+.parts-list-container a:hover {
+    text-decoration: underline;
 }
 </style>

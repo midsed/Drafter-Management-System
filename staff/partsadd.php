@@ -36,11 +36,11 @@ $username = $user['Username'];
     }
 
     .error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-    display: block;
-}
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+    }
 
     label {
         display: block;
@@ -49,7 +49,7 @@ $username = $user['Username'];
     }
 
     input, select, textarea {
-        width: 100%;
+        width: calc(100% - 20px); /* Adjusted for padding */
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 3px;
@@ -94,8 +94,8 @@ $username = $user['Username'];
     }
     
     .center-container {
-        width: 50%; 
-        max-width: 1000px; 
+        width: 80%; /* Increased width */
+        max-width: 1200px; /* Adjusted max width */
         margin: 0 auto; 
         background: white;
         padding: 20px;
@@ -130,11 +130,29 @@ $username = $user['Username'];
     }
 
     .image-preview {
-        display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        margin-bottom: 15px;
     }
+    
     .image-preview img {
-        max-width: 300px; height: auto; border-radius: 8px;
+        max-width: 300px; 
+        height: auto; 
+        border-radius: 8px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* New styles for the grid layout */
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px; /* Space between fields */
+    }
+
+    .form-row .form-group {
+        flex: 1 1 calc(33.333% - 10px); /* Three fields per row */
+        min-width: 250px; /* Minimum width for responsiveness */
     }
 </style>
 
@@ -152,102 +170,110 @@ $username = $user['Username'];
                 <label for="part_name">Part Name:</label>
                 <input type="text" id="part_name" name="part_name" required>
             </div>
-            
-            <div class="form-group">
-                <label for="part_price">Part Price:</label>
-                <input type="number" placeholder="0.00" id="part_price" name="part_price" step="0.01" min="0" required>
-            </div>
 
-            <div class="form-group">
-                <label for="quantity">Quantity:</label>
-                <div class="quantity-container">
-                    <button type="button" onclick="decreaseQuantity()">−</button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" required>
-                    <button type="button" onclick="increaseQuantity()">+</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="part_price">Part Price:</label>
+                    <input type="number" placeholder="0.00" id="part_price" name="part_price" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-container">
+                        <button type="button" onclick="decreaseQuantity()">−</button>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+                        <button type="button" onclick="increaseQuantity()">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="make">Make:</label>
-                <input type="text" id="make" name="make" required>
-            </div>
-
-            <div class="form-group">
-                <label for="model">Model:</label>
-                <input type="text" id="model" name="model" required>
-            </div>
-
-            <div class="form-group">
-                <label for="year_model">Year Model:</label>
-                <input type="text" id="year_model" name="year_model" maxlength="4" pattern="\d{4}" required 
-                    title="Enter a year">
-            </div>
-
-            <div class="form-group">
-                <label for="chassis_number">Chassis Number:</label>
-                <input type="text" id="chassis_number" name="chassis_number" maxlength="20" required>
-            </div>
-
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="" selected disabled>Select Category</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Body Panel">Body Panel</option>
-                    <option value="Brakes">Brakes</option>
-                    <option value="Engine & Transmission">Engine & Transmission</option>
-                    <option value="Interior">Interior</option>
-                    <option value="Lights">Lights</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Wheels & Tires">Wheels & Tires</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="authenticity">Authenticity:</label>
-                <select id="authenticity" name="authenticity" required>
-                    <option value="" selected disabled>Select Authenticity</option>
-                    <option value="Genuine">Genuine</option>
-                    <option value="Replacement">Replacement</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="condition">Condition:</label>
-                <select id="condition" name="condition" required>
-                    <option value="" selected disabled>Select Condition</option>
-                    <option value="Used">Used</option>
-                    <option value="New">New</option>
-                    <option value="For Repair">For Repair</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="item_status">Item Status:</label>
-                <select id="item_status" name="item_status" required>
-                    <option value="" selected disabled>Select Status</option>
-                    <option value="Available">Available</option>
-                    <option value="Used for Service">Used for Service</option>
-                    <option value="Surrendered">Surrendered</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" id="location"  name="location" required>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <textarea id="description" name="description"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="part_image">Upload Image:</label>
-                <div class="image-preview">
-                    <img id="previewImage" src="images/no-image.png" alt="No Image Available">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="make">Make:</label>
+                    <input type="text" id="make" name="make" required>
                 </div>
-                <input type="file" id="part_image" name="part_image" accept="image/*" required onchange="previewFile(event)">
+
+                <div class="form-group">
+                    <label for="model">Model:</label>
+                    <input type="text" id="model" name="model" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="year_model">Year Model:</label>
+                    <input type="text" id="year_model" name="year_model" maxlength="4" pattern="\d{4}" required 
+                        title="Enter a year">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="chassis_number">Chassis Number:</label>
+                    <input type="text" id="chassis_number" name="chassis_number" maxlength="20" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="" selected disabled>Select Category</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Body Panel">Body Panel</option>
+                        <option value="Brakes">Brakes</option>
+                        <option value="Engine & Transmission">Engine & Transmission</option>
+                        <option value="Interior">Interior</option>
+                        <option value="Lights">Lights</option>
+                        <option value="Suspension">Suspension</option>
+                        <option value="Wheels & Tires">Wheels & Tires</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="authenticity">Authenticity:</label>
+                    <select id="authenticity" name="authenticity" required>
+                        <option value="" selected disabled>Select Authenticity</option>
+                        <option value="Genuine">Genuine</option>
+                        <option value="Replacement">Replacement</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="condition">Condition:</label>
+                    <select id="condition" name="condition" required>
+                        <option value="" selected disabled>Select Condition</option>
+                        <option value="Used">Used</option>
+                        <option value="New">New</option>
+                        <option value="For Repair">For Repair</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="item_status">Item Status:</label>
+                    <select id="item_status" name="item_status" required>
+                        <option value="" selected disabled>Select Status</option>
+                        <option value="Available">Available</option>
+                        <option value="Used for Service">Used for Service</option>
+                        <option value="Surrendered">Surrendered</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="part_image">Upload Image:</label>
+                    <div class="image-preview">
+                        <img id="previewImage" src="images/no-image.png" alt="No Image Available">
+                    </div>
+                    <input type="file" id="part_image" name="part_image" accept="image/*" required onchange="previewFile(event)">
+                </div>
             </div>
 
             <!-- Supplier Details -->
