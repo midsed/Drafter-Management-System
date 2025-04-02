@@ -19,55 +19,87 @@ include('navigation/topbar.php');
     </a>
     <h1 style="font-family: 'Poppins', sans-serif;">Parts List</h1>
   </div>
+
   <div class="search-actions">
+
     <div class="search-container">
-      <input type="text" placeholder="Quick search" id="searchInput">
+        <input type="text" placeholder="Quick search" id="searchInput">
       <div class="filter-container">
         <span>Filter</span>
-        <div class="dropdown">
-          <button id="filterButton" class="filter-icon" title="Filter">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div id="filterDropdown" class="dropdown-content">
+            <div class="dropdown">
+                <button id="filterButton" class="filter-icon" title="Filter">
+                    <i class="fas fa-filter"></i>
+                </button>
+            <div id="filterDropdown" class="dropdown-content">
+                <div class="filter-section">
+                    <h4>Category</h4>
+                <div class="filter-options" id="categoryFilter">
+                    <?php
+                        $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
+                        $categoryResult = $conn->query($categoryQuery);
+                        if ($categoryResult->num_rows > 0) {
+                            while ($category = $categoryResult->fetch_assoc()) {
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
+                            }
+                        } else {
+                            echo "<p>No categories found.</p>";
+                        }
+                    ?>
+                </div>
+            </div>
             <div class="filter-section">
-              <h4>Category</h4>
-              <div class="filter-options" id="categoryFilter">
-                <?php
-                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
-                $categoryResult = $conn->query($categoryQuery);
-                if ($categoryResult->num_rows > 0) {
-                    while ($category = $categoryResult->fetch_assoc()) {
-                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
-                    }
-                } else {
-                    echo "<p>No categories found.</p>";
-                }
-                ?>
-              </div>
+                <h4>Make</h4>
+                <div class="filter-options" id="makeFilter">
+                    <?php
+                        $makeQuery = "SELECT DISTINCT Make FROM part WHERE archived = 0 AND Make IS NOT NULL AND Make != ''";
+                        $makeResult = $conn->query($makeQuery);
+                        if ($makeResult->num_rows > 0) {
+                            while ($make = $makeResult->fetch_assoc()) {
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='make' value='{$make['Make']}'> {$make['Make']}</label>";
+                            }
+                        } else {
+                            echo "<p>No makes found.</p>";
+                        }
+                    ?>
+                </div>
             </div>
-            <div class="filter-actions">
-              <button id="applyFilter" class="red-button">Apply</button>
-              <button id="clearFilter" class="red-button">Clear</button>
+            <div class="filter-section">
+                <h4>Model</h4>
+                <div class="filter-options" id="modelFilter">
+                    <?php
+                        $modelQuery = "SELECT DISTINCT Model FROM part WHERE archived = 0 AND Model IS NOT NULL AND Model != ''";
+                        $modelResult = $conn->query($modelQuery);
+                        if ($modelResult->num_rows > 0) {
+                            while ($model = $modelResult->fetch_assoc()) {
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='model' value='{$model['Model']}'> {$model['Model']}</label>";
+                            }
+                        } else {
+                            echo "<p>No models found.</p>";
+                        }
+                    ?>
+                </div>
             </div>
+                <div class="filter-actions">
+                    <button id="applyFilter" class="red-button">Apply</button>
+                    <button id="clearFilter" class="red-button">Clear</button>
+                </div>
+            </div>
+            </div>
+      </div>
+      <div class="sort-container">
+        <span>Sort By</span>
+        <div class="dropdown">
+          <button id="sortButton" class="sort-icon" title="Sort">
+            <i class="fas fa-sort-alpha-down"></i>
+          </button>
+          <div id="sortDropdown" class="dropdown-content">
+            <button class="sort-option red-button" data-sort="asc">Ascending</button>
+            <button class="sort-option red-button" data-sort="desc">Descending</button>
           </div>
         </div>
       </div>
-      
-      <div class="sort-container">
-        <span>Sort By</span>
-            <div class="dropdown">
-                <button id="sortButton" class="sort-icon" title="Sort">
-                    <i class="fas fa-sort-alpha-down"></i>
-                </button>
-            <div id="sortDropdown" class="dropdown-content">
-                <button class="sort-option red-button" data-sort="asc">Ascending</button>
-                <button class="sort-option red-button" data-sort="desc">Descending</button>
-            </div>
-            </div>
-            </div>
-        </div>
 
-        <div class="view-toggle">
+      <div class="view-toggle">
             <button id="gridViewBtn" class="view-button active" title="Grid View">
                 <i class="fas fa-th-large"></i>
             </button>
@@ -76,57 +108,72 @@ include('navigation/topbar.php');
             </button>
         </div>
 
-    <div class="right-actions">
-      <a href="cart.php" class="cart-icon" title="Cart">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
-      </a>
-      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
-      <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
-      <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
-      <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
-      <a href="partsarchive.php" class="red-button">Archives</a>
-      <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
     </div>
-  </div>
-  <div class="selection-summary" id="selectionSummary" style="display: none;">
-    <span id="selectedCount">0 items selected</span>
-  </div>
+    <div class="right-actions">
+        <a href="cart.php" class="cart-icon" title="Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
+        </a>
+            <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
+            <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
+            <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
+            <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+            <a href="partsarchive.php" class="red-button">Archives</a>
+            <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
+        </div>
+    </div>
 
-  <div class="parts-container" id="partsList">
+    <div class="selection-summary" id="selectionSummary" style="display: none;">
+        <span id="selectedCount">0 items selected</span>
+    </div>
+
+    <div class="parts-container" id="partsList">
         <?php
         $limit = 20;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($page - 1) * $limit;
         $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
         $categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
+        $makes = isset($_GET['make']) ? explode(',', $_GET['make']) : [];
+        $models = isset($_GET['model']) ? explode(',', $_GET['model']) : [];
         $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
         
         $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
             $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
-            if (!empty($categories)) {
-                $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
-                $categoryList = "'" . implode("','", $escapedCategories) . "'";
-                $sql .= " AND Category IN ($categoryList)";
-                $countSql .= " AND Category IN ($categoryList)";
-            }
-            if (!empty($search)) {
-                $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-                $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-            }
+                if (!empty($categories)) {
+                    $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+                    $categoryList = "'" . implode("','", $escapedCategories) . "'";
+                    $sql .= " AND Category IN ($categoryList)";
+                    $countSql .= " AND Category IN ($categoryList)";
+                }
+                if (!empty($makes)) {
+                    $escapedMakes = array_map([$conn, 'real_escape_string'], $makes);
+                    $makeList = "'" . implode("','", $escapedMakes) . "'";
+                    $sql .= " AND Make IN ($makeList)";
+                    $countSql .= " AND Make IN ($makeList)";
+                }
+                if (!empty($models)) {
+                    $escapedModels = array_map([$conn, 'real_escape_string'], $models);
+                    $modelList = "'" . implode("','", $escapedModels) . "'";
+                    $sql .= " AND Model IN ($modelList)";
+                    $countSql .= " AND Model IN ($modelList)";
+                }
+                if (!empty($search)) {
+                    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                    $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                }
 
-            // Sorting logic
-            if ($sort === 'asc') {
-                $sql .= " ORDER BY Name ASC";
-            } elseif ($sort === 'desc') {
-                $sql .= " ORDER BY Name DESC";
-            } else {
-                // Default sorting (out of stock items at the end)
-                $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
-            }
+                // Sorting logic
+                if ($sort === 'asc') {
+                    $sql .= " ORDER BY Name ASC";
+                } elseif ($sort === 'desc') {
+                    $sql .= " ORDER BY Name DESC";
+                } else {
+                    // Default sorting (out of stock items at the end)
+                    $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
+                }
 
             $sql .= " LIMIT $limit OFFSET $offset";
-
 
         $totalResult = $conn->query($countSql);
         $totalRow = $totalResult->fetch_assoc();
@@ -206,15 +253,16 @@ include('navigation/topbar.php');
             </tbody>
         </table>
     </div>
+
     <div class="pagination">
         <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
+            <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($makes) ? '&make='.implode(',', $makes) : '' ?><?= !empty($models) ? '&model='.implode(',', $models) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($makes) ? '&make='.implode(',', $makes) : '' ?><?= !empty($models) ? '&model='.implode(',', $models) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button <?= $i == $page ? 'active-page' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-            <a href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Next</a>
+            <a href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($makes) ? '&make='.implode(',', $makes) : '' ?><?= !empty($models) ? '&model='.implode(',', $models) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Next</a>
         <?php endif; ?>
     </div>
 </div>
@@ -249,7 +297,6 @@ function toggleSelectMode() {
         });
     }
 }
-
 
 function selectAllParts() {
     const checkboxes = document.querySelectorAll('.part-checkbox');
@@ -470,9 +517,32 @@ document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
     const urlParams = new URLSearchParams(window.location.search);
     const searchTerm = urlParams.get("search");
+    const selectedCategories = urlParams.get("category") ? urlParams.get("category").split(",") : [];
+    const selectedMakes = urlParams.get("make") ? urlParams.get("make").split(",") : [];
+    const selectedModels = urlParams.get("model") ? urlParams.get("model").split(",") : [];
+    
     if (searchTerm) {
         document.getElementById("searchInput").value = searchTerm;
     }
+    
+    // Set checked state for filters
+    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
+        if (selectedCategories.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
+    
+    document.querySelectorAll('.filter-option[data-filter="make"]').forEach(checkbox => {
+        if (selectedMakes.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
+    
+    document.querySelectorAll('.filter-option[data-filter="model"]').forEach(checkbox => {
+        if (selectedModels.includes(checkbox.value)) {
+            checkbox.checked = true; 
+        }
+    });
     
     document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
     document.getElementById('cancelSelectBtn').addEventListener('click', toggleSelectMode);
@@ -545,13 +615,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const applyFilterButton = document.getElementById("applyFilter");
     const clearFilterButton = document.getElementById("clearFilter");
     const searchInput = document.getElementById("searchInput");
-    const queryParams = new URLSearchParams(window.location.search);
-    const selectedCategories = queryParams.get("category") ? queryParams.get("category").split(",") : [];
-    document.querySelectorAll('.filter-option[data-filter="category"]').forEach(checkbox => {
-        if (selectedCategories.includes(checkbox.value)) {
-            checkbox.checked = true; 
-        }
-    });
+    
     filterButton.addEventListener("click", function (event) {
         event.stopPropagation();
         filterDropdown.classList.toggle("show");
@@ -579,28 +643,50 @@ document.addEventListener("DOMContentLoaded", function () {
     applyFilterButton.addEventListener("click", function () {
         const selectedCategories = Array.from(document.querySelectorAll('.filter-option[data-filter="category"]:checked'))
             .map(checkbox => checkbox.value);
+        const selectedMakes = Array.from(document.querySelectorAll('.filter-option[data-filter="make"]:checked'))
+            .map(checkbox => checkbox.value);
+        const selectedModels = Array.from(document.querySelectorAll('.filter-option[data-filter="model"]:checked'))
+            .map(checkbox => checkbox.value);
         const searchQuery = searchInput.value.trim();
+        
         const queryParams = new URLSearchParams(window.location.search);
         queryParams.set("page", "1");
+        
         if (selectedCategories.length > 0) {
             queryParams.set("category", selectedCategories.join(",")); 
         } else {
             queryParams.delete("category");
         }
+        
+        if (selectedMakes.length > 0) {
+            queryParams.set("make", selectedMakes.join(",")); 
+        } else {
+            queryParams.delete("make");
+        }
+        
+        if (selectedModels.length > 0) {
+            queryParams.set("model", selectedModels.join(",")); 
+        } else {
+            queryParams.delete("model");
+        }
+        
         if (searchQuery) {
             queryParams.set("search", searchQuery);
         } else {
             queryParams.delete("search");
         }
+        
         const sortParam = queryParams.get("sort");
         if (!sortParam) {
             queryParams.delete("sort");
         }
+        
         window.location.search = queryParams.toString(); 
     });
     clearFilterButton.addEventListener("click", function () {
         window.location.href = window.location.pathname;
     });
+    
     document.querySelectorAll(".sort-option").forEach(option => {
         option.addEventListener("click", function () {
             const selectedSort = this.dataset.sort;
@@ -711,6 +797,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
 </script>
 
 <style>
@@ -798,9 +885,7 @@ body {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
-    background: none;
-    border: none;
-    cursor: pointer;
+    background: none
 }
 .filter-icon:hover, .sort-icon:hover {
     color: darkred;
@@ -1011,6 +1096,15 @@ body {
     background-color: darkred; 
 }
 
+.part-card .edit-btn {
+    background: gray;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease; 
+}
+
+.part-card .edit-btn:hover {
+    background: #555555; 
+}
 .part-card .add-to-cart-btn {
     background: #FFB52E;
     color: white;
@@ -1026,7 +1120,7 @@ body {
 }
 
 .new-stock-btn {
-    background: #00A300;
+    background:  #00A300;
     color: white;
 }
 
@@ -1034,6 +1128,7 @@ body {
     border: 6px solid rgba(225, 15, 15, 0.7);
     animation: pulse 0.5s ease-out;
 }
+
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -1047,6 +1142,15 @@ body {
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
     }
+}
+
+
+.part-card .card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 /* View Toggle Styles */
@@ -1067,7 +1171,7 @@ body {
 }
 
 .view-button.active {
-    background:rgb(225, 15, 15);
+    background: #E10F0F;
     color: white;
 }
 
@@ -1127,5 +1231,27 @@ body {
 
 .parts-list-container a:hover {
     text-decoration: underline;
+}
+
+.filter-section {
+    margin-bottom: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.filter-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+    position: sticky;
+    top: 0;
+    background: white;
+    padding-bottom: 5px;
+}
+
+.dropdown-content {
+    max-height: 500px;
+    overflow-y: auto;
 }
 </style>
