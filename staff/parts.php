@@ -83,7 +83,7 @@ include('navigation/topbar.php');
   </div>
   <div class="parts-container" id="partsList">
     <?php
-    $limit = 10;
+    $limit = 20;
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $offset = ($page - 1) * $limit;
     $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
