@@ -140,7 +140,6 @@ include('navigation/topbar.php');
                     <p><strong>Location:</strong> {$part['Location']}</p>
                     <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                     <div class='actions card-actions'>
-                        <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                         <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
                     </div>
                 </div>
@@ -912,15 +911,6 @@ body {
     background-color: darkred; 
 }
 
-.part-card .edit-btn {
-    background: gray;
-    color: white;
-    transition: background 0.3s ease, color 0.3s ease; 
-}
-
-.part-card .edit-btn:hover {
-    background: #555555; 
-}
 .part-card .add-to-cart-btn {
     background: #FFB52E;
     color: white;
