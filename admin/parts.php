@@ -19,38 +19,40 @@ include('navigation/topbar.php');
     </a>
     <h1 style="font-family: 'Poppins', sans-serif;">Parts List</h1>
   </div>
+
   <div class="search-actions">
+
     <div class="search-container">
-      <input type="text" placeholder="Quick search" id="searchInput">
+        <input type="text" placeholder="Quick search" id="searchInput">
       <div class="filter-container">
         <span>Filter</span>
-        <div class="dropdown">
-          <button id="filterButton" class="filter-icon" title="Filter">
-            <i class="fas fa-filter"></i>
-          </button>
-          <div id="filterDropdown" class="dropdown-content">
-            <div class="filter-section">
-              <h4>Category</h4>
-              <div class="filter-options" id="categoryFilter">
-                <?php
-                $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
-                $categoryResult = $conn->query($categoryQuery);
-                if ($categoryResult->num_rows > 0) {
-                    while ($category = $categoryResult->fetch_assoc()) {
-                        echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
-                    }
-                } else {
-                    echo "<p>No categories found.</p>";
-                }
-                ?>
-              </div>
+            <div class="dropdown">
+                <button id="filterButton" class="filter-icon" title="Filter">
+                    <i class="fas fa-filter"></i>
+                </button>
+            <div id="filterDropdown" class="dropdown-content">
+                <div class="filter-section">
+                    <h4>Category</h4>
+                <div class="filter-options" id="categoryFilter">
+                    <?php
+                        $categoryQuery = "SELECT DISTINCT Category FROM part WHERE archived = 0";
+                        $categoryResult = $conn->query($categoryQuery);
+                        if ($categoryResult->num_rows > 0) {
+                            while ($category = $categoryResult->fetch_assoc()) {
+                                echo "<label><input type='checkbox' class='filter-option' data-filter='category' value='{$category['Category']}'> {$category['Category']}</label>";
+                            }
+                        } else {
+                            echo "<p>No categories found.</p>";
+                        }
+                    ?>
+                </div>
             </div>
-            <div class="filter-actions">
-              <button id="applyFilter" class="red-button">Apply</button>
-              <button id="clearFilter" class="red-button">Clear</button>
+                <div class="filter-actions">
+                    <button id="applyFilter" class="red-button">Apply</button>
+                    <button id="clearFilter" class="red-button">Clear</button>
+                </div>
             </div>
-          </div>
-        </div>
+            </div>
       </div>
       <div class="sort-container">
         <span>Sort By</span>
@@ -64,92 +66,149 @@ include('navigation/topbar.php');
           </div>
         </div>
       </div>
+
+      <div class="view-toggle">
+            <button id="gridViewBtn" class="view-button active" title="Grid View">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button id="listViewBtn" class="view-button" title="List View">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+
     </div>
     <div class="right-actions">
-      <a href="cart.php" class="cart-icon" title="Cart">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
-      </a>
-      <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
-      <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
-      <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
-      <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
-      <a href="partsarchive.php" class="red-button">Archives</a>
-      <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
+        <a href="cart.php" class="cart-icon" title="Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
+        </a>
+            <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
+            <button id="selectAllBtn" class="red-button" style="display: none;">Select All</button>
+            <button id="archiveSelectedBtn" class="red-button" style="display: none;"><i class="fas fa-archive"></i> Archive Selected</button>
+            <button id="cancelSelectBtn" class="red-button" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+            <a href="partsarchive.php" class="red-button">Archives</a>
+            <a href="partsadd.php" class="red-button new-stock-btn">+ New Stock</a>
+        </div>
     </div>
-  </div>
-  <div class="selection-summary" id="selectionSummary" style="display: none;">
-    <span id="selectedCount">0 items selected</span>
-  </div>
-  <div class="parts-container" id="partsList">
-    <?php
-    $limit = 20;
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $offset = ($page - 1) * $limit;
-    $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
-    $categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
-    $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
-    
-    $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
-        $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
-            if (!empty($categories)) {
-                $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
-                $categoryList = "'" . implode("','", $escapedCategories) . "'";
-                $sql .= " AND Category IN ($categoryList)";
-                $countSql .= " AND Category IN ($categoryList)";
-            }
-            if (!empty($search)) {
-                $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-                $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
-            }
 
-            // Sorting logic
-            if ($sort === 'asc') {
-                $sql .= " ORDER BY Name ASC";
-            } elseif ($sort === 'desc') {
-                $sql .= " ORDER BY Name DESC";
-            } else {
-                // Default sorting (out of stock items at the end)
-                $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
+    <div class="selection-summary" id="selectionSummary" style="display: none;">
+        <span id="selectedCount">0 items selected</span>
+    </div>
+
+    <div class="parts-container" id="partsList">
+        <?php
+        $limit = 20;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+        $categories = isset($_GET['category']) ? explode(',', $_GET['category']) : [];
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
+        
+        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
+            $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
+                if (!empty($categories)) {
+                    $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
+                    $categoryList = "'" . implode("','", $escapedCategories) . "'";
+                    $sql .= " AND Category IN ($categoryList)";
+                    $countSql .= " AND Category IN ($categoryList)";
+                }
+                if (!empty($search)) {
+                    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                    $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                }
+
+                // Sorting logic
+                if ($sort === 'asc') {
+                    $sql .= " ORDER BY Name ASC";
+                } elseif ($sort === 'desc') {
+                    $sql .= " ORDER BY Name DESC";
+                } else {
+                    // Default sorting (out of stock items at the end)
+                    $sql .= " ORDER BY CASE WHEN Quantity = 0 THEN 1 ELSE 0 END, DateAdded DESC";
+                }
+
+            $sql .= " LIMIT $limit OFFSET $offset";
+
+        $totalResult = $conn->query($countSql);
+        $totalRow = $totalResult->fetch_assoc();
+        $totalPages = ceil($totalRow['total'] / $limit);
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0) {
+            while ($part = $result->fetch_assoc()) {
+                $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
+                $isOutOfStock = $part['Quantity'] <= 0;
+                echo "
+                    <div class='part-card' data-part-id='{$part['PartID']}'>
+                        <div class='select-checkbox' style='display: none;'>
+                            <input type='checkbox' class='part-checkbox' data-part-id='{$part['PartID']}' data-part-name='{$part['Name']}'>
+                        </div>
+                        <div class='image-container'>
+                            <a href='partdetail.php?id={$part['PartID']}' class='part-link'><img src='$imageSrc' alt='Part Image'></a>
+                            " . ($isOutOfStock ? "<div class='out-of-stock-overlay'><img src='images/outofstock.png' alt='Out of Stock'><span>OUT OF STOCK</span></div>" : "") . "
+                        </div>
+                        <p><strong>Name:</strong> {$part['Name']}</p>
+                        <p><strong>Make:</strong> {$part['Make']}</p>
+                        <p><strong>Model:</strong> {$part['Model']}</p>
+                        <p><strong>Category:</strong> {$part['Category']}</p>
+                        <p><strong>Location:</strong> {$part['Location']}</p>
+                        <p><strong>Quantity:</strong> {$part['Quantity']}</p>
+                        <div class='actions card-actions'>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
+                            <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
+                        </div>
+                    </div>
+                ";
             }
-
-        $sql .= " LIMIT $limit OFFSET $offset";
-
-    $totalResult = $conn->query($countSql);
-    $totalRow = $totalResult->fetch_assoc();
-    $totalPages = ceil($totalRow['total'] / $limit);
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        while ($part = $result->fetch_assoc()) {
-            $imageSrc = !empty($part['Media']) ? '/Drafter-Management-System/' . $part['Media'] : 'images/no-image.png';
-            $isOutOfStock = $part['Quantity'] <= 0;
-            echo "
-                <div class='part-card' data-part-id='{$part['PartID']}'>
-                    <div class='select-checkbox' style='display: none;'>
-                        <input type='checkbox' class='part-checkbox' data-part-id='{$part['PartID']}' data-part-name='{$part['Name']}'>
-                    </div>
-                    <div class='image-container'>
-                        <a href='partdetail.php?id={$part['PartID']}' class='part-link'><img src='$imageSrc' alt='Part Image'></a>
-                        " . ($isOutOfStock ? "<div class='out-of-stock-overlay'><img src='images/outofstock.png' alt='Out of Stock'><span>OUT OF STOCK</span></div>" : "") . "
-                    </div>
-                    <p><strong>Name:</strong> {$part['Name']}</p>
-                    <p><strong>Make:</strong> {$part['Make']}</p>
-                    <p><strong>Model:</strong> {$part['Model']}</p>
-                    <p><strong>Category:</strong> {$part['Category']}</p>
-                    <p><strong>Location:</strong> {$part['Location']}</p>
-                    <p><strong>Quantity:</strong> {$part['Quantity']}</p>
-                    <div class='actions card-actions'>
-                        <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
-                        <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
-                    </div>
-                </div>
-            ";
+        } else {
+            echo "<p>No parts found.</p>";
         }
-    } else {
-        echo "<p>No parts found.</p>";
-    }
-    ?>
+        ?>
     </div>
+
+    <div class="parts-list-container" id="partsListTable" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Part ID</th>
+                    <th>Name</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Reuse the same query results
+                if ($result->num_rows > 0) {
+                    $result->data_seek(0); // Reset pointer to start
+                    while ($part = $result->fetch_assoc()) {
+                        $isOutOfStock = $part['Quantity'] <= 0;
+                        echo "
+                        <tr class='part-row' data-part-id='{$part['PartID']}'>
+                            <td>{$part['PartID']}</td>
+                            <td><a href='partdetail.php?id={$part['PartID']}'>{$part['Name']}</a></td>
+                            <td>{$part['Make']}</td>
+                            <td>{$part['Model']}</td>
+                            <td>{$part['Category']}</td>
+                            <td>{$part['Location']}</td>
+                            <td class='" . ($isOutOfStock ? "out-of-stock" : "") . "'>{$part['Quantity']}</td>
+                            <td class='actions'>
+                                <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
+                            </td>
+                        </tr>
+                        ";
+                    }
+                } else {
+                    echo "<tr><td colspan='8'>No parts found.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+
     <div class="pagination">
         <?php if ($page > 1): ?>
             <a href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?><?= !empty($categories) ? '&category='.implode(',', $categories) : '' ?><?= !empty($sort) ? '&sort='.$sort : '' ?>" class="pagination-button">Previous</a>
@@ -176,9 +235,10 @@ function toggleSelectMode() {
     document.getElementById('selectAllBtn').style.display = selectMode ? 'inline-block' : 'none';
     document.getElementById('selectionSummary').style.display = selectMode ? 'block' : 'none';
 
-    const cardActions = document.querySelectorAll('.card-actions');
+    // Handle both grid and list views
+    const cardActions = document.querySelectorAll('.card-actions, .parts-list-container .actions');
     cardActions.forEach(action => {
-        action.style.display = selectMode ? 'none' : 'flex';
+        action.style.display = selectMode ? 'none' : (action.classList.contains('actions') ? 'block' : 'flex');
     });
 
     if (!selectMode) {
@@ -187,8 +247,8 @@ function toggleSelectMode() {
         document.querySelectorAll('.part-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
-        document.querySelectorAll('.part-card').forEach(card => {
-            card.classList.remove('selected-card');
+        document.querySelectorAll('.part-card, .part-row').forEach(element => {
+            element.classList.remove('selected-card');
         });
     }
 }
@@ -210,13 +270,13 @@ function updateSelectedCount() {
 }
 
 function togglePartSelection(partId, checkbox) {
-    const partCard = document.querySelector(`.part-card[data-part-id="${partId}"]`);
+    const partElement = document.querySelector(`.part-card[data-part-id="${partId}"], .part-row[data-part-id="${partId}"]`);
     if (checkbox.checked) {
         selectedParts.add(partId);
-        partCard.classList.add('selected-card');
+        partElement.classList.add('selected-card');
     } else {
         selectedParts.delete(partId);
-        partCard.classList.remove('selected-card');
+        partElement.classList.remove('selected-card');
     }
     updateSelectedCount();
 }
@@ -613,6 +673,48 @@ document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
 });
 
+// View Toggle Functionality
+document.addEventListener("DOMContentLoaded", function() {
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const partsGrid = document.getElementById('partsList');
+    const partsTable = document.getElementById('partsListTable');
+
+    gridViewBtn.addEventListener('click', function() {
+        partsGrid.style.display = 'grid';
+        partsTable.style.display = 'none';
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        localStorage.setItem('partsViewMode', 'grid');
+    });
+
+    listViewBtn.addEventListener('click', function() {
+        partsGrid.style.display = 'none';
+        partsTable.style.display = 'block';
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        localStorage.setItem('partsViewMode', 'list');
+    });
+
+    // Check for saved view preference
+    const savedViewMode = localStorage.getItem('partsViewMode') || 'grid';
+    if (savedViewMode === 'list') {
+        listViewBtn.click();
+    } else {
+        gridViewBtn.click();
+    }
+
+    // Make table rows clickable (except when clicking on buttons)
+    document.querySelectorAll('.part-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (!e.target.closest('button') && !e.target.closest('a')) {
+                const partId = this.dataset.partId;
+                window.location.href = `partdetail.php?id=${partId}`;
+            }
+        });
+    });
+});
+
 </script>
 
 <style>
@@ -968,5 +1070,85 @@ body {
     align-items: center;
     gap: 10px;
     margin-top: 10px;
+}
+
+/* View Toggle Styles */
+.view-toggle {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.view-button {
+    background: #f0f0f0;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+.view-button.active {
+    background: #E10F0F;
+    color: white;
+}
+
+.view-button:first-child {
+    border-radius: 4px 0 0 4px;
+}
+
+.view-button:last-child {
+    border-radius: 0 4px 4px 0;
+}
+
+/* List View Styles */
+.parts-list-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.parts-list-container table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.parts-list-container th, 
+.parts-list-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.parts-list-container th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.parts-list-container tr:hover {
+    background-color: #f5f5f5;
+}
+
+.parts-list-container .out-of-stock {
+    color: #E10F0F;
+    font-weight: bold;
+}
+
+.parts-list-container .actions {
+    white-space: nowrap;
+}
+
+.parts-list-container a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.parts-list-container a:hover {
+    text-decoration: underline;
 }
 </style>
