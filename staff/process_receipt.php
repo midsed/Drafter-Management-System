@@ -1,5 +1,6 @@
 <?php
 session_start();
+date_default_timezone_set('Asia/Manila');
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
@@ -16,10 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
     $userID = $_SESSION['UserID'];
     $roleType = $_SESSION['RoleType'] ?? 'Staff';
     
+    // Prepare ActionBy from session FName and LName
+    $actionBy = (isset($_SESSION['FName']) ? $_SESSION['FName'] : '') . ' ' . (isset($_SESSION['LName']) ? $_SESSION['LName'] : '') . " ($roleType)";
+    
     $conn->begin_transaction();
     
     try {
         foreach ($_SESSION['cart'] as $partID => $part) {
+            // Insert into receipt table
             $stmt = $conn->prepare("INSERT INTO receipt (RetrievedBy, RetrievedDate, PartID, DateAdded, Location, Quantity, RoleType, UserID) 
                                   VALUES (?, NOW(), ?, NOW(), ?, ?, ?, ?)");
             $stmt->bind_param("sisssi", $retrievedBy, $partID, $part['Location'], $part['Quantity'], $roleType, $userID);
@@ -29,9 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retrievedBy'])) {
                 $receiptID = $conn->insert_id;
             }
             
+            // Update the part quantity in the part table
             $stmt = $conn->prepare("UPDATE part SET Quantity = Quantity - ?, LastUpdated = NOW() WHERE PartID = ?");
             $stmt->bind_param("ii", $part['Quantity'], $partID);
             $stmt->execute();
+            
+            // Log the action for this part
+            $actionType = "Retrieved" . " " . $part['Name'];
+            $logStmt = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID, RoleType) VALUES (?, ?, NOW(), ?, ?, ?)");
+            $logStmt->bind_param("ssiis", $actionBy, $actionType, $userID, $partID, $roleType);
+            $logStmt->execute();
         }
         
         $conn->commit();

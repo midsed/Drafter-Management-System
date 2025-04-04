@@ -1,6 +1,7 @@
 <?php 
 ob_start();
 session_start();
+date_default_timezone_set('Asia/Manila');
 require_once "dbconnect.php"; 
 
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
@@ -771,8 +772,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $partID = $conn->insert_id; 
         $timestamp = date("Y-m-d H:i:s");
         $adminId = $_SESSION['UserID'];
-        $actionBy = $_SESSION['Username'];
-        $actionType = "Added new Part";
+        $actionBy = (isset($_SESSION['FName']) ? $_SESSION['FName'] : '') . ' ' . (isset($_SESSION['LName']) ? $_SESSION['LName'] : '') . " ($roleType)";
+        $actionType = "Added new Part: " . $chassis_number . " " . $name;
+        $roleType = $_SESSION['RoleType'];
     
         $log = $conn->prepare("INSERT INTO logs (ActionBy, ActionType, Timestamp, UserID, PartID) VALUES (?, ?, ?, ?, ?)");
         if ($log === false) {
