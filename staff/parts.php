@@ -886,7 +886,9 @@ body {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
-    background: none
+    background: none;
+    border: none;      
+    outline: none;
 }
 .filter-icon:hover, .sort-icon:hover {
     color: darkred;
