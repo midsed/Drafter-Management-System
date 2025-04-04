@@ -95,8 +95,8 @@ $username = $user['Username'];
     }
     
     .center-container {
-        width: 80%; /* Increased width */
-        max-width: 1200px; /* Adjusted max width */
+        width: 80%; 
+        max-width: 1200px; 
         margin: 0 auto; 
         background: white;
         padding: 20px;
