@@ -50,6 +50,50 @@ while ($row = mysqli_fetch_assoc($checkoutResult)) {
     $checkoutData[$row['date']] = intval($row['total']);
 }
 
+// Initialize all metrics to 0
+$totalPartsAdded = 0;
+$totalPartsRetrieved = 0;
+$totalPartsArchived = 0;
+$totalUsers = 0;
+$totalSuppliers = 0;
+$totalServices = 0;
+
+// Get total parts added
+$result = $conn->query("SELECT COUNT(*) FROM part");
+if ($result && $result->num_rows > 0) {
+    $totalPartsAdded = $result->fetch_row()[0];
+}
+
+// Get total parts retrieved
+$result = $conn->query("SELECT SUM(Quantity) FROM receipt");
+if ($result && $result->num_rows > 0) {
+    $totalPartsRetrieved = $result->fetch_row()[0] ?? 0;
+}
+
+// Get total parts archived
+$result = $conn->query("SELECT COUNT(*) FROM part WHERE Archived = 1");
+if ($result && $result->num_rows > 0) {
+    $totalPartsArchived = $result->fetch_row()[0];
+}
+
+// Get total users with roles
+$result = $conn->query("SELECT COUNT(*) FROM user");
+if ($result && $result->num_rows > 0) {
+    $totalUsers = $result->fetch_row()[0];
+}
+
+// Get total suppliers
+$result = $conn->query("SELECT COUNT(*) FROM supplier");
+if ($result && $result->num_rows > 0) {
+    $totalSuppliers = $result->fetch_row()[0];
+}
+
+// Get total services
+$result = $conn->query("SELECT COUNT(*) FROM service");
+if ($result && $result->num_rows > 0) {
+    $totalServices = $result->fetch_row()[0];
+}
+
 ?> 
 
 <?php include('navigation/sidebar.php'); ?> 
@@ -65,6 +109,50 @@ while ($row = mysqli_fetch_assoc($checkoutResult)) {
     </div>
 
     <div class="content">
+        <div class="metrics-container">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <h2>Total Parts Added</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsAdded); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-arrow-alt-circle-down"></i>
+                </div>
+                <h2>Total Parts Retrieved</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsRetrieved); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <h2>Total Parts Archived</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsArchived); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2>Total Users</h2>
+                <div class="metric-value"><?php echo number_format($totalUsers); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h2>Total Suppliers</h2>
+                <div class="metric-value"><?php echo number_format($totalSuppliers); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h2>Total Services</h2>
+                <div class="metric-value"><?php echo number_format($totalServices); ?></div>
+            </div>
+        </div>
         <div class="chart-container">
             <div class="chart-box">
                 <h2>Stock Levels</h2>
@@ -560,6 +648,52 @@ document.addEventListener("DOMContentLoaded", function () {
         margin: 0;
         padding: 0;
     }
+    .metrics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.metric-icon {
+    font-size: 24px;
+    color: #E10F0F;
+    margin-bottom: 10px;
+}
+
+.metric-icon i {
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover .metric-icon i {
+    transform: scale(1.1);
+}
+
+.metric-card h2 {
+    font-size: 16px;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #E10F0F;
+}
 
     .main-content {
         padding: 20px;
