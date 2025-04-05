@@ -4,7 +4,25 @@ include('dbconnect.php');
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
-}   
+}
+
+// Get total parts added
+$totalPartsAdded = $conn->query("SELECT COUNT(*) FROM part")->fetch_row()[0];
+
+// Get total parts retrieved
+$totalPartsRetrieved = $conn->query("SELECT SUM(Quantity) FROM receipt")->fetch_row()[0];
+
+// Get total parts archived
+$totalPartsArchived = $conn->query("SELECT COUNT(*) FROM part WHERE Archived = 1")->fetch_row()[0];
+
+// Get total users with roles
+$totalUsers = $conn->query("SELECT COUNT(*) FROM user")->fetch_row()[0];
+
+// Get total suppliers
+$totalSuppliers = $conn->query("SELECT COUNT(*) FROM supplier")->fetch_row()[0];
+
+// Get total services
+$totalServices = $conn->query("SELECT COUNT(*) FROM service")->fetch_row()[0];
 
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
 $lowStockResult = mysqli_query($conn, $lowStockQuery);
@@ -95,8 +113,52 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
 <link rel="icon" type="image/x-icon" href="images/New Drafter Logo Cropped.png">
 
 <div class="main-content">
-        <button id="generateReportBtn" class="report-button">Generate Report</button>
+    <button id="generateReportBtn" class="report-button">Generate Report</button>
     <div class="content">
+        <div class="metrics-container">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <h2>Total Parts Added</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsAdded); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-arrow-alt-circle-down"></i>
+                </div>
+                <h2>Total Parts Retrieved</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsRetrieved); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <h2>Total Parts Archived</h2>
+                <div class="metric-value"><?php echo number_format($totalPartsArchived); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2>Total Users</h2>
+                <div class="metric-value"><?php echo number_format($totalUsers); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h2>Total Suppliers</h2>
+                <div class="metric-value"><?php echo number_format($totalSuppliers); ?></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h2>Total Services</h2>
+                <div class="metric-value"><?php echo number_format($totalServices); ?></div>
+            </div>
+        </div>
         <div class="chart-container">
             <div class="chart-box">
                 <h2>Stock Levels</h2>
@@ -244,6 +306,14 @@ body {
 .main-content {
     padding: 20px;
     transition: margin-left 0.3s;
+    margin-left: 250px; /* Adjust based on sidebar width */
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 80px; /* Add space for mobile header */
+    }
 }
 .header {
     margin-bottom: 20px;
@@ -271,19 +341,23 @@ body {
     background-color: rgb(156, 197, 109);
 }
 .chart-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 .chart-box {
-    flex: 1;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
     position: relative;
-    height: 300px;
+    height: 350px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.chart-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 .chart-box h2 {
     margin-top: 0;
@@ -1444,23 +1518,24 @@ body {
 
 #generateReportBtn {
     display: block;
-    margin: 0 auto;
+    margin: 3rem auto 1rem;
     margin-right: 0;
-    background: linear-gradient(135deg, #9c0b0b,rgb(190, 74, 74));
+    background-color: #E10F0F;
     font-family: 'Poppins', sans-serif;
     color: #fff;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 24px;
     font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
+    font-weight: 600;
+    border-radius: 8px;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 10px;
-    margin-top: 60px;
+}
+#generateReportBtn:hover {
+    background-color: #c00d0d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 #generateReportBtn:hover {
     transform: scale(1.05);
@@ -1472,7 +1547,7 @@ body {
     position: absolute;
     top: 0;
     left: -100%;
-    width: 100%;
+    width: 50%;
     height: 100%;
     background: rgba(255, 255, 255, 0.2);
     transform: skewX(-45deg);
@@ -1485,6 +1560,53 @@ body {
     0% { box-shadow: 0 0 0 0 rgba(225, 57, 57, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(225, 57, 57, 0); }
     100% { box-shadow: 0 0 0 0 rgba(225, 57, 57, 0); }
+}
+
+.metrics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.metric-icon {
+    font-size: 24px;
+    color: #E10F0F;
+    margin-bottom: 10px;
+}
+
+.metric-icon i {
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover .metric-icon i {
+    transform: scale(1.1);
+}
+
+.metric-card h2 {
+    font-size: 16px;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #E10F0F;
 }
 
 .chart-container {
@@ -1586,11 +1708,30 @@ tr:hover {
     border: 1px solid #888;
     width: 50%;
 }
-.report-sections,
-.report-customization,
-.report-preview,
+.report-sections {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+.report-customization {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+.report-preview {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
 .report-actions {
-    margin-bottom: 20px;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
 }
 .report-sections h3,
 .customization-group h3,
