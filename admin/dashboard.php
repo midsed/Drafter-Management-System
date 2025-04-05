@@ -43,7 +43,7 @@ $recentReceiptsQuery = "SELECT r.ReceiptID, CONCAT(r.RetrievedBy, ' (', u.RoleTy
                         FROM receipt r 
                         LEFT JOIN part p ON r.PartID = p.PartID 
                         LEFT JOIN user u ON r.UserID = u.UserID 
-                        ORDER BY r.RetrievedDate DESC LIMIT 5";
+                        ORDER BY r.RetrievedDate DESC LIMIT 10";
 $recentReceiptsResult = mysqli_query($conn, $recentReceiptsQuery);
 if (!$recentReceiptsResult) {
     die("SQL Error: " . mysqli_error($conn));
@@ -117,7 +117,7 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
         </div>
         <div class="chart-container">
             <div class="chart-box">
-                <h2>Recent Checkouts (30 Days)</h2>
+                <h2>Recent Parts Retrieved (30 Days)</h2>
                 <canvas id="checkoutTrendChart"></canvas>
             </div>
             <div class="chart-box">
@@ -126,7 +126,7 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
             </div>
         </div>
         <div class="transaction-history">
-            <h2>Recent Checkout History</h2>
+            <h2>Recent Parts Retrieved</h2>
             <div class="table-responsive">
                 <table>
                     <tr>
@@ -323,7 +323,7 @@ tr:hover {
             <div class="checkbox-group">
                 <label><input type="checkbox" name="reportSection" value="stockLevels" checked> Stock Levels</label>
                 <label><input type="checkbox" name="reportSection" value="partsAdded" checked> Parts Added Over Time</label>
-                <label><input type="checkbox" name="reportSection" value="checkoutTrend" checked> Recent Checkouts</label>
+                <label><input type="checkbox" name="reportSection" value="checkoutTrend" checked> Recent Parts Retrieved</label>
                 <label><input type="checkbox" name="reportSection" value="valueByCategory" checked> Inventory Value by Category</label>
                 <label><input type="checkbox" name="reportSection" value="monthlySummary" checked> Monthly Transaction Summary</label>
             </div>
