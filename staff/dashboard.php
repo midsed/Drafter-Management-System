@@ -110,42 +110,35 @@ if ($result && $result->num_rows > 0) {
 
     <div class="content">
         <div class="metrics-container">
-            <div class="metric-card">
+        <div class="metric-card" onclick="window.location.href='parts.php'">
                 <div class="metric-icon">
                     <i class="fas fa-boxes"></i>
                 </div>
                 <h2>Total Parts Added</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsAdded); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='receipts.php'">
                 <div class="metric-icon">
                     <i class="fas fa-arrow-alt-circle-down"></i>
                 </div>
                 <h2>Total Parts Retrieved</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsRetrieved); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='partsarchive.php'">
                 <div class="metric-icon">
                     <i class="fas fa-archive"></i>
                 </div>
                 <h2>Total Parts Archived</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsArchived); ?></div>
             </div>
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h2>Total Users</h2>
-                <div class="metric-value"><?php echo number_format($totalUsers); ?></div>
-            </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='supplier.php'">
                 <div class="metric-icon">
                     <i class="fas fa-truck"></i>
                 </div>
                 <h2>Total Suppliers</h2>
                 <div class="metric-value"><?php echo number_format($totalSuppliers); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='service.php'">
                 <div class="metric-icon">
                     <i class="fas fa-cogs"></i>
                 </div>
@@ -667,6 +660,13 @@ document.addEventListener("DOMContentLoaded", function () {
     flex-direction: column;
     justify-content: center;
     position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: #f8f8f8;
 }
 
 .metric-icon {

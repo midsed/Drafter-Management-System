@@ -116,42 +116,42 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
     <button id="generateReportBtn" class="report-button">Generate Report</button>
     <div class="content">
         <div class="metrics-container">
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='parts.php'">
                 <div class="metric-icon">
                     <i class="fas fa-boxes"></i>
                 </div>
                 <h2>Total Parts Added</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsAdded); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='receipts.php'">
                 <div class="metric-icon">
                     <i class="fas fa-arrow-alt-circle-down"></i>
                 </div>
                 <h2>Total Parts Retrieved</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsRetrieved); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='partsarchive.php'">
                 <div class="metric-icon">
                     <i class="fas fa-archive"></i>
                 </div>
                 <h2>Total Parts Archived</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsArchived); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='users.php'">
                 <div class="metric-icon">
                     <i class="fas fa-users"></i>
                 </div>
                 <h2>Total Users</h2>
                 <div class="metric-value"><?php echo number_format($totalUsers); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='supplier.php'">
                 <div class="metric-icon">
                     <i class="fas fa-truck"></i>
                 </div>
                 <h2>Total Suppliers</h2>
                 <div class="metric-value"><?php echo number_format($totalSuppliers); ?></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" onclick="window.location.href='service.php'">
                 <div class="metric-icon">
                     <i class="fas fa-cogs"></i>
                 </div>
@@ -162,6 +162,14 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
         <div class="chart-container">
             <div class="chart-box">
                 <h2>Stock Levels</h2>
+                <div class="chart-controls">
+                    <select id="stockTimePeriod" onchange="updateStockChart()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
                 <canvas id="stockLevelChart"></canvas>
             </div>
             <div class="chart-box">
@@ -179,11 +187,27 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
         </div>
         <div class="chart-container">
             <div class="chart-box">
-                <h2>Recent Parts Retrieved (30 Days)</h2>
+                <h2>Recent Parts Retrieved</h2>
+                <div class="chart-controls">
+                    <select id="checkoutTimePeriod" onchange="updateCheckoutChart()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
                 <canvas id="checkoutTrendChart"></canvas>
             </div>
             <div class="chart-box">
                 <h2>Inventory Value by Category</h2>
+                <div class="chart-controls">
+                    <select id="valueTimePeriod" onchange="updateValueChart()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
                 <canvas id="valueChart"></canvas>
             </div>
         </div>
@@ -469,6 +493,29 @@ tr:hover {
 <script>
     // Global chart objects for later reference
     let stockChart, partsAddedChart, checkoutChart, valueChart;
+
+    // Function to update stock chart based on time period
+    function updateStockChart() {
+        const selectedPeriod = document.getElementById('stockTimePeriod')?.value || 'daily';
+        // Implementation would be similar to updateLineChart()
+        // You would need to modify your SQL queries to support different time periods
+        console.log('Stock chart time period changed to:', selectedPeriod);
+        // In a real implementation, you would fetch new data and update the chart
+    }
+
+    // Function to update checkout chart based on time period
+    function updateCheckoutChart() {
+        const selectedPeriod = document.getElementById('checkoutTimePeriod')?.value || 'daily';
+        console.log('Checkout chart time period changed to:', selectedPeriod);
+        // In a real implementation, you would fetch new data and update the chart
+    }
+
+    // Function to update value chart based on time period
+    function updateValueChart() {
+        const selectedPeriod = document.getElementById('valueTimePeriod')?.value || 'daily';
+        console.log('Value chart time period changed to:', selectedPeriod);
+        // In a real implementation, you would fetch new data and update the chart
+    }
     
     const colors = {
         primary: '#4A90E2',
@@ -1581,6 +1628,13 @@ body {
     flex-direction: column;
     justify-content: center;
     position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: #f8f8f8;
 }
 
 .metric-icon {
