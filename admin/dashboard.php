@@ -6,11 +6,18 @@ if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Admin') {
     exit();
 }
 
-// Get total parts added
-$totalPartsAdded = $conn->query("SELECT COUNT(*) FROM part")->fetch_row()[0];
+// Get total parts added and their value
+$totalPartsQuery = $conn->query("SELECT COUNT(*) as count, SUM(Price * Quantity) as value FROM part WHERE Archived = 0");
+$totalPartsData = $totalPartsQuery->fetch_assoc();
+$totalPartsAdded = $totalPartsData['count'];
+$totalInventoryValue = $totalPartsData['value'] ?? 0;
 
-// Get total parts retrieved
-$totalPartsRetrieved = $conn->query("SELECT SUM(Quantity) FROM receipt")->fetch_row()[0];
+// Get total parts retrieved and their value
+$retrievalQuery = $conn->query("SELECT SUM(r.Quantity) as quantity, SUM(r.Quantity * p.Price) as value 
+FROM receipt r JOIN part p ON r.PartID = p.PartID");
+$retrievalData = $retrievalQuery->fetch_assoc();
+$totalPartsRetrieved = $retrievalData['quantity'] ?? 0;
+$totalRetrievalValue = $retrievalData['value'] ?? 0;
 
 // Get total parts archived
 $totalPartsArchived = $conn->query("SELECT COUNT(*) FROM part WHERE Archived = 1")->fetch_row()[0];
@@ -23,6 +30,24 @@ $totalSuppliers = $conn->query("SELECT COUNT(*) FROM supplier")->fetch_row()[0];
 
 // Get total services
 $totalServices = $conn->query("SELECT COUNT(*) FROM service")->fetch_row()[0];
+
+// Get stock value by category
+$categoryValueQuery = "SELECT Category, SUM(Price * Quantity) as value FROM part WHERE Archived = 0 GROUP BY Category";
+$categoryValueResult = $conn->query($categoryValueQuery);
+$categoryValues = [];
+while ($row = $categoryValueResult->fetch_assoc()) {
+    $categoryValues[$row['Category']] = $row['value'];
+}
+
+// Get parts movement trends
+$movementQuery = "SELECT DATE(r.RetrievedDate) as date, SUM(r.Quantity) as quantity 
+FROM receipt r GROUP BY DATE(r.RetrievedDate) 
+ORDER BY date DESC LIMIT 30";
+$movementResult = $conn->query($movementQuery);
+$movementTrends = [];
+while ($row = $movementResult->fetch_assoc()) {
+    $movementTrends[$row['date']] = $row['quantity'];
+}
 
 $lowStockQuery = "SELECT * FROM part WHERE Quantity < 2";
 $lowStockResult = mysqli_query($conn, $lowStockQuery);
@@ -120,43 +145,49 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
                 <div class="metric-icon">
                     <i class="fas fa-boxes"></i>
                 </div>
-                <h2>Total Parts Added</h2>
+                <h2>Active Parts</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsAdded); ?></div>
+                <div class="metric-subtitle">Value: ₱<?php echo number_format($totalInventoryValue, 2); ?></div>
             </div>
             <div class="metric-card" onclick="window.location.href='receipts.php'">
                 <div class="metric-icon">
                     <i class="fas fa-arrow-alt-circle-down"></i>
                 </div>
-                <h2>Total Parts Retrieved</h2>
+                <h2>Parts Retrieved</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsRetrieved); ?></div>
+                <div class="metric-subtitle">Value: ₱<?php echo number_format($totalRetrievalValue, 2); ?></div>
             </div>
             <div class="metric-card" onclick="window.location.href='partsarchive.php'">
                 <div class="metric-icon">
                     <i class="fas fa-archive"></i>
                 </div>
-                <h2>Total Parts Archived</h2>
+                <h2>Archived Parts</h2>
                 <div class="metric-value"><?php echo number_format($totalPartsArchived); ?></div>
+                <div class="metric-subtitle">Inactive Inventory</div>
             </div>
             <div class="metric-card" onclick="window.location.href='users.php'">
                 <div class="metric-icon">
                     <i class="fas fa-users"></i>
                 </div>
-                <h2>Total Users</h2>
+                <h2>System Users</h2>
                 <div class="metric-value"><?php echo number_format($totalUsers); ?></div>
+                <div class="metric-subtitle">Active Accounts</div>
             </div>
             <div class="metric-card" onclick="window.location.href='supplier.php'">
                 <div class="metric-icon">
                     <i class="fas fa-truck"></i>
                 </div>
-                <h2>Total Suppliers</h2>
+                <h2>Active Suppliers</h2>
                 <div class="metric-value"><?php echo number_format($totalSuppliers); ?></div>
+                <div class="metric-subtitle">Parts Providers</div>
             </div>
             <div class="metric-card" onclick="window.location.href='service.php'">
                 <div class="metric-icon">
                     <i class="fas fa-cogs"></i>
                 </div>
-                <h2>Total Services</h2>
+                <h2>Available Services</h2>
                 <div class="metric-value"><?php echo number_format($totalServices); ?></div>
+                <div class="metric-subtitle">Active Services</div>
             </div>
         </div>
         <div class="chart-container">
@@ -323,20 +354,76 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
 <style>
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
     margin: 0;
     padding: 0;
 }
 .main-content {
     padding: 20px;
     transition: margin-left 0.3s;
-    margin-left: 250px; /* Adjust based on sidebar width */
+    margin-left: 250px;
+}
+
+.metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+}
+
+.metric-icon {
+    font-size: 2rem;
+    color: #E10F0F;
+    margin-bottom: 1rem;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+}
+
+.metric-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.metric-card h2 {
+    font-size: 1.1rem;
+    color: #343a40;
+    margin: 0;
+    font-weight: 500;
 }
 
 @media (max-width: 768px) {
     .main-content {
         margin-left: 0;
-        padding-top: 80px; /* Add space for mobile header */
+        padding-top: 80px;
+    }
+    .metrics-container {
+        grid-template-columns: 1fr;
     }
 }
 .header {
@@ -497,24 +584,46 @@ tr:hover {
     // Function to update stock chart based on time period
     function updateStockChart() {
         const selectedPeriod = document.getElementById('stockTimePeriod')?.value || 'daily';
-        // Implementation would be similar to updateLineChart()
-        // You would need to modify your SQL queries to support different time periods
-        console.log('Stock chart time period changed to:', selectedPeriod);
-        // In a real implementation, you would fetch new data and update the chart
+        fetch(`get_chart_data.php?chart=stock&period=${selectedPeriod}`)
+            .then(response => response.json())
+            .then(data => {
+                if (stockChart) {
+                    stockChart.data.labels = data.labels;
+                    stockChart.data.datasets[0].data = data.values;
+                    stockChart.update();
+                }
+            })
+            .catch(error => console.error('Error updating stock chart:', error));
     }
 
     // Function to update checkout chart based on time period
     function updateCheckoutChart() {
         const selectedPeriod = document.getElementById('checkoutTimePeriod')?.value || 'daily';
-        console.log('Checkout chart time period changed to:', selectedPeriod);
-        // In a real implementation, you would fetch new data and update the chart
+        fetch(`get_chart_data.php?chart=checkout&period=${selectedPeriod}`)
+            .then(response => response.json())
+            .then(data => {
+                if (checkoutChart) {
+                    checkoutChart.data.labels = data.labels;
+                    checkoutChart.data.datasets[0].data = data.values;
+                    checkoutChart.update();
+                }
+            })
+            .catch(error => console.error('Error updating checkout chart:', error));
     }
 
     // Function to update value chart based on time period
     function updateValueChart() {
         const selectedPeriod = document.getElementById('valueTimePeriod')?.value || 'daily';
-        console.log('Value chart time period changed to:', selectedPeriod);
-        // In a real implementation, you would fetch new data and update the chart
+        fetch(`get_chart_data.php?chart=value&period=${selectedPeriod}`)
+            .then(response => response.json())
+            .then(data => {
+                if (valueChart) {
+                    valueChart.data.labels = data.labels;
+                    valueChart.data.datasets[0].data = data.values;
+                    valueChart.update();
+                }
+            })
+            .catch(error => console.error('Error updating value chart:', error));
     }
     
     const colors = {
@@ -591,25 +700,21 @@ tr:hover {
     const stockCanvas = document.getElementById('stockLevelChart');
     if (!stockCanvas) return;
 
-    // Get stock levels from PHP or use sample data
+    // Get stock levels and category values from PHP
     let stockLevels = {};
+    let categoryValues = {};
     try {
         stockLevels = <?php echo json_encode($stockLevels); ?>;
+        categoryValues = <?php echo json_encode($categoryValues); ?>;
     } catch (e) {
-        // Sample data if PHP variables aren't available
-        stockLevels = {
-            "Processor": 15,
-            "Memory": 28,
-            "SSD": 12,
-            "HDD": 8,
-            "Power Supply": 5,
-            "Motherboard": 3,
-            "Graphics Card": 6,
-            "Case": 10,
-            "Monitor": 7,
-            "Keyboard": 25
-        };
+        console.error('Error loading stock data:', e);
+        return;
     }
+
+    // Prepare data for visualization
+    const categories = Object.keys(stockLevels);
+    const quantities = Object.values(stockLevels);
+    const values = categories.map(cat => categoryValues[cat] || 0);
 
     const stockLabels = Object.keys(stockLevels);
     const stockDataValues = Object.values(stockLevels);
