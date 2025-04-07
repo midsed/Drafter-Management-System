@@ -20,8 +20,19 @@ $sortField  = isset($_GET['sort_field']) ? $conn->real_escape_string($_GET['sort
 $sortOrder  = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort_order']) : 'DESC';
 $startDate  = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $endDate    = isset($_GET['end_date']) ? $_GET['end_date'] : '';
-$actionType = isset($_GET['action_type']) ? $conn->real_escape_string($_GET['action_type']) : '';
 $roleFilter = isset($_GET['role']) ? $conn->real_escape_string($_GET['role']) : '';
+
+// For Action Type, expect an array from the checkboxes
+$actionTypes = array();
+if (isset($_GET['action_type'])) {
+    if (is_array($_GET['action_type'])) {
+        foreach ($_GET['action_type'] as $atype) {
+            $actionTypes[] = $conn->real_escape_string($atype);
+        }
+    } else {
+        $actionTypes[] = $conn->real_escape_string($_GET['action_type']);
+    }
+}
 
 $sql = "SELECT l.LogsID, CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy, l.ActionType, l.Timestamp
         FROM logs l
@@ -34,9 +45,14 @@ if (!empty($search)) {
                    OR l.Timestamp LIKE '%$search%')";
 }
 
-// Filter by Action Type if chosen and not "All"
-if (!empty($actionType) && $actionType !== "All") {
-    $sql .= " AND l.ActionType LIKE '$actionType%'";
+// Apply the Action Type filter if any checkboxes are selected.
+// Build multiple LIKE conditions combined with OR.
+if (!empty($actionTypes)) {
+    $likeClauses = array();
+    foreach ($actionTypes as $atype) {
+        $likeClauses[] = "l.ActionType LIKE '%$atype%'";
+    }
+    $sql .= " AND (" . implode(" OR ", $likeClauses) . ")";
 }
 
 // Filter by Role Type if chosen and not "All"
@@ -98,16 +114,6 @@ $result = $conn->query($sql);
                         <input type="date" id="start_date" value="<?= htmlspecialchars($startDate) ?>">
                         <input type="date" id="end_date" value="<?= htmlspecialchars($endDate) ?>">
                     </div>
-                    <h4>Action Type</h4>
-                    <div class="action-type-filter">
-                        <select id="action_type">
-                            <option value="">All</option>
-                            <option value="Add" <?= ($actionType=="Add") ? "selected" : "" ?>>Add</option>
-                            <option value="Update" <?= ($actionType=="Update") ? "selected" : "" ?>>Update</option>
-                            <option value="Archive" <?= ($actionType=="Archive") ? "selected" : "" ?>>Archive</option>
-                            <option value="Re-list" <?= ($actionType=="Re-list") ? "selected" : "" ?>>Re-list</option>
-                        </select>
-                    </div>
                     <h4>User Role</h4>
                     <div class="role-filter">
                         <select id="role_filter">
@@ -115,6 +121,25 @@ $result = $conn->query($sql);
                             <option value="admin" <?= ($roleFilter=="admin") ? "selected" : "" ?>>Admin</option>
                             <option value="staff" <?= ($roleFilter=="staff") ? "selected" : "" ?>>Staff</option>
                         </select>
+                    </div>
+                    <h4>Action Type</h4>
+                    <div class="action-type-filter">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="action_type[]" value="Add" <?= (in_array("Add", $actionTypes)) ? "checked" : "" ?>>
+                            Add
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="action_type[]" value="Update" <?= (in_array("Update", $actionTypes)) ? "checked" : "" ?>>
+                            Update
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="action_type[]" value="Archive" <?= (in_array("Archive", $actionTypes)) ? "checked" : "" ?>>
+                            Archive
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="action_type[]" value="Re-list" <?= (in_array("Re-list", $actionTypes)) ? "checked" : "" ?>>
+                            Re-list
+                        </label>
                     </div>
                     <div class="filter-actions">
                         <button id="applyFilter" class="red-button">Apply</button>
@@ -258,6 +283,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
         .catch(error => console.error("Error updating search results:", error));
 });
 
+// Sorting functionality
 document.getElementById("sortButton").addEventListener("click", function(e) {
     e.stopPropagation();
     document.getElementById("sortDropdown").classList.toggle("show");
@@ -274,18 +300,28 @@ document.querySelectorAll(".sort-option").forEach(option => {
     });
 });
 
+// Filter dropdown toggle
 document.getElementById("filterButton").addEventListener("click", function(e) {
     e.stopPropagation();
     document.getElementById("filterDropdown").classList.toggle("show");
 });
 
+// Apply filter button: gather all selected filters including multiple action_type checkboxes
 document.getElementById("applyFilter").addEventListener("click", function() {
     const startDate = document.getElementById("start_date").value;
     const endDate   = document.getElementById("end_date").value;
-    const actionType = document.getElementById("action_type").value;
+    
+    // Get all checked action type checkboxes using the name "action_type[]"
+    const actionTypeCheckboxes = document.querySelectorAll('input[name="action_type[]"]:checked');
+    let actionTypeValues = [];
+    actionTypeCheckboxes.forEach(cb => {
+        actionTypeValues.push(cb.value);
+    });
+    
     const roleFilter = document.getElementById("role_filter").value;
     const currentUrl = new URL(window.location.href);
     
+    // Set or remove date filters
     if (startDate && endDate) {
         currentUrl.searchParams.set("start_date", startDate);
         currentUrl.searchParams.set("end_date", endDate);
@@ -293,34 +329,43 @@ document.getElementById("applyFilter").addEventListener("click", function() {
         currentUrl.searchParams.delete("start_date");
         currentUrl.searchParams.delete("end_date");
     }
-    if (actionType) {
-        currentUrl.searchParams.set("action_type", actionType);
-    } else {
-        currentUrl.searchParams.delete("action_type");
+    
+    // Remove any existing "action_type[]" parameters and then append each checked value
+    currentUrl.searchParams.delete("action_type[]");
+    if (actionTypeValues.length > 0) {
+        actionTypeValues.forEach(value => {
+            currentUrl.searchParams.append("action_type[]", value);
+        });
     }
+    
+    // Set or remove the role filter
     if (roleFilter) {
         currentUrl.searchParams.set("role", roleFilter);
     } else {
         currentUrl.searchParams.delete("role");
     }
+    
+    // Reset page to 1 and redirect
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
 });
 
+// Clear filter button: uncheck all checkboxes and clear filters
 document.getElementById("clearFilter").addEventListener("click", function() {
     document.getElementById("start_date").value = "";
     document.getElementById("end_date").value   = "";
-    document.getElementById("action_type").value = "";
+    document.querySelectorAll('input[name="action_type[]"]:checked').forEach(cb => cb.checked = false);
     document.getElementById("role_filter").value = "";
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.delete("start_date");
     currentUrl.searchParams.delete("end_date");
-    currentUrl.searchParams.delete("action_type");
+    currentUrl.searchParams.delete("action_type[]");
     currentUrl.searchParams.delete("role");
     currentUrl.searchParams.set("page", "1");
     window.location.href = currentUrl.toString();
 });
 
+// Hide dropdowns if clicking outside
 window.addEventListener("click", function(e) {
     if (!e.target.closest(".dropdown-content") && 
         !e.target.closest(".filter-icon") && 
@@ -360,6 +405,18 @@ body, button, select, input, a {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
 }
 
 .filter-icon, .sort-icon {
