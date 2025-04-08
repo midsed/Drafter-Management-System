@@ -110,8 +110,9 @@ include('navigation/topbar.php');
 
     </div>
     <div class="right-actions">
-        <a href="cart.php" class="cart-icon" title="Cart">
-            <i class="fas fa-shopping-cart"></i>
+        <a href="cart.php" class="cart-icon" title="Parts to Retrieve">
+        <img src="images/spare-parts.png" alt="Spare Parts" style="width: 30px; height: 30px;">
+
             <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
         </a>
             <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
@@ -199,7 +200,7 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions card-actions'>
-                            <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
+                            <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Parts to Retrieve</button>
                         </div>
                     </div>
                 ";
@@ -579,7 +580,7 @@ function addToCart(partID) {
     .then(data => {
         if (data.success) {
             Swal.fire({
-                title: "Added to Cart!",
+                title: "Added to Parts to Retrieve!",
                 text: data.message,
                 icon: "success",
                 confirmButtonColor: "#32CD32"

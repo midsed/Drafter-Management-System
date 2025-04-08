@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
         <a href="javascript:void(0);" onclick="window.history.back();" style="text-decoration: none;">
             <img src="https://i.ibb.co/M68249k/go-back-arrow.png" alt="Back" style="width: 35px; height: 35px; margin-right: 20px;">
         </a>
-        <h1 style="font-family: 'Poppins', sans-serif;">Your Cart</h1>
+        <h1 style="font-family: 'Poppins', sans-serif;">Your Parts</h1>
     </div>
 
     <div class="search-container">
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['partID'], $_POST['cha
                     ";
                 }
             } else {
-                echo "<p>Your cart is empty.</p>";
+                echo "<p>Your parts is empty.</p>";
             }
             ?>
         </div>

@@ -42,7 +42,7 @@ if (isset($_POST['id'])) {
             ];
         }
 
-        echo json_encode(['success' => true, 'message' => 'Item added to cart']);
+        echo json_encode(['success' => true, 'message' => 'Item added to parts']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Part not found or archived']);
     }
