@@ -639,7 +639,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (yearModelInput.value.trim() === "") {
                 showError(yearModelInput, "Year is required.");
                 return false;
-            } else {
+            } else { 
                 clearError(yearModelInput);
                 return true;
             }

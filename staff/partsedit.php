@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 showError(yearModelInput, "Year is required.");
                 return false;
             } else { 
-                clearError(yearModelInput);
+                clearError(yearModelInput);z
                 return true;
             }
         }
