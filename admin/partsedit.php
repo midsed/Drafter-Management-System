@@ -255,7 +255,7 @@ include('navigation/topbar.php');
         <div class="quantity-container quantity-total">
             <button type="button" onclick="decreaseQuantity()">−</button>
             <input type="number" id="quantity" name="quantity" 
-                   value="<?php echo (int)$part['Quantity']; ?>" min="0" required>
+                value="<?php echo isset($part['Quantity']) ? (int)$part['Quantity'] : 0; ?>" min="0" required>
             <button type="button" onclick="increaseQuantity()">+</button>
         </div>
     </div>
@@ -480,56 +480,51 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTotalQuantity();
 });
 
-// Update total quantity based on left and right quantities
-function updateTotalQuantity() {
-    const quantityLeftInput = document.getElementById('quantity_left');
-    const quantityRightInput = document.getElementById('quantity_right');
-    const totalQuantityInput = document.getElementById('quantity');
-    
-    const leftQty = parseInt(quantityLeftInput.value) || 0;
-    const rightQty = parseInt(quantityRightInput.value) || 0;
-    
-    totalQuantityInput.value = leftQty + rightQty;
+function decreaseQuantity() {
+    var qty = parseInt(document.getElementById('quantity').value) || 0;
+    if (qty > 0) {
+        document.getElementById('quantity').value = qty - 1;
+    }
 }
 
-function increaseQuantityLeft() {
-    const quantityLeftInput = document.getElementById('quantity_left');
-    quantityLeftInput.value = parseInt(quantityLeftInput.value || 0) + 1;
-    updateTotalQuantity();
+function increaseQuantity() {
+    var qty = parseInt(document.getElementById('quantity').value) || 0;
+    document.getElementById('quantity').value = qty + 1;
 }
 
 function decreaseQuantityLeft() {
-    const quantityLeftInput = document.getElementById('quantity_left');
-    if (parseInt(quantityLeftInput.value) > 0) {
-        quantityLeftInput.value = parseInt(quantityLeftInput.value) - 1;
+    var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+    if (qtyLeft > 0) {
+        document.getElementById('quantity_left').value = qtyLeft - 1;
+        updateTotalQuantity();
+    }
+}
+
+function increaseQuantityLeft() {
+    var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+    document.getElementById('quantity_left').value = qtyLeft + 1;
+    updateTotalQuantity();
+}
+
+function decreaseQuantityRight() {
+    var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
+    if (qtyRight > 0) {
+        document.getElementById('quantity_right').value = qtyRight - 1;
         updateTotalQuantity();
     }
 }
 
 function increaseQuantityRight() {
-    const quantityRightInput = document.getElementById('quantity_right');
-    quantityRightInput.value = parseInt(quantityRightInput.value || 0) + 1;
+    var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
+    document.getElementById('quantity_right').value = qtyRight + 1;
     updateTotalQuantity();
 }
 
-function decreaseQuantityRight() {
-    const quantityRightInput = document.getElementById('quantity_right');
-    if (parseInt(quantityRightInput.value) > 0) {
-        quantityRightInput.value = parseInt(quantityRightInput.value) - 1;
-        updateTotalQuantity();
-    }
-}
-
-// These functions are kept for compatibility but disabled in the UI
-function increaseQuantity() {
-    let quantity = document.getElementById('quantity');
-    quantity.value = parseInt(quantity.value) + 1;
-}
-function decreaseQuantity() {
-    let quantity = document.getElementById('quantity');
-    if (quantity.value > 0) {
-        quantity.value = parseInt(quantity.value) - 1;
-    }
+function updateTotalQuantity() {
+    var quantityLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+    var quantityRight = parseInt(document.getElementById('quantity_right').value) || 0;
+    var totalQuantity = quantityLeft + quantityRight;
+    document.getElementById('quantity').value = totalQuantity;
 }
 
 // Preview new image (like in add form)
