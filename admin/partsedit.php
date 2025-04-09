@@ -253,10 +253,10 @@ include('navigation/topbar.php');
     <div class="form-group">
         <label for="quantity">Total Quantity:</label>
         <div class="quantity-container quantity-total">
-            <button type="button" onclick="decreaseQuantity()">−</button>
+            <button type="button" onclick="decreaseTotalQuantity()">−</button>
             <input type="number" id="quantity" name="quantity" 
                 value="<?php echo isset($part['Quantity']) ? (int)$part['Quantity'] : 0; ?>" min="0" required>
-            <button type="button" onclick="increaseQuantity()">+</button>
+            <button type="button" onclick="increaseTotalQuantity()">+</button>
         </div>
     </div>
 
@@ -480,51 +480,54 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTotalQuantity();
 });
 
-function decreaseQuantity() {
-    var qty = parseInt(document.getElementById('quantity').value) || 0;
-    if (qty > 0) {
-        document.getElementById('quantity').value = qty - 1;
+function decreaseTotalQuantity() {
+    var totalQty = parseInt(document.getElementById('quantity').value) || 0;
+    if (totalQty > 0) {
+        document.getElementById('quantity').value = totalQty - 1;
     }
 }
 
-function increaseQuantity() {
-    var qty = parseInt(document.getElementById('quantity').value) || 0;
-    document.getElementById('quantity').value = qty + 1;
+function increaseTotalQuantity() {
+    var totalQty = parseInt(document.getElementById('quantity').value) || 0;
+    document.getElementById('quantity').value = totalQty + 1;
 }
 
+// Existing functions for left and right quantities
 function decreaseQuantityLeft() {
     var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
     if (qtyLeft > 0) {
         document.getElementById('quantity_left').value = qtyLeft - 1;
-        updateTotalQuantity();
+        updateTotalQuantity(); // Update total quantity if needed
     }
 }
 
 function increaseQuantityLeft() {
     var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
     document.getElementById('quantity_left').value = qtyLeft + 1;
-    updateTotalQuantity();
+    updateTotalQuantity(); // Update total quantity if needed
 }
 
 function decreaseQuantityRight() {
     var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
     if (qtyRight > 0) {
         document.getElementById('quantity_right').value = qtyRight - 1;
-        updateTotalQuantity();
+        updateTotalQuantity(); // Update total quantity if needed
     }
 }
 
 function increaseQuantityRight() {
     var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
     document.getElementById('quantity_right').value = qtyRight + 1;
-    updateTotalQuantity();
+    updateTotalQuantity(); // Update total quantity if needed
 }
 
+// Update total quantity function if needed
 function updateTotalQuantity() {
+    // This function can be used if you want to display the sum of left and right quantities somewhere else
     var quantityLeft = parseInt(document.getElementById('quantity_left').value) || 0;
     var quantityRight = parseInt(document.getElementById('quantity_right').value) || 0;
     var totalQuantity = quantityLeft + quantityRight;
-    document.getElementById('quantity').value = totalQuantity;
+    // If you want to display this somewhere, you can do it here
 }
 
 // Preview new image (like in add form)
