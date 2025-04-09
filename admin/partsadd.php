@@ -105,30 +105,57 @@ $username = $user['Username'];
     }
 
     .quantity-container {
-        display: flex;
-        align-items: center;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f4f4f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-    .quantity-container button {
-        background-color: #272727;
-        color: white;
-        border: none;
-        width: 30px;
-        height: 30px;
-        font-size: 18px;
-        cursor: pointer;
-        margin: 0 5px;
-        border-radius: 3px;
-    }
+.quantity-container button {
+    background-color: #272727;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 0 5px;
+    border-radius: 3px;
+}
 
-    .quantity-container button:hover {
-        background-color: #444;
-    }
+.quantity-container button:hover {
+    background-color: #444;
+}
 
-    .quantity-container input {
-        text-align: center;
-        width: 60px;
-    }
+.quantity-container input {
+    text-align: center;
+    width: 60px;
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+/* Style Total Quantity */
+.quantity-total {
+    background-color: #DFF7E5;
+    border: 1px solid #92D88B;
+}
+
+/* Style Quantity Left */
+.quantity-left {
+    background-color:rgb(255, 236, 224);
+    border: 1px solid #f77e82;
+}
+
+/* Style Quantity Right */
+.quantity-right {
+    background-color:rgb(255, 236, 224);
+    border: 1px solid #f77e82;
+}
 
     .image-preview {
         display: flex; 
@@ -179,21 +206,38 @@ $username = $user['Username'];
                 </div>
 
                 <div class="form-group">
-                    <label for="quantity">Quantity:</label>
-                    <div class="quantity-container">
-                        <button type="button" onclick="decreaseQuantity()">−</button>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" required>
-                        <button type="button" onclick="increaseQuantity()">+</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label for="location">Location:</label>
                     <input type="text" id="location" name="location" required>
                 </div>
             </div>
+            <div class="form-row">                <div class="form-group">
+                    <label for="quantity">Total Quantity:</label>
+                    <div class="quantity-container quantity-total">
+                        <button type="button" onclick="decreaseTotalQuantity()">−</button>
+                        <input type="number" id="quantity" name="quantity" value="0" min="0" required>
+                        <button type="button" onclick="increaseTotalQuantity()">+</button>
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label for="quantity_left">Quantity Left:</label>
+                    <div class="quantity-container quantity-left">
+                        <button type="button" onclick="decreaseQuantityLeft()">−</button>
+                        <input type="number" id="quantity_left" name="quantity_left" value="0" min="0" required>
+                        <button type="button" onclick="increaseQuantityLeft()">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity_right">Quantity Right:</label>
+                    <div class="quantity-container quantity-right">
+                        <button type="button" onclick="decreaseQuantityRight()">−</button>
+                        <input type="number" id="quantity_right" name="quantity_right" value="0" min="0" required>
+                        <button type="button" onclick="increaseQuantityRight()">+</button>
+                    </div>
+                </div></div>
             <div class="form-row">
+
                 <div class="form-group">
                     <label for="make">Make:</label>
                     <input type="text" id="make" name="make" required>
@@ -337,18 +381,54 @@ $username = $user['Username'];
     // Check the sidebar state when the page loads
     document.addEventListener("DOMContentLoaded", function () {
         checkSidebarState();
+        // Initialize total quantity calculation
+        updateTotalQuantity();
     });
 
-    function increaseQuantity() {
-        let quantity = document.getElementById('quantity');
-        quantity.value = parseInt(quantity.value) + 1;
+    function decreaseTotalQuantity() {
+        var totalQty = parseInt(document.getElementById('quantity').value) || 0;
+        if (totalQty > 0) {
+            document.getElementById('quantity').value = totalQty - 1;
+        }
     }
 
-    function decreaseQuantity() {
-        let quantity = document.getElementById('quantity');
-        if (quantity.value > 1) {
-            quantity.value = parseInt(quantity.value) - 1;
+    function increaseTotalQuantity() {
+        var totalQty = parseInt(document.getElementById('quantity').value) || 0;
+        document.getElementById('quantity').value = totalQty + 1;
+    }
+
+    function decreaseQuantityLeft() {
+        var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+        if (qtyLeft > 0) {
+            document.getElementById('quantity_left').value = qtyLeft - 1;
+            updateTotalQuantity();
         }
+    }
+
+    function increaseQuantityLeft() {
+        var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+        document.getElementById('quantity_left').value = qtyLeft + 1;
+        updateTotalQuantity();
+    }
+
+    function decreaseQuantityRight() {
+        var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
+        if (qtyRight > 0) {
+            document.getElementById('quantity_right').value = qtyRight - 1;
+            updateTotalQuantity();
+        }
+    }
+
+    function increaseQuantityRight() {
+        var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
+        document.getElementById('quantity_right').value = qtyRight + 1;
+        updateTotalQuantity();
+    }
+
+    function updateTotalQuantity() {
+        var qtyLeft = parseInt(document.getElementById('quantity_left').value) || 0;
+        var qtyRight = parseInt(document.getElementById('quantity_right').value) || 0;
+        document.getElementById('quantity').value = qtyLeft + qtyRight;
     }
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');

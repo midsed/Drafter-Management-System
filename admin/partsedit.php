@@ -133,58 +133,58 @@ include('navigation/topbar.php');
         justify-content: center;
     }
     /* Add background color and styling for quantity fields */
-.quantity-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f4f4f9;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+    .quantity-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #f4f4f9;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-.quantity-container button {
-    background-color: #272727;
-    color: white;
-    border: none;
-    width: 30px;
-    height: 30px;
-    font-size: 18px;
-    cursor: pointer;
-    margin: 0 5px;
-    border-radius: 3px;
-}
+    .quantity-container button {
+        background-color: #272727;
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+        cursor: pointer;
+        margin: 0 5px;
+        border-radius: 3px;
+    }
 
-.quantity-container button:hover {
-    background-color: #444;
-}
+    .quantity-container button:hover {
+        background-color: #444;
+    }
 
-.quantity-container input {
-    text-align: center;
-    width: 60px;
-    padding: 8px;
-    border-radius: 3px;
-    border: 1px solid #ccc;
-}
+    .quantity-container input {
+        text-align: center;
+        width: 60px;
+        padding: 8px;
+        border-radius: 3px;
+        border: 1px solid #ccc;
+    }
 
-/* Style Total Quantity */
-.quantity-total {
-    background-color: #DFF7E5;
-    border: 1px solid #92D88B;
-}
+    /* Style Total Quantity */
+    .quantity-total {
+        background-color: #DFF7E5;
+        border: 1px solid #92D88B;
+    }
 
-/* Style Quantity Left */
-.quantity-left {
-    background-color:rgb(255, 236, 224);
-    border: 1px solid #f77e82;
-}
+    /* Style Quantity Left */
+    .quantity-left {
+        background-color:rgb(255, 236, 224);
+        border: 1px solid #f77e82;
+    }
 
-/* Style Quantity Right */
-.quantity-right {
-    background-color:rgb(255, 236, 224);
-    border: 1px solid #f77e82;
-}
+    /* Style Quantity Right */
+    .quantity-right {
+        background-color:rgb(255, 236, 224);
+        border: 1px solid #f77e82;
+    }
 
     .image-preview {
         display: flex; 
