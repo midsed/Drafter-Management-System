@@ -217,12 +217,32 @@ include('navigation/topbar.php');
                            step="0.01" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label for="quantity">Quantity:</label>
+                    <label for="quantity">Total Quantity:</label>
                     <div class="quantity-container">
-                        <button type="button" onclick="decreaseQuantity()">−</button>
+                        <button type="button" onclick="decreaseQuantity()" disabled>−</button>
                         <input type="number" id="quantity" name="quantity"
-                               value="<?php echo (int)$part['Quantity']; ?>" min="0" required>
-                        <button type="button" onclick="increaseQuantity()">+</button>
+                               value="<?php echo (int)$part['Quantity']; ?>" min="0" required readonly>
+                        <button type="button" onclick="increaseQuantity()" disabled>+</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity_left">Quantity Left:</label>
+                    <div class="quantity-container">
+                        <button type="button" onclick="decreaseQuantityLeft()">−</button>
+                        <input type="number" id="quantity_left" name="quantity_left"
+                               value="<?php echo isset($part['QuantityLeft']) ? (int)$part['QuantityLeft'] : 0; ?>" min="0" required>
+                        <button type="button" onclick="increaseQuantityLeft()">+</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity_right">Quantity Right:</label>
+                    <div class="quantity-container">
+                        <button type="button" onclick="decreaseQuantityRight()">−</button>
+                        <input type="number" id="quantity_right" name="quantity_right"
+                               value="<?php echo isset($part['QuantityRight']) ? (int)$part['QuantityRight'] : 0; ?>" min="0" required>
+                        <button type="button" onclick="increaseQuantityRight()">+</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -410,9 +430,51 @@ function checkSidebarState() {
 }
 document.addEventListener("DOMContentLoaded", function() {
     checkSidebarState();
+    // Initialize total quantity calculation
+    updateTotalQuantity();
 });
 
-// Increase/decrease quantity
+// Update total quantity based on left and right quantities
+function updateTotalQuantity() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    const quantityRightInput = document.getElementById('quantity_right');
+    const totalQuantityInput = document.getElementById('quantity');
+    
+    const leftQty = parseInt(quantityLeftInput.value) || 0;
+    const rightQty = parseInt(quantityRightInput.value) || 0;
+    
+    totalQuantityInput.value = leftQty + rightQty;
+}
+
+function increaseQuantityLeft() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    quantityLeftInput.value = parseInt(quantityLeftInput.value || 0) + 1;
+    updateTotalQuantity();
+}
+
+function decreaseQuantityLeft() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    if (parseInt(quantityLeftInput.value) > 0) {
+        quantityLeftInput.value = parseInt(quantityLeftInput.value) - 1;
+        updateTotalQuantity();
+    }
+}
+
+function increaseQuantityRight() {
+    const quantityRightInput = document.getElementById('quantity_right');
+    quantityRightInput.value = parseInt(quantityRightInput.value || 0) + 1;
+    updateTotalQuantity();
+}
+
+function decreaseQuantityRight() {
+    const quantityRightInput = document.getElementById('quantity_right');
+    if (parseInt(quantityRightInput.value) > 0) {
+        quantityRightInput.value = parseInt(quantityRightInput.value) - 1;
+        updateTotalQuantity();
+    }
+}
+
+// These functions are kept for compatibility but disabled in the UI
 function increaseQuantity() {
     let quantity = document.getElementById('quantity');
     quantity.value = parseInt(quantity.value) + 1;

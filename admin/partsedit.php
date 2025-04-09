@@ -132,28 +132,60 @@ include('navigation/topbar.php');
         gap: 15px;
         justify-content: center;
     }
-    .quantity-container {
-        display: flex;
-        align-items: center;
-    }
-    .quantity-container button {
-        background-color: #272727;
-        color: white;
-        border: none;
-        width: 30px;
-        height: 30px;
-        font-size: 18px;
-        cursor: pointer;
-        margin: 0 5px;
-        border-radius: 3px;
-    }
-    .quantity-container button:hover {
-        background-color: #444;
-    }
-    .quantity-container input {
-        text-align: center;
-        width: 60px;
-    }
+    /* Add background color and styling for quantity fields */
+.quantity-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f4f4f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.quantity-container button {
+    background-color: #272727;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 0 5px;
+    border-radius: 3px;
+}
+
+.quantity-container button:hover {
+    background-color: #444;
+}
+
+.quantity-container input {
+    text-align: center;
+    width: 60px;
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+/* Style Total Quantity */
+.quantity-total {
+    background-color: #DFF7E5;
+    border: 1px solid #92D88B;
+}
+
+/* Style Quantity Left */
+.quantity-left {
+    background-color:rgb(255, 236, 224);
+    border: 1px solid #f77e82;
+}
+
+/* Style Quantity Right */
+.quantity-right {
+    background-color:rgb(255, 236, 224);
+    border: 1px solid #f77e82;
+}
+
     .image-preview {
         display: flex; 
         justify-content: center; 
@@ -209,23 +241,48 @@ include('navigation/topbar.php');
                            value="<?php echo htmlspecialchars($part['Price']); ?>"
                            step="0.01" min="0" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="quantity">Quantity:</label>
-                    <div class="quantity-container">
-                        <button type="button" onclick="decreaseQuantity()">−</button>
-                        <input type="number" id="quantity" name="quantity" 
-                               value="<?php echo (int)$part['Quantity']; ?>" min="0" required>
-                        <button type="button" onclick="increaseQuantity()">+</button>
-                    </div>
-                </div>
-
+                
                 <div class="form-group">
                     <label for="location">Location:</label>
                     <input type="text" id="location" name="location" 
                            value="<?php echo htmlspecialchars($part['Location']); ?>" required>
                 </div>
-            </div>
+                </div>
+                <div class="form-row">
+    <!-- Total Quantity -->
+    <div class="form-group">
+        <label for="quantity">Total Quantity:</label>
+        <div class="quantity-container quantity-total">
+            <button type="button" onclick="decreaseQuantity()">−</button>
+            <input type="number" id="quantity" name="quantity" 
+                   value="<?php echo (int)$part['Quantity']; ?>" min="0" required>
+            <button type="button" onclick="increaseQuantity()">+</button>
+        </div>
+    </div>
+
+    <!-- Quantity Left -->
+    <div class="form-group">
+        <label for="quantity_left">Quantity Left:</label>
+        <div class="quantity-container quantity-left">
+            <button type="button" onclick="decreaseQuantityLeft()">−</button>
+            <input type="number" id="quantity_left" name="quantity_left" 
+                   value="<?php echo isset($part['QuantityLeft']) ? (int)$part['QuantityLeft'] : 0; ?>" min="0" required>
+            <button type="button" onclick="increaseQuantityLeft()">+</button>
+        </div>
+    </div>
+    
+    <!-- Quantity Right -->
+    <div class="form-group">
+        <label for="quantity_right">Quantity Right:</label>
+        <div class="quantity-container quantity-right">
+            <button type="button" onclick="decreaseQuantityRight()">−</button>
+            <input type="number" id="quantity_right" name="quantity_right" 
+                   value="<?php echo isset($part['QuantityRight']) ? (int)$part['QuantityRight'] : 0; ?>" min="0" required>
+            <button type="button" onclick="increaseQuantityRight()">+</button>
+        </div>
+    </div>
+</div>
+
 
             <!-- .form-row for Make, Model, Year Model -->
             <div class="form-row">
@@ -419,9 +476,51 @@ function checkSidebarState() {
 }
 document.addEventListener("DOMContentLoaded", function () {
     checkSidebarState();
+    // Initialize total quantity calculation
+    updateTotalQuantity();
 });
 
-// Increase / Decrease quantity
+// Update total quantity based on left and right quantities
+function updateTotalQuantity() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    const quantityRightInput = document.getElementById('quantity_right');
+    const totalQuantityInput = document.getElementById('quantity');
+    
+    const leftQty = parseInt(quantityLeftInput.value) || 0;
+    const rightQty = parseInt(quantityRightInput.value) || 0;
+    
+    totalQuantityInput.value = leftQty + rightQty;
+}
+
+function increaseQuantityLeft() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    quantityLeftInput.value = parseInt(quantityLeftInput.value || 0) + 1;
+    updateTotalQuantity();
+}
+
+function decreaseQuantityLeft() {
+    const quantityLeftInput = document.getElementById('quantity_left');
+    if (parseInt(quantityLeftInput.value) > 0) {
+        quantityLeftInput.value = parseInt(quantityLeftInput.value) - 1;
+        updateTotalQuantity();
+    }
+}
+
+function increaseQuantityRight() {
+    const quantityRightInput = document.getElementById('quantity_right');
+    quantityRightInput.value = parseInt(quantityRightInput.value || 0) + 1;
+    updateTotalQuantity();
+}
+
+function decreaseQuantityRight() {
+    const quantityRightInput = document.getElementById('quantity_right');
+    if (parseInt(quantityRightInput.value) > 0) {
+        quantityRightInput.value = parseInt(quantityRightInput.value) - 1;
+        updateTotalQuantity();
+    }
+}
+
+// These functions are kept for compatibility but disabled in the UI
 function increaseQuantity() {
     let quantity = document.getElementById('quantity');
     quantity.value = parseInt(quantity.value) + 1;
@@ -638,3 +737,4 @@ function clearError(input) {
     }
 }
 </script>
+

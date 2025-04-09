@@ -35,6 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $part_name = trim($_POST['part_name']);
     $part_price = floatval($_POST['part_price']);
     $quantity = intval($_POST['quantity']);
+    $quantity_left = intval($_POST['quantity_left']);
+    $quantity_right = intval($_POST['quantity_right']);
     $make = trim($_POST['make']);
     $model = trim($_POST['model']);
     $year_model = trim($_POST['year_model']);
@@ -111,8 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
-    $updatePartQuery->bind_param("sdissssssssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);
+    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, QuantityLeft = ?, QuantityRight = ?, Make = ?, Model = ?, YearModel = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
+    $updatePartQuery->bind_param("sdiiiisssssssssi", $part_name, $part_price, $quantity, $quantity_left, $quantity_right, $make, $model, $year_model, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);
     $updatePartQuery->execute();
     $updatePartQuery->close();
 

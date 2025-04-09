@@ -34,14 +34,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $part_id = $_POST['part_id'];
     $part_name = trim($_POST['part_name']);
     $part_price = floatval($_POST['part_price']);
-    $quantity = intval($_POST['quantity']);
+    $quantity_left = intval($_POST['quantity_left']);
+    $quantity_right = intval($_POST['quantity_right']);
+    $quantity = $quantity_left + $quantity_right;
     $make = trim($_POST['make']);
     $model = trim($_POST['model']);
     $year_model = trim($_POST['year_model']);
     $chassis_number = trim($_POST['chassis_number']);
     $category = trim($_POST['category']);
     $authenticity = trim($_POST['authenticity']);
-    $part_condition = trim($_POST['part_condition']);
+    $part_condition = trim($_POST['condition']);
     $item_status = trim($_POST['item_status']);
     $location = trim($_POST['location']);
     $description = trim($_POST['description']);
@@ -112,8 +114,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, ChassisNumber = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
-    $updatePartQuery->bind_param("sdisssssssssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $chassis_number, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);
+    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, QuantityLeft = ?, QuantityRight = ?, Make = ?, Model = ?, YearModel = ?, ChassisNumber = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
+    $updatePartQuery->bind_param("sdiiisssssssssssi", 
+        $part_name, 
+        $part_price, 
+        $quantity, 
+        $quantity_left, 
+        $quantity_right, 
+        $make, 
+        $model, 
+        $year_model, 
+        $chassis_number, 
+        $category, 
+        $authenticity, 
+        $part_condition, 
+        $item_status, 
+        $location, 
+        $description, 
+        $imageName, 
+        $part_id
+    );
     $updatePartQuery->execute();
     $updatePartQuery->close();
 
