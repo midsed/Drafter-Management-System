@@ -301,9 +301,7 @@ include('navigation/topbar.php');
                 <div class="form-group">
                     <label for="year_model">Year Model:</label>
                     <input type="text" id="year_model" name="year_model" 
-                           value="<?php echo htmlspecialchars($part['YearModel']); ?>"
-                           maxlength="4" pattern="\d{4}" required 
-                           title="Enter a year">
+                           value="<?php echo htmlspecialchars($part['YearModel']); ?>" required>
                 </div>
             </div>
 
@@ -638,14 +636,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     function validateYearModel() {
-        if (yearModelInput.value.length !== 4) {
-            showError(yearModelInput, "Year must be exactly 4 digits.");
-            return false;
-        } else {
-            clearError(yearModelInput);
-            return true;
+            if (yearModelInput.value.trim() === "") {
+                showError(yearModelInput, "Year is required.");
+                return false;
+            } else {
+                clearError(yearModelInput);
+                return true;
+            }
         }
-    }
     function validateChassisNumber() {
         // Make chassis number optional
         if (chassisNumberInput.value.trim() !== "" && chassisNumberInput.value.length > 20) {

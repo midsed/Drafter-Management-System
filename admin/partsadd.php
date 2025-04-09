@@ -250,7 +250,7 @@ $username = $user['Username'];
 
                 <div class="form-group">
                     <label for="year_model">Year Model:</label>
-                    <input type="text" id="year_model" name="year_model" maxlength="4" pattern="\d{4}" required 
+                    <input type="text" id="year_model" name="year_model" required 
                         title="Enter a year">
                 </div>
             </div>
@@ -573,8 +573,8 @@ function clearError(input) {
 
         // Validate Year Model (Only 4 digits)
         function validateYearModel() {
-            if (yearModelInput.value.length !== 4) {
-                showError(yearModelInput, "Year must be exactly 4 digits.");
+            if (yearModelInput.value.trim() === "") {
+                showError(yearModelInput, "Year is required.");
                 return false;
             } else {
                 clearError(yearModelInput);
