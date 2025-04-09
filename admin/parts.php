@@ -111,7 +111,7 @@ include('navigation/topbar.php');
     </div>
     <div class="right-actions">
         <a href="cart.php" class="cart-icon" title="Parts to Retrieve">
-        <img src="images/spare-parts.png" alt="Spare Parts" style="width: 30px; height: 30px;">
+        <img src="images/retrieve-icon.png" alt="Spare Parts" style="width: 50px; height: 50px;">
             <span class="cart-count"><?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?></span>
         </a>
             <button id="selectModeBtn" class="red-button"><i class="fas fa-check-square"></i> Select Parts to Archive</button>
