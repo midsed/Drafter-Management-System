@@ -83,20 +83,12 @@ $conn->close();
                     <div class="detail-value">#<?php echo $part["PartID"]; ?></div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Category</div>
-                    <div class="detail-value"><?php echo htmlspecialchars($part["Category"]); ?></div>
+                    <div class="detail-label">Chassis Number</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["ChassisNumber"]); ?></div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Condition</div>
                     <div class="detail-value"><?php echo htmlspecialchars($part["PartCondition"]); ?></div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Quantity</div>
-                    <div class="detail-value"><?php echo $part["Quantity"]; ?></div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Authenticity</div>
-                    <div class="detail-value"><?php echo htmlspecialchars($part["Authenticity"]); ?></div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Make</div>
@@ -111,19 +103,40 @@ $conn->close();
                     <div class="detail-value"><?php echo htmlspecialchars($part["YearModel"]); ?></div>
                 </div>
                 <div class="detail-item">
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Category"]); ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Authenticity</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($part["Authenticity"]); ?></div>
+                </div>
+                <div class="detail-item">
                     <div class="detail-label">Part Price</div>
                     <div class="detail-value price-value">₱ <?php echo number_format($part["Price"], 2); ?></div>
                 </div>
                 <div class="detail-item">
+                    <div class="detail-label">Total Quantity</div>
+                    <div class="detail-value"><?php echo $part["Quantity"]; ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Quantity Left</div>
+                    <div class="detail-value"><?php echo $part["QuantityLeft"]; ?></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Quantity Right</div>
+                    <div class="detail-value"><?php echo $part["QuantityRight"]; ?></div>
+                </div>
+            </div>
+            <div class="details-grid1">
+            <div class="detail-item">
                     <div class="detail-label">Date Added</div>
                     <div class="detail-value"><?php echo htmlspecialchars($part["DateAdded"]); ?></div>
-                </div>
+            </div>
                 <div class="detail-item">
                     <div class="detail-label">Last Updated</div>
                     <div class="detail-value"><?php echo htmlspecialchars($part["LastUpdated"]); ?></div>
                 </div>
-            </div>
-            
+                </div>
             <div class="description-section">
                 <h3>Description</h3>
                 <div class="description-content">
@@ -136,35 +149,35 @@ $conn->close();
 
 <script>
     function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('collapsed');
 
-    // Save the sidebar state to localStorage
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('sidebarCollapsed', isCollapsed);
-}
-
-function checkSidebarState() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-    // Apply the saved state on page load
-    if (isCollapsed) {
-        sidebar.classList.add('collapsed');
-        mainContent.classList.add('collapsed');
-    } else {
-        sidebar.classList.remove('collapsed');
-        mainContent.classList.remove('collapsed');
+        // Save the sidebar state to localStorage
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
     }
-}
 
-// Check the sidebar state when the page loads
-document.addEventListener("DOMContentLoaded", function () {
-    checkSidebarState();
-});
+    function checkSidebarState() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+        // Apply the saved state on page load
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('collapsed');
+        } else {
+            sidebar.classList.remove('collapsed');
+            mainContent.classList.remove('collapsed');
+        }
+    }
+
+    // Check the sidebar state when the page loads
+    document.addEventListener("DOMContentLoaded", function () {
+        checkSidebarState();
+    });
 </script>
 
 <style>
@@ -211,8 +224,8 @@ document.addEventListener("DOMContentLoaded", function () {
     bottom: -85px;
     left: 50%;
     transform: translateX(-50%);
-    background:rgb(213, 58, 58);
-    background: linear-gradient(to right,rgb(228, 93, 93),rgb(43, 8, 3));
+    background: rgb(213, 58, 58);
+    background: linear-gradient(to right, rgb(228, 93, 93), rgb(43, 8, 3));
     color: white;
     padding: 12px 25px;
     border-radius: 50px;
@@ -267,42 +280,64 @@ document.addEventListener("DOMContentLoaded", function () {
     margin-bottom: 30px;
 }
 
+.details-grid1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 50px;
+}
+
 .detail-item {
-    background: #f8f9fa;
+    background: #ffffff; /* White background for clarity */
+    border: 1px solid #ccc; /* Light gray border for distinction */
     border-radius: 8px;
     padding: 15px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative; /* For positioning pseudo-elements */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .detail-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+.detail-item::before {
+    content: ""; /* Pseudo-element for decorative effect */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px; /* Height of the decorative line */
+    background:rgba(255, 0, 0, 0.55); /* Blue color for the line */
+    border-radius: 8px 8px 0 0; /* Rounded top corners */
 }
 
 .detail-label {
     font-size: 14px;
-    color: #6c757d;
+    color: #495057; /* Darker gray for better readability */
     margin-bottom: 5px;
-    font-weight: 500;
+    font-weight: 600; /* Slightly bolder for emphasis */
 }
 
 .detail-value {
     font-size: 16px;
-    color: #333;
+    color: #333; /* Darker color for value text */
     font-weight: 500;
 }
 
 .price-value {
-    color: #28a745;
+    color: #28a745; /* Green for price */
     font-weight: 700;
     font-size: 18px;
 }
 
 .description-section {
     margin-top: 30px;
-    background: #f8f9fa;
+    background: #f8f9fa; /* Light gray background for description */
     border-radius: 8px;
     padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .description-section h3 {
@@ -315,6 +350,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 .description-content {
     line-height: 1.6;
-    color: #495057;
+    color: #495057; /* Darker gray for description text */
 }
 </style>
