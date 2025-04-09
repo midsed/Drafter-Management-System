@@ -242,7 +242,8 @@ include('navigation/topbar.php');
                             <td>{$part['Location']}</td>
                             <td class='" . ($isOutOfStock ? "out-of-stock" : "") . "'>{$part['Quantity']}</td>
                             <td class='actions'>
-                                <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Add to Cart</button>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
+                                <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Retrieve Part</button>
                             </td>
                         </tr>
                         ";
@@ -1116,6 +1117,33 @@ body {
 
 .part-card .add-to-cart-btn:hover {
     background: darkorange
+}
+
+/* List view button styling */
+.parts-list-container .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.parts-list-container .edit-btn {
+    background: gray;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.parts-list-container .edit-btn:hover {
+    background: #555555;
+}
+
+.parts-list-container .add-to-cart-btn {
+    background: #FFB52E;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.parts-list-container .add-to-cart-btn:hover {
+    background: darkorange;
 }
 
 .cart-icon {
