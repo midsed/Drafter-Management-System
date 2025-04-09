@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $make = trim($_POST['make']);
     $model = trim($_POST['model']);
     $year_model = trim($_POST['year_model']);
+    $chassis_number = trim($_POST['chassis_number']);
     $category = trim($_POST['category']);
     $authenticity = trim($_POST['authenticity']);
     $part_condition = trim($_POST['part_condition']);
@@ -111,8 +112,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
-    $updatePartQuery->bind_param("sdissssssssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);
+    $updatePartQuery = $conn->prepare("UPDATE part SET Name = ?, Price = ?, Quantity = ?, Make = ?, Model = ?, YearModel = ?, ChassisNumber = ?, Category = ?, Authenticity = ?, PartCondition = ?, ItemStatus = ?, Location = ?, Description = ?, Media = ? WHERE PartID = ?");
+    $updatePartQuery->bind_param("sdisssssssssssi", $part_name, $part_price, $quantity, $make, $model, $year_model, $chassis_number, $category, $authenticity, $part_condition, $item_status, $location, $description, $imageName, $part_id);
     $updatePartQuery->execute();
     $updatePartQuery->close();
 

@@ -255,7 +255,7 @@ include('navigation/topbar.php');
                 <div class="form-group">
                     <label for="chassis_number">Chassis Number:</label>
                     <input type="text" id="chassis_number" name="chassis_number" maxlength="20"
-                           value="<?php echo htmlspecialchars($part['ChassisNumber'] ?? ''); ?>" required>
+                           value="<?php echo htmlspecialchars($part['ChassisNumber'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
@@ -550,10 +550,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     function validateChassisNumber() {
-        if (chassisNumberInput.value.trim() === "") {
-            showError(chassisNumberInput, "Chassis Number is required.");
-            return false;
-        } else if (chassisNumberInput.value.length > 20) {
+        // Make chassis number optional
+        if (chassisNumberInput.value.trim() !== "" && chassisNumberInput.value.length > 20) {
             showError(chassisNumberInput, "Chassis Number must not exceed 20 characters.");
             return false;
         } else {
@@ -583,8 +581,8 @@ document.addEventListener("DOMContentLoaded", function () {
     conditionInput.addEventListener("blur", () => validateRequired(conditionInput));
     itemStatusInput.addEventListener("blur", () => validateRequired(itemStatusInput));
     locationInput.addEventListener("blur", () => validateRequired(locationInput));
-    // If your edit form does NOT require uploading a new image, you can remove this "required" check:
-    partImageInput.addEventListener("blur", () => validateRequired(partImageInput));
+    // Remove the required validation for image upload since we want to keep existing images
+    // partImageInput.addEventListener("blur", () => validateRequired(partImageInput));
 
     // On submit
     const submitButton = document.querySelector("button[type='submit']");
@@ -614,8 +612,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!validateRequired(conditionInput))      isValid = false;
         if (!validateRequired(itemStatusInput))     isValid = false;
         if (!validateRequired(locationInput))       isValid = false;
-        // If not requiring new image on each edit, remove the next line:
-        if (!validateRequired(partImageInput))      isValid = false;
+        // Removed image validation to allow editing without requiring a new image upload
+        // if (!validateRequired(partImageInput))      isValid = false;
 
         return isValid;
     }
