@@ -730,6 +730,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['part_name'];
     $price = $_POST['part_price'];
     $quantity = $_POST['quantity'];
+    $quantity_left = $_POST['quantity_left'];
+    $quantity_right = $_POST['quantity_right'];
     $make = $_POST['make'];
     $model = $_POST['model'];
     $year_model = $_POST['year_model'];
@@ -837,15 +839,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Insert Part
-    $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, Category, Make, Model, YearModel, ChassisNumber, SupplierID)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $part_sql = "INSERT INTO part (PartCondition, ItemStatus, Description, DateAdded, LastUpdated, Media, UserID, Location, Name, Price, Quantity, QuantityLeft, QuantityRight, Category, Make, Model, YearModel, ChassisNumber, SupplierID, Authenticity)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $part_stmt = $conn->prepare($part_sql);
         if ($part_stmt === false) {
             die("Error preparing part query: " . $conn->error);
         }
-        $part_stmt->bind_param("ssssssssssssssssi", 
+        $part_stmt->bind_param("ssssssssssiiisssssis", 
             $condition, $item_status, $description, $date_added, $last_updated, $media, $user_id, $location, 
-            $name, $price, $quantity, $category, $make, $model, $year_model, $chassis_number, $supplier_id
+            $name, $price, $quantity, $quantity_left, $quantity_right, $category, $make, $model, $year_model, $chassis_number, $supplier_id, $authenticity
         );
 
     if ($part_stmt->execute()) {
