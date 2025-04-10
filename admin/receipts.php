@@ -11,7 +11,7 @@ include('navigation/topbar.php');
 include('dbconnect.php');
 $userID = $_SESSION['UserID'];
 
-$limit = 10;
+$limit = 20;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 

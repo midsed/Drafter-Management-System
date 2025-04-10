@@ -30,6 +30,9 @@ function logAction($conn, $userID, $username, $roleType, $actionType, $partID = 
     $logQuery->close();
 }
 
+// Include the detailed logging functionality
+include_once('../shared/detailed_logging.php');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $part_id = $_POST['part_id'];
     $part_name = trim($_POST['part_name']);
@@ -58,6 +61,14 @@ if ($quantity < ($quantity_left + $quantity_right)) {
 
     $partUpdated = false;
     $supplierUpdated = false;
+    
+    // Get the current part data for logging purposes
+    $currentPartStmt = $conn->prepare("SELECT * FROM part WHERE PartID = ?");
+    $currentPartStmt->bind_param("i", $part_id);
+    $currentPartStmt->execute();
+    $currentPartResult = $currentPartStmt->get_result();
+    $currentPart = $currentPartResult->fetch_assoc();
+    $currentPartStmt->close();
 
     $partQuery = $conn->prepare("SELECT Media FROM part WHERE PartID = ?");
     $partQuery->bind_param("i", $part_id);
@@ -141,7 +152,69 @@ if ($quantity < ($quantity_left + $quantity_right)) {
     $updatePartQuery->execute();
     $updatePartQuery->close();
 
-    logAction($conn, $userID, $username, $roleType, "Update Parts", $part_id);
+    // Log detailed changes for each field if it was modified
+    if ($currentPart['Name'] != $part_name) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Name", $part_id, $currentPart['Name'], $part_name, "Name");
+    }
+    
+    if ($currentPart['Price'] != $part_price) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Price", $part_id, $currentPart['Price'], $part_price, "Price");
+    }
+    
+    if ($currentPart['Quantity'] != $quantity) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Quantity", $part_id, $currentPart['Quantity'], $quantity, "Quantity");
+    }
+    
+    if ($currentPart['QuantityLeft'] != $quantity_left) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Left Quantity", $part_id, $currentPart['QuantityLeft'], $quantity_left, "QuantityLeft");
+    }
+    
+    if ($currentPart['QuantityRight'] != $quantity_right) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Right Quantity", $part_id, $currentPart['QuantityRight'], $quantity_right, "QuantityRight");
+    }
+    
+    if ($currentPart['Make'] != $make) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Make", $part_id, $currentPart['Make'], $make, "Make");
+    }
+    
+    if ($currentPart['Model'] != $model) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Model", $part_id, $currentPart['Model'], $model, "Model");
+    }
+    
+    if ($currentPart['YearModel'] != $year_model) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Year", $part_id, $currentPart['YearModel'], $year_model, "YearModel");
+    }
+    
+    if ($currentPart['ChassisNumber'] != $chassis_number) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Chassis Number", $part_id, $currentPart['ChassisNumber'], $chassis_number, "ChassisNumber");
+    }
+    
+    if ($currentPart['Category'] != $category) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Category", $part_id, $currentPart['Category'], $category, "Category");
+    }
+    
+    if ($currentPart['Authenticity'] != $authenticity) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Authenticity", $part_id, $currentPart['Authenticity'], $authenticity, "Authenticity");
+    }
+    
+    if ($currentPart['PartCondition'] != $part_condition) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Condition", $part_id, $currentPart['PartCondition'], $part_condition, "PartCondition");
+    }
+    
+    if ($currentPart['ItemStatus'] != $item_status) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Status", $part_id, $currentPart['ItemStatus'], $item_status, "ItemStatus");
+    }
+    
+    if ($currentPart['Location'] != $location) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Location", $part_id, $currentPart['Location'], $location, "Location");
+    }
+    
+    if ($currentPart['Description'] != $description) {
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Description", $part_id, $currentPart['Description'], $description, "Description");
+    }
+    
+    // Also log a general update action
+    logSimpleAction($conn, $userID, $username, $roleType, "Update Parts", $part_id);
     $partUpdated = true;
 
     if (!empty($supplier_name)) {

@@ -138,7 +138,9 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
 <link rel="icon" type="image/x-icon" href="images/New Drafter Logo Cropped.png">
 
 <div class="main-content">
-    <button id="generateReportBtn" class="report-button">Generate Report</button>
+    <button id="generateReportBtn" class="report-button">
+        <i class="fas fa-chart-bar"></i> Generate Report
+    </button>
     <div class="content">
         <div class="metrics-container">
             <div class="metric-card" onclick="window.location.href='parts.php'">
@@ -357,217 +359,990 @@ body {
     background-color: #f8f9fa;
     margin: 0;
     padding: 0;
-}
-.main-content {
-    padding: 20px;
-    transition: margin-left 0.3s;
-    margin-left: 250px;
+    color: #333;
 }
 
+.main-content {
+    padding: 25px;
+    transition: margin-left 0.3s, padding 0.3s;
+    margin-left: 250px;
+    margin-right:50px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 60px);
+}
+
+/* Dashboard Header Styling */
+.header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(225, 15, 15, 0.1);
+}
+
+.header h1 {
+    margin: 0;
+    color: #E10F0F;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Report Button Styling */
+.report-button {
+    background: linear-gradient(135deg, #00A300, #008500);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 163, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-button:hover {
+    background: linear-gradient(135deg, #008500, #006800);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 163, 0, 0.25);
+}
+
+.report-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 163, 0, 0.2);
+}
+
+/* Metrics Cards Styling */
 .metrics-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.8rem;
+    margin-bottom: 2.5rem;
 }
 
 .metric-card {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    padding: 1.8rem;
     position: relative;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #E10F0F, #FF5757);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
 }
 
 .metric-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.metric-card:hover::before {
+    transform: scaleX(1);
 }
 
 .metric-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #E10F0F;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
+    background: rgba(225, 15, 15, 0.08);
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover .metric-icon {
+    transform: scale(1.1);
+    background: rgba(225, 15, 15, 0.12);
 }
 
 .metric-value {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 2.2rem;
+    font-weight: 700;
     color: #2c3e50;
-    margin: 0.5rem 0;
+    margin: 0.6rem 0;
+    transition: color 0.3s ease;
+}
+
+.metric-card:hover .metric-value {
+    color: #E10F0F;
 }
 
 .metric-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #6c757d;
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
+    font-weight: 500;
 }
 
 .metric-card h2 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #343a40;
     margin: 0;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.metric-card:hover h2 {
+    color: #E10F0F;
+}
+
+/* Chart Container Styling */
+.chart-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.chart-box {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    padding: 1.8rem;
+    position: relative;
+    height: 380px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.chart-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.chart-box h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 20px;
+    text-align: center;
+    color: #2c3e50;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.chart-box h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #E10F0F, #FF5757);
+    border-radius: 3px;
+}
+
+.chart-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.chart-controls select {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.chart-controls select:hover {
+    border-color: #E10F0F;
+}
+
+.chart-controls select:focus {
+    border-color: #E10F0F;
+    box-shadow: 0 0 0 3px rgba(225, 15, 15, 0.1);
+}
+
+/* Table Styling */
+.transaction-history, .low-stock-alerts, .new-updated-parts {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    padding: 1.8rem;
+    margin-bottom: 2.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+}
+
+.transaction-history:hover, .low-stock-alerts:hover, .new-updated-parts:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.transaction-history h2, .low-stock-alerts h2, .new-updated-parts h2 {
+    color: #2c3e50;
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.transaction-history h2::after, .low-stock-alerts h2::after, .new-updated-parts h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #E10F0F, #FF5757);
+    border-radius: 3px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: #f4f6f8;
+    font-weight: 600;
+    color: #2c3e50;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: rgba(225, 15, 15, 0.03);
+}
+
+table td button, table td a {
+    background: linear-gradient(135deg, #E10F0F, #FF5757);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    display: inline-block;
+    font-size: 0.9rem;
     font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(225, 15, 15, 0.2);
+}
+
+table td button:hover, table td a:hover {
+    background: linear-gradient(135deg, #c90d0d, #e64c4c);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(225, 15, 15, 0.3);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .chart-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .metrics-container {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
 }
 
 @media (max-width: 768px) {
     .main-content {
         margin-left: 0;
+        padding: 20px 15px;
         padding-top: 80px;
     }
+    
+    .metrics-container {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.2rem;
+    }
+    
+    .chart-box {
+        height: 320px;
+        padding: 1.2rem;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .report-button {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
     .metrics-container {
         grid-template-columns: 1fr;
     }
+    
+    .metric-card {
+        padding: 1.5rem;
+    }
+    
+    .chart-box h2, .transaction-history h2, .low-stock-alerts h2, .new-updated-parts h2 {
+        font-size: 18px;
+    }
 }
-.header {
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+
+/* Animation Styles */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
-.header h1 {
-    margin: 0;
-    color:rgb(231, 37, 37);
-    font-size: 24px;
+
+.metric-card, .chart-box, .transaction-history, .low-stock-alerts, .new-updated-parts {
+    opacity: 0;
 }
+
+.animate-in {
+    animation: fadeInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Enhanced hover effects */
+.metric-card:hover .metric-icon i {
+    transform: scale(1.2) rotate(5deg);
+    transition: transform 0.3s ease;
+}
+
+/* Pulse animation for report button */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 163, 0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 163, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 163, 0, 0);
+    }
+}
+
 .report-button {
-    background-color: #00A300;
-    color: white;
-    border: none;
-    padding: 15px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    animation: pulse 2s infinite;
 }
-.report-button:hover {
-    background-color: rgb(156, 197, 109);
-}
-.chart-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-.chart-box {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    position: relative;
-    height: 350px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.chart-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-.chart-box h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 18px;
+
+/* Preview Content Styling */
+.preview-loading {
     text-align: center;
-    color: #333;
+    padding: 30px;
+    color: #6c757d;
 }
-.table-responsive {
-    overflow-x: auto;
+
+.preview-loading i {
+    font-size: 36px;
+    margin-bottom: 15px;
+    color: #E10F0F;
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+
+.preview-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
-th, td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+
+.preview-header {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
 }
-th {
-    background-color: #f4f4f4;
-    font-weight: 600;
+
+.preview-logo {
+    height: 60px;
+    margin-bottom: 10px;
 }
-tr:hover {
-    background-color: #f8f8f8;
+
+.preview-header h2 {
+    margin: 10px 0;
+    color: #2c3e50;
+    font-size: 22px;
+}
+
+.preview-header p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+}
+
+.preview-body {
+    padding: 20px;
+}
+
+.preview-section {
+    margin-bottom: 20px;
+}
+
+.preview-section h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid rgba(225, 15, 15, 0.1);
+}
+
+.preview-metrics {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.preview-metric {
+    text-align: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    flex: 1;
+    margin: 0 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.metric-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #E10F0F;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
 }
 </style>
 
 <div id="reportModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Customize Report</h2>
-        <div class="report-sections">
-            <h3>Select Sections to Include</h3>
-            <div class="checkbox-group">
-                <label><input type="checkbox" name="reportSection" value="stockLevels" checked> Stock Levels</label>
-                <label><input type="checkbox" name="reportSection" value="partsAdded" checked> Parts Added Over Time</label>
-                <label><input type="checkbox" name="reportSection" value="checkoutTrend" checked> Recent Parts Retrieved</label>
-                <label><input type="checkbox" name="reportSection" value="valueByCategory" checked> Inventory Value by Category</label>
-                <label><input type="checkbox" name="reportSection" value="monthlySummary" checked> Monthly Transaction Summary</label>
-            </div>
+        <div class="modal-header">
+            <h2>Customize Report</h2>
+            <span class="close">&times;</span>
         </div>
-        <div class="report-customization">
-            <div class="customization-group">
-                <h3>Layout & Style</h3>
-                <div class="form-group">
-                    <label for="reportTitle">Report Title:</label>
-                    <input type="text" id="reportTitle" value="Inventory Dashboard Report">
-                </div>
-                <div class="form-group">
-                    <label for="reportPrimaryColor">Primary Color:</label>
-                    <input type="color" id="reportPrimaryColor" value="#E10F0F">
-                </div>
-                <div class="form-group">
-                    <label for="reportAccentColor">Accent Color:</label>
-                    <input type="color" id="reportAccentColor" value="#4A90E2">
-                </div>
-                <div class="form-group">
-                    <label for="reportLogo">Include Company Logo:</label>
-                    <input type="checkbox" id="reportLogo" checked>
-                </div>
-            </div>
-            <div class="customization-group">
-                <h3>Data Options</h3>
-                <div class="form-group">
-                    <label for="dataTimeRange">Time Range:</label>
-                    <select id="dataTimeRange">
-                        <option value="7">Last 7 Days</option>
-                        <option value="30" selected>Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                        <option value="180">Last 6 Months</option>
-                        <option value="365">Last Year</option>
-                        <option value="all">All Time</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="includeRawData">Include Raw Data Tables:</label>
-                    <input type="checkbox" id="includeRawData" checked>
+        <div class="modal-body">
+            <div class="report-sections">
+                <h3>Select Sections to Include</h3>
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="reportSection" value="stockLevels" checked>
+                        <span class="checkmark"></span>
+                        <span>Stock Levels</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="reportSection" value="partsAdded" checked>
+                        <span class="checkmark"></span>
+                        <span>Parts Added Over Time</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="reportSection" value="checkoutTrend" checked>
+                        <span class="checkmark"></span>
+                        <span>Recent Parts Retrieved</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="reportSection" value="valueByCategory" checked>
+                        <span class="checkmark"></span>
+                        <span>Inventory Value by Category</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="reportSection" value="monthlySummary" checked>
+                        <span class="checkmark"></span>
+                        <span>Monthly Transaction Summary</span>
+                    </label>
                 </div>
             </div>
-        </div>
-        <div class="report-preview">
-            <h3>Preview</h3>
-            <div id="reportPreview" class="preview-container">
-                <div class="preview-placeholder">
-                    <p>Your report will include the selected sections with your customized styling.</p>
-                    <p>The preview will update as you change options.</p>
+            <div class="report-customization">
+                <div class="customization-group">
+                    <h3>Layout & Style</h3>
+                    <div class="form-group">
+                        <label for="reportTitle">Report Title:</label>
+                        <input type="text" id="reportTitle" value="Inventory Dashboard Report" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportPrimaryColor">Primary Color:</label>
+                        <input type="color" id="reportPrimaryColor" value="#E10F0F" class="color-picker">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportAccentColor">Accent Color:</label>
+                        <input type="color" id="reportAccentColor" value="#4A90E2" class="color-picker">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportLogo" class="toggle-label">Include Company Logo:
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="reportLogo" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="customization-group">
+                    <h3>Data Options</h3>
+                    <div class="form-group">
+                        <label for="dataTimeRange">Time Range:</label>
+                        <select id="dataTimeRange" class="form-control">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="180">Last 6 Months</option>
+                            <option value="365">Last Year</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="includeRawData" class="toggle-label">Include Raw Data Tables:
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="includeRawData" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="report-preview">
+                <h3>Preview</h3>
+                <div id="reportPreview" class="preview-container">
+                    <div class="preview-placeholder">
+                        <i class="fas fa-file-alt preview-icon"></i>
+                        <p>Your report will include the selected sections with your customized styling.</p>
+                        <p>The preview will update as you change options.</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="report-actions">
-            <button id="previewReport" class="action-button preview-button">Update Preview</button>
-            <button id="exportExcel" class="action-button excel-button">Export to Excel</button>
-            <button id="exportPDF" class="action-button pdf-button">Export to PDF</button>
+            <button id="previewReport" class="action-button preview-button">
+                <i class="fas fa-sync-alt"></i> Update Preview
+            </button>
+            <button id="exportExcel" class="action-button excel-button">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+            <button id="exportPDF" class="action-button pdf-button">
+                <i class="fas fa-file-pdf"></i> Export to PDF
+            </button>
         </div>
     </div>
 </div>
+
+<!-- Modal Styling -->
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    transform: translateY(-50px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #E10F0F;
+}
+
+.modal-body {
+    padding: 25px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.report-sections, .report-customization, .report-preview {
+    margin-bottom: 30px;
+}
+
+.report-sections h3, .report-customization h3, .report-preview h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.report-sections h3::after, .report-customization h3::after, .report-preview h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #E10F0F, #FF5757);
+    border-radius: 3px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    font-size: 15px;
+    user-select: none;
+    margin-bottom: 12px;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 22px;
+    width: 22px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    background-color: #e0e0e0;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #E10F0F;
+    border-color: #E10F0F;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.custom-checkbox .checkmark:after {
+    left: 8px;
+    top: 4px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.report-customization {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.customization-group {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #E10F0F;
+    box-shadow: 0 0 0 3px rgba(225, 15, 15, 0.1);
+    outline: none;
+}
+
+.color-picker {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.toggle-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #E10F0F;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.preview-container {
+    background-color: #f8f9fa;
+    border: 1px dashed #ddd;
+    border-radius: 12px;
+    padding: 25px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-placeholder {
+    text-align: center;
+    color: #6c757d;
+}
+
+.preview-icon {
+    font-size: 48px;
+    color: #E10F0F;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.report-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px 25px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.action-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.preview-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.preview-button:hover {
+    background-color: #5a6268;
+}
+
+.excel-button {
+    background-color: #217346;
+    color: white;
+}
+
+.excel-button:hover {
+    background-color: #1a5c38;
+}
+
+.pdf-button {
+    background-color: #E10F0F;
+    color: white;
+}
+
+.pdf-button:hover {
+    background-color: #c90d0d;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .report-customization {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .report-actions {
+        flex-direction: column;
+    }
+    
+    .action-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
@@ -580,7 +1355,103 @@ tr:hover {
 <script>
     // Global chart objects for later reference
     let stockChart, partsAddedChart, checkoutChart, valueChart;
-
+    
+    // Add animation class to metric cards on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate metric cards with a staggered delay
+        const metricCards = document.querySelectorAll('.metric-card');
+        metricCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('animate-in');
+            }, 100 * index);
+        });
+        
+        // Animate chart boxes with a staggered delay
+        const chartBoxes = document.querySelectorAll('.chart-box');
+        chartBoxes.forEach((box, index) => {
+            setTimeout(() => {
+                box.classList.add('animate-in');
+            }, 300 + (100 * index));
+        });
+        
+        // Animate tables with a staggered delay
+        const tables = document.querySelectorAll('.transaction-history, .low-stock-alerts, .new-updated-parts');
+        tables.forEach((table, index) => {
+            setTimeout(() => {
+                table.classList.add('animate-in');
+            }, 600 + (100 * index));
+        });
+        
+        // Modal functionality
+        const modal = document.getElementById('reportModal');
+        const btn = document.getElementById('generateReportBtn');
+        const span = document.getElementsByClassName('close')[0];
+        
+        // When the user clicks the button, open the modal
+        btn.onclick = function() {
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+        
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // Preview report button functionality
+        document.getElementById('previewReport').addEventListener('click', function() {
+            const previewContainer = document.getElementById('reportPreview');
+            previewContainer.innerHTML = '<div class="preview-loading"><i class="fas fa-spinner fa-spin"></i><p>Generating preview...</p></div>';
+            
+            setTimeout(() => {
+                previewContainer.innerHTML = `
+                    <div class="preview-content">
+                        <div class="preview-header">
+                            <img src="images/New Drafter Logo Cropped.png" alt="Drafter Logo" class="preview-logo">
+                            <h2>${document.getElementById('reportTitle').value}</h2>
+                            <p>Generated on ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                        <div class="preview-body">
+                            <div class="preview-section">
+                                <h3>Dashboard Summary</h3>
+                                <p>This report provides an overview of your inventory management system.</p>
+                                <div class="preview-metrics">
+                                    <div class="preview-metric">
+                                        <span class="metric-number">${document.querySelector('.metrics-container .metric-card:nth-child(1) .metric-value').textContent}</span>
+                                        <span class="metric-label">Active Parts</span>
+                                    </div>
+                                    <div class="preview-metric">
+                                        <span class="metric-number">${document.querySelector('.metrics-container .metric-card:nth-child(2) .metric-value').textContent}</span>
+                                        <span class="metric-label">Parts Retrieved</span>
+                                    </div>
+                                    <div class="preview-metric">
+                                        <span class="metric-number">${document.querySelector('.metrics-container .metric-card:nth-child(3) .metric-value').textContent}</span>
+                                        <span class="metric-label">Archived Parts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
+        });
+    });
+    
     // Function to update stock chart based on time period
     function updateStockChart() {
         const selectedPeriod = document.getElementById('stockTimePeriod')?.value || 'daily';

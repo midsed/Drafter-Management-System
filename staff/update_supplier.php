@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "dbconnect.php";
+include('../shared/detailed_logging.php');
 
 if (isset($_SESSION['UserID']) && $_SESSION['RoleType'] != 'Staff') { 
     header("Location: /Drafter-Management-System/login.php"); 

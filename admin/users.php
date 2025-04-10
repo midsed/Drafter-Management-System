@@ -22,7 +22,7 @@ $sortField = isset($_GET['sort_field']) ? $conn->real_escape_string($_GET['sort_
 $sortOrder = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort_order']) : 'DESC';
 
 // Pagination
-$limit  = 10;
+$limit  = 20;
 $page   = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 

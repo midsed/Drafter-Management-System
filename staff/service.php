@@ -16,7 +16,7 @@ $staffs = isset($_GET['staff'])  ? explode(',', $_GET['staff']) : [];
 $sort   = isset($_GET['sort'])   ? $_GET['sort'] : '';
 
 // Pagination
-$limit  = 10;
+$limit  = 20;
 $page   = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 

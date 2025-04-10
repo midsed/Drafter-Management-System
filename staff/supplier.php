@@ -20,7 +20,7 @@ $partIDs   = isset($_GET['part']) ? explode(',', $_GET['part']) : [];
 $companies = isset($_GET['company']) ? explode(',', $_GET['company']) : [];
 
 $sort    = isset($_GET['sort']) ? $_GET['sort'] : '';
-$limit   = 10; // pagination limit
+$limit   = 20; // pagination limit
 $page    = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset  = ($page - 1) * $limit;
 

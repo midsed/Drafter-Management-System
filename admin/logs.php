@@ -13,11 +13,11 @@ include('logging.php');
 
 // Retrieve filter parameters
 $search     = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
-$limit      = 10;
+$limit      = 20;
 $page       = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset     = ($page - 1) * $limit;
 $sortField  = isset($_GET['sort_field']) ? $conn->real_escape_string($_GET['sort_field']) : 'Timestamp';
-$sortOrder  = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort_order']) : 'DESC';
+$sortOrder  = isset($_GET['sort_order']) ? $conn->real_escape_string($_GET['sort_order']) : 'DESC'; // Default to descending (newest first)
 $startDate  = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $endDate    = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 $roleFilter = isset($_GET['role']) ? $conn->real_escape_string($_GET['role']) : '';
@@ -34,7 +34,8 @@ if (isset($_GET['action_type'])) {
     }
 }
 
-$sql = "SELECT l.LogsID, CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy, l.ActionType, l.Timestamp
+$sql = "SELECT l.LogsID, CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS ActionBy, 
+        l.ActionType, l.Timestamp, l.PartID, l.OldValue, l.NewValue, l.FieldName
         FROM logs l
         JOIN user u ON l.UserID = u.UserID
         WHERE 1=1";
@@ -42,7 +43,8 @@ $sql = "SELECT l.LogsID, CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') AS
 if (!empty($search)) {
     $sql .= " AND (CONCAT(u.FName, ' ', u.LName, ' (', u.RoleType, ')') LIKE '%$search%'
                    OR l.ActionType LIKE '%$search%'
-                   OR l.Timestamp LIKE '%$search%')";
+                   OR l.Timestamp LIKE '%$search%'
+                   OR l.FieldName LIKE '%$search%')";
 }
 
 // Apply the Action Type filter if any checkboxes are selected.
@@ -133,6 +135,10 @@ $result = $conn->query($sql);
                             Update
                         </label>
                         <label class="checkbox-label">
+                            <input type="checkbox" name="action_type[]" value="Edit" <?= (in_array("Edit", $actionTypes)) ? "checked" : "" ?>>
+                            Edit
+                        </label>
+                        <label class="checkbox-label">
                             <input type="checkbox" name="action_type[]" value="Archive" <?= (in_array("Archive", $actionTypes)) ? "checked" : "" ?>>
                             Archive
                         </label>
@@ -166,6 +172,9 @@ $result = $conn->query($sql);
                         <button class="sort-option red-button" data-sort="asc">Ascending</button>
                         <button class="sort-option red-button" data-sort="desc">Descending</button>
                     </div>
+                    <div class="sort-info" style="margin-top: 10px; font-size: 12px; color: #666;">
+                        <small>Default: Newest logs first (Descending)</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,21 +189,71 @@ $result = $conn->query($sql);
                     <th>Log ID</th>
                     <th>Action By</th>
                     <th>Action Type</th>
+                    <th>Details</th>
                     <th>Timestamp</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="logsTableBody">
             <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
+                <?php while ($row = $result->fetch_assoc()): 
+                    // Determine action type category for styling
+                    $actionCategory = "other";
+                    if (strpos($row['ActionType'], 'Add') !== false) {
+                        $actionCategory = "add";
+                    } elseif (strpos($row['ActionType'], 'Edit') !== false || strpos($row['ActionType'], 'Update') !== false) {
+                        $actionCategory = "edit";
+                    } elseif (strpos($row['ActionType'], 'Archive') !== false) {
+                        $actionCategory = "archive";
+                    } elseif (strpos($row['ActionType'], 'Re-list') !== false) {
+                        $actionCategory = "relist";
+                    }
+                    
+                    // Extract field name and changes if available
+                    $hasDetails = !empty($row['FieldName']) || !empty($row['OldValue']) || !empty($row['NewValue']);
+                    $fieldName = !empty($row['FieldName']) ? $row['FieldName'] : '';
+                    $oldValue = !empty($row['OldValue']) ? $row['OldValue'] : '';
+                    $newValue = !empty($row['NewValue']) ? $row['NewValue'] : '';
+                ?>
+                    <tr class="log-row <?= $actionCategory ?>-row">
                         <td>#<?= $row['LogsID'] ?></td>
                         <td><?= htmlspecialchars($row['ActionBy']) ?></td>
-                        <td><?= htmlspecialchars($row['ActionType']) ?></td>
+                        <td>
+                            <span class="action-badge <?= $actionCategory ?>">
+                                <?= htmlspecialchars($row['ActionType']) ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php if ($hasDetails): ?>
+                                <div class="details-preview">
+                                    <?php if (!empty($fieldName)): ?>
+                                        <span class="field-name"><?= htmlspecialchars($fieldName) ?></span>
+                                        <?php if (!empty($oldValue) && !empty($newValue)): ?>
+                                            <span class="change-indicator">changed</span>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="no-field">General update</span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php else: ?>
+                                <span class="no-details">No details available</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= date("F j, Y, g:i A", strtotime($row['Timestamp'])) ?></td>
+                        <td class="actions-cell">
+                            <a href="detailed_log_view.php?id=<?= $row['LogsID'] ?>" class="view-details-btn" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <?php if (!empty($row['PartID'])): ?>
+                                <a href="partsedit.php?id=<?= $row['PartID'] ?>" class="go-to-part-btn" title="Go to Part">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>
-                <tr><td colspan="4">No logs found.</td></tr>
+                <tr><td colspan="6">No logs found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -520,26 +579,147 @@ body, button, select, input, a {
 
 .table-container {
     overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
 .logs-table {
     width: 100%;
     border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .logs-table th, .logs-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
 }
 
 .logs-table th {
-    background-color: #f2f2f2;
+    background-color: #f8f8f8;
     font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
 }
 
-.logs-table tr:hover {
-    background-color: rgb(218, 218, 218);
+/* Color coding for different action types */
+.log-row {
+    transition: background-color 0.2s;
+}
+
+.log-row:hover {
+    background-color: #f9f9f9;
+}
+
+.add-row {
+    border-left: 4px solid #4CAF50;
+}
+
+.edit-row {
+    border-left: 4px solid #2196F3;
+}
+
+.archive-row {
+    border-left: 4px solid #F44336;
+}
+
+.relist-row {
+    border-left: 4px solid #FF9800;
+}
+
+.other-row {
+    border-left: 4px solid #9E9E9E;
+}
+
+/* Action badges */
+.action-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+}
+
+.action-badge.add {
+    background-color: #4CAF50;
+}
+
+.action-badge.edit {
+    background-color: #2196F3;
+}
+
+.action-badge.archive {
+    background-color: #F44336;
+}
+
+.action-badge.relist {
+    background-color: #FF9800;
+}
+
+.action-badge.other {
+    background-color: #9E9E9E;
+}
+
+/* Details column styling */
+.details-preview {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.field-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.change-indicator {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
+.no-field, .no-details {
+    color: #999;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* Action buttons */
+.actions-cell {
+    display: flex;
+    gap: 10px;
+}
+
+.view-details-btn, .go-to-part-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.view-details-btn {
+    background-color: #2196F3;
+}
+
+.view-details-btn:hover {
+    background-color: #0b7dda;
+}
+
+.go-to-part-btn {
+    background-color: #E10F0F;
+}
+
+.go-to-part-btn:hover {
+    background-color: darkred;
 }
 
 .pagination {
@@ -569,15 +749,162 @@ body, button, select, input, a {
     color: white;
     font-weight: bold;
 }
-a {
-    text-decoration: none;
-}
-.logs-table th, .logs-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-}
-</style>
 
-</body>
-</html>
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    font-size: 14px;
+}
+
+.logs-table th {
+    background-color: #f2f2f2;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+}
+
+.logs-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.logs-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.action-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.add {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.edit {
+    background-color: #2196F3;
+    color: white;
+}
+
+.archive {
+    background-color: #E10F0F;
+    color: white;
+}
+
+.relist {
+    background-color: #FF9800;
+    color: white;
+}
+
+.other {
+    background-color: #9E9E9E;
+    color: white;
+}
+
+.details-preview {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+}
+
+.field-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.change-indicator {
+    color: #E10F0F;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.no-field, .no-details {
+    color: #777;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.date-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.date-filters input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.role-filter, .action-type-filter {
+    margin-bottom: 15px;
+}
+
+.role-filter select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.red-button {
+    background-color: #E10F0F;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.red-button:hover {
+    background-color: darkred;
+}
+
+.clear-button {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.clear-button:hover {
+    background-color: #e0e0e0;
+}
+
+.download-container {
+    margin-bottom: 15px;
+    text-align: right;
+}
