@@ -1,3 +1,4 @@
+part admin
 <?php 
 session_start();
 include('dbconnect.php');
@@ -803,9 +804,169 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* ---------- Keyframes for container's one-time scale on load ---------- */
+@keyframes scaleUp {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* If you have a special highlight for 'selected-card' */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+/* ---------- Base Body / Font ---------- */
 body {
     font-family: 'Poppins', sans-serif;
 }
+
+/* 
+   ---------- .parts-container ----------
+   Scales in once on page load, no repeated zoom on hover
+*/
+.parts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 40px;
+    padding: 20px;
+
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+
+    animation: scaleUp 1s ease forwards; /* Animate once on page load */
+    transition: box-shadow 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Optional subtle shadow shift on hover, but no new zoom. */
+.parts-container:hover {
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* If you want a second container that's larger from the start */
+.parts-container2 {
+    transform: scale(1.1);
+    transform-origin: center center;
+}
+
+/* 
+   ---------- .part-card ----------
+   Zooms in on hover with a scale transform
+*/
+.part-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    position: relative;
+}
+
+/* Card hover: scale up slightly & add a mild box-shadow. */
+.part-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(255, 77, 77, 0.3);
+}
+
+/* If it's 'selected' for highlight/archiving, show a pulse */
+.selected-card {
+    border: 6px solid rgba(225, 15, 15, 0.7);
+    animation: pulse 0.5s ease-out;
+}
+
+/* ---------- Image Container & Out-of-Stock Overlay ---------- */
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    margin-bottom: 10px;
+}
+.part-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.out-of-stock-overlay {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    background: rgba(22, 22, 22, 0.64);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+.out-of-stock-overlay img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+/* ---------- Card Text & Actions ---------- */
+.part-card p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+.part-card .card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+.part-card .edit-btn {
+    background: gray;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+.part-card .edit-btn:hover {
+    background: #555555;
+}
+.part-card .add-to-cart-btn {
+    background: #FFB52E;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+.part-card .add-to-cart-btn:hover {
+    background: darkorange;
+}
+
+/* ---------- Search, Filter, Sort, and Pagination Bars ---------- */
 .search-actions {
     display: flex;
     justify-content: space-between;
@@ -850,7 +1011,6 @@ body {
 .red-button:hover {
     background: darkred;
 }
-/* Updated Cart Icon Color */
 .cart-icon {
     color: #FFB52E;
     font-size: 20px;
@@ -872,141 +1032,36 @@ body {
     font-size: 10px;
     font-weight: bold;
 }
-.filter-container, .sort-container {
+
+/* Filter & Sort containers */
+.filter-container,
+.sort-container {
     display: flex;
     align-items: center;
     gap: 5px;
     cursor: pointer;
 }
-.filter-container span, .sort-container span {
+.filter-container span,
+.sort-container span {
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
     color: #333;
 }
-.filter-icon, .sort-icon {
+.filter-icon,
+.sort-icon {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
     background: none;
-    border: none;      
-    outline: none;     
+    border: none;
+    outline: none; 
 }
-.filter-icon:hover, .sort-icon:hover {
+.filter-icon:hover,
+.sort-icon:hover {
     color: darkred;
 }
-.parts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 40px;
-}
-.part-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.3s ease;
-    position: relative;
-}
-.part-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
-}
-.image-container {
-    position: relative;
-    width: 100%;
-    height: 150px;
-    margin-bottom: 10px;
-}
-.part-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-}
-.out-of-stock-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(22, 22, 22, 0.64);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    font-weight: bold;
-    border-radius: 4px;
-}
-.out-of-stock-overlay img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.5;
-    z-index: -1;
-}
-.part-card p {
-    margin: 8px 0;
-    font-size: 14px;
-}
-/* Center and compact the card actions */
-.part-card .card-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-}
-.qty-btn {
-    background-color: #d8dcde;
-    border: 1px;
-    border-radius: 5px;
-    padding: 5px 20px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 900;
-}
-.quantity-input {
-    width: 50px;
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    margin: 0 5px;
-}
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 40px;
-    position: relative;
-    width: 100%; 
-    padding-bottom: 40px; 
-}
-.pagination-button {
-    padding: 8px 12px;
-    border-radius: 4px;
-    background: white;
-    border: 1px solid black;
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-.pagination-button:hover {
-    background: #f0f0f0;
-}
-.active-page {
-    background: black;
-    color: white;
-    font-weight: bold;
-}
+
+/* Filter & Sort Dropdowns */
 .dropdown-content {
     display: none;
     position: absolute;
@@ -1024,11 +1079,18 @@ body {
 }
 .filter-section {
     margin-bottom: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 .filter-section h4 {
     margin: 0 0 10px 0;
     font-size: 16px;
     color: #333;
+    position: sticky;
+    top: 0;
+    background: white;
+    padding-bottom: 5px;
 }
 .filter-options {
     display: flex;
@@ -1076,121 +1138,120 @@ body {
 .filter-actions #clearFilter:hover {
     background-color: #bbb;
 }
+
+/* Sort Options */
 .sort-options {
     display: flex;
     gap: 10px;
     justify-content: center;
 }
 .sort-option {
-    background-color: #E10F0F; 
+    background-color: #E10F0F;
     color: white;
     border: none;
-    border-radius: 4px; 
-    padding: 10px 20px; 
+    border-radius: 4px;
+    padding: 10px 20px;
     font-size: 14px;
     cursor: pointer;
     transition: background 0.3s ease;
 }
-
 .sort-option.active-sort {
     background-color: darkred;
 }
-
 .sort-option:hover {
-    background-color: darkred; 
+    background-color: darkred;
 }
 
-.part-card .edit-btn {
-    background: gray;
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    position: relative;
+    width: 100%;
+    padding-bottom: 40px;
+}
+.pagination-button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid black;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+.pagination-button:hover {
+    background: #f0f0f0;
+}
+.active-page {
+    background: black;
     color: white;
-    transition: background 0.3s ease, color 0.3s ease; 
+    font-weight: bold;
 }
 
-.part-card .edit-btn:hover {
-    background: #555555; 
+/* ---------- TABLE VIEW (List Style) ---------- */
+.parts-list-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
 }
-.part-card .add-to-cart-btn {
-    background: #FFB52E;
-    color: white;
-    transition: background 0.3s ease, color 0.3s ease; 
+.parts-list-container table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-.part-card .add-to-cart-btn:hover {
-    background: darkorange
+.parts-list-container th,
+.parts-list-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
 }
-
-/* List view button styling */
+.parts-list-container th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+.parts-list-container tr:hover {
+    background-color: #f5f5f5;
+}
+.parts-list-container .out-of-stock {
+    color: #E10F0F;
+    font-weight: bold;
+}
 .parts-list-container .actions {
     display: flex;
     gap: 10px;
     justify-content: center;
+    white-space: nowrap;
+}
+.parts-list-container a {
+    color: #fff;
+    text-decoration: none;
+}
+.parts-list-container a:hover {
+    text-decoration: underline;
 }
 
-.parts-list-container .edit-btn {
-    background: gray;
-    color: white;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-.parts-list-container .edit-btn:hover {
-    background: #555555;
-}
-
-.parts-list-container .add-to-cart-btn {
-    background: #FFB52E;
-    color: white;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-.parts-list-container .add-to-cart-btn:hover {
-    background: darkorange;
-}
-
+/* Additional Buttons */
 .cart-icon {
     color: #FFB52E;
 }
-
 .new-stock-btn {
     background:  #00A300;
     color: white;
 }
 
-.selected-card {
-    border: 6px solid rgba(225, 15, 15, 0.7);
-    animation: pulse 0.5s ease-out;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-    }
-    70% {
-        transform: scale(1.02);
-        box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
-    }
-}
-
-
-.part-card .card-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-/* View Toggle Styles */
+/* View Toggle (Grid/List) */
 .view-toggle {
     display: flex;
     align-items: center;
     margin-left: 10px;
 }
-
 .view-button {
     background: #f0f0f0;
     border: none;
@@ -1200,101 +1261,15 @@ body {
     color: #555;
     transition: all 0.3s ease;
 }
-
 .view-button.active {
     background: #E10F0F;
     color: white;
 }
-
 .view-button:first-child {
     border-radius: 4px 0 0 4px;
 }
-
 .view-button:last-child {
     border-radius: 0 4px 4px 0;
 }
 
-/* List View Styles */
-.parts-list-container {
-    width: 100%;
-    overflow-x: auto;
-    margin-top: 20px;
-}
-
-.parts-list-container table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.parts-list-container th, 
-.parts-list-container td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.parts-list-container th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-}
-
-.parts-list-container tr:hover {
-    background-color: #f5f5f5;
-}
-
-.parts-list-container .out-of-stock {
-    color: #E10F0F;
-    font-weight: bold;
-}
-
-.parts-list-container .actions {
-    white-space: nowrap;
-}
-
-.parts-list-container a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-.parts-list-container a:hover {
-    text-decoration: underline;
-}
-
-.filter-section {
-    margin-bottom: 15px;
-    max-height: 200px;
-    overflow-y: auto;
-    padding-right: 5px;
-}
-
-.filter-section h4 {
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    color: #333;
-    position: sticky;
-    top: 0;
-    background: white;
-    padding-bottom: 5px;
-}
-
-.dropdown-content {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.part-card .part-link {
-    color: white;
-}
-
-.parts-list-container a {
-    color: white;
-}
-
-.parts-list-container a:hover {
-    text-decoration: underline;
-}
 </style>

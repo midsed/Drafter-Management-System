@@ -423,9 +423,173 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* ---------- Keyframes ---------- */
+@keyframes scaleUp {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Keyframes for card hover pulse glow (subtle red glow) */
+@keyframes cardPulseGlow {
+    0%   { box-shadow: 0 0 6px rgba(255,77,77,0.3); }
+    50%  { box-shadow: 0 0 16px rgba(255,77,77,0.5); }
+    100% { box-shadow: 0 0 6px rgba(255,77,77,0.3); }
+}
+
+/* Pulse keyframe for selected-card (unchanged) */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255,0,0,0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 10px 5px rgba(255,0,0,0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255,0,0,0);
+    }
+}
+
+/* ---------- Base Body ---------- */
 body {
     font-family: 'Poppins', sans-serif;
 }
+
+/* ---------- Parts Container ---------- */
+/* Extra padding ensures the container appears larger than the cards */
+.parts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 40px;
+    padding: 20px;
+
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+
+    animation: scaleUp 1s ease forwards; /* Zooms in once on page load */
+    transition: box-shadow 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* On hover, the container only adjusts its shadow (NO extra zoom) */
+.parts-container:hover {
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* Optional: If you have a second container that should be larger */
+.parts-container2 {
+    transform: scale(1.1);
+    transform-origin: center center;
+}
+
+/* ---------- Part Card ---------- */
+/* Flex layout and minimum height for consistent sizing */
+.part-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    transform-origin: center center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    position: relative;
+}
+
+/* On hover, each card scales up and applies a repeating red pulse glow */
+.part-card:hover {
+    transform: scale(1.05);
+    animation: cardPulseGlow 1.5s infinite;
+}
+
+/* Highlight for selected card */
+.selected-card {
+    border: 6px solid rgba(225,15,15,0.7);
+    animation: pulse 0.5s ease-out;
+}
+
+/* ---------- Image Container & Out-of-Stock Overlay ---------- */
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    margin-bottom: 10px;
+}
+.part-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.out-of-stock-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(22,22,22,0.64);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+.out-of-stock-overlay img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+/* ---------- Card Text & Actions ---------- */
+.part-card p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+.part-card .card-actions {
+    margin-top: auto; /* Push actions to the bottom */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+}
+.part-card .edit-btn {
+    background: gray;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+.part-card .edit-btn:hover {
+    background: #555555;
+}
+.part-card .add-to-cart-btn {
+    background: #FFB52E;
+    color: white;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+.part-card .add-to-cart-btn:hover {
+    background: darkorange;
+}
+
+/* ---------- Search, Filter, Sort, and Pagination ---------- */
 .search-actions {
     display: flex;
     justify-content: space-between;
@@ -455,6 +619,8 @@ body {
     gap: 10px;
     position: relative;
 }
+
+/* ---------- Buttons (Red, Green, Select, New Stock, etc.) ---------- */
 .red-button {
     background: #E10F0F;
     color: white;
@@ -470,15 +636,49 @@ body {
 .red-button:hover {
     background: darkred;
 }
+.green-button {
+    background: rgb(88,186,35);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+.green-button:hover {
+    background: rgb(48,100,20);
+}
+.new-stock-btn {
+    background: black;
+    color: white;
+}
+.select-button {
+    background: rgb(88,186,35);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+.select-button:hover {
+    background: darkgreen;
+}
+
+/* ---------- Cart Icon ---------- */
 .cart-icon {
-    color: #E10F0F;
+    color: #FFB52E;
     font-size: 20px;
     cursor: pointer;
     transition: color 0.3s ease;
     text-decoration: none;
 }
 .cart-icon:hover {
-    color: darkred;
+    color: #e0a53a;
 }
 .cart-count {
     position: relative;
@@ -491,18 +691,23 @@ body {
     font-size: 10px;
     font-weight: bold;
 }
-.filter-container, .sort-container {
+
+/* ---------- Filter & Sort Dropdowns ---------- */
+.filter-container,
+.sort-container {
     display: flex;
     align-items: center;
     gap: 5px;
     cursor: pointer;
 }
-.filter-container span, .sort-container span {
+.filter-container span,
+.sort-container span {
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
     color: #333;
 }
-.filter-icon, .sort-icon {
+.filter-icon,
+.sort-icon {
     color: #E10F0F;
     font-size: 20px;
     transition: color 0.3s ease;
@@ -510,82 +715,9 @@ body {
     border: none;
     cursor: pointer;
 }
-.filter-icon:hover, .sort-icon:hover {
+.filter-icon:hover,
+.sort-icon:hover {
     color: darkred;
-}
-.parts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 40px;
-}
-.part-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.3s ease;
-    position: relative;
-}
-.part-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 10px rgba(0,0,0,0.15);
-}
-.part-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-.part-card p {
-    margin: 8px 0;
-    font-size: 14px;
-}
-.actions {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-}
-.green-button {
-    background: rgb(88, 186, 35);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
-}
-.green-button:hover {
-    background: rgb(48, 100, 20);
-}
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 40px;
-    position: relative;
-    width: 100%;
-    padding-bottom: 40px;
-}
-.pagination-button {
-    padding: 8px 12px;
-    border-radius: 4px;
-    background: white;
-    border: 1px solid black;
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-.pagination-button:hover {
-    background: #f0f0f0;
-}
-.active-page {
-    background: black;
-    color: white;
-    font-weight: bold;
 }
 .dropdown-content {
     display: none;
@@ -656,6 +788,13 @@ body {
 .filter-actions #clearFilter:hover {
     background-color: #bbb;
 }
+
+/* ---------- Sort Option ---------- */
+.sort-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
 .sort-option.red-button {
     display: block;
     width: 100%;
@@ -669,54 +808,107 @@ body {
     background-color: #f8f8f8;
 }
 
-.part-card .edit-btn {
-    background: gray;
-    color: white;
+/* ---------- Pagination ---------- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    padding-bottom: 40px;
 }
-.part-card .add-to-cart-btn {
-    background: #FFB52E;
-    color: white;
+.pagination-button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid black;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
 }
+.pagination-button:hover {
+    background: #f0f0f0;
+}
+.active-page {
+    background: black;
+    color: white;
+    font-weight: bold;
+}
+
+/* ---------- List View (Table) Styles ---------- */
+.parts-list-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.parts-list-container table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+}
+.parts-list-container th,
+.parts-list-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.parts-list-container th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+.parts-list-container tr:hover {
+    background-color: #f5f5f5;
+}
+.parts-list-container .out-of-stock {
+    color: #E10F0F;
+    font-weight: bold;
+}
+.parts-list-container .actions {
+    white-space: nowrap;
+}
+.parts-list-container a {
+    color: #0066cc;
+    text-decoration: none;
+}
+.parts-list-container a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Additional Buttons & View Toggle ---------- */
 .cart-icon {
     color: #FFB52E;
 }
 .new-stock-btn {
-    background: black;
+    background: #00A300;
     color: white;
 }
-
-.selected-card {
-    border: 6px solid #FF0000;
-    animation: pulse 0.5s ease-out;
+.view-toggle {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
 }
-
-.select-button {
-    background: rgb(88, 186, 35);
-    color: white;
+.view-button {
+    background: #f0f0f0;
     border: none;
     padding: 8px 12px;
-    border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    text-decoration: none;
-    transition: background 0.3s ease;
+    color: #555;
+    transition: all 0.3s ease;
 }
-.select-button:hover {
-    background: darkgreen;
+.view-button.active {
+    background: #E10F0F;
+    color: white;
 }
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-    }
-    70% {
-        transform: scale(1.02);
-        box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
-    }
+.view-button:first-child {
+    border-radius: 4px 0 0 4px;
 }
+.view-button:last-child {
+    border-radius: 0 4px 4px 0;
+}
+
 </style>
