@@ -69,6 +69,7 @@ $username = $user['Username'];
         border: none;
         border-radius: 3px;
         cursor: pointer;
+        font-weight: bold;
     }
 
     .black-button {
@@ -102,6 +103,20 @@ $username = $user['Username'];
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeZoomIn 1.5s ease forwards;
+    }
+        .center-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, #444, #111);
+        border-radius: 8px 8px 0 0;
     }
 
     .quantity-container {
@@ -182,6 +197,16 @@ $username = $user['Username'];
         flex: 1 1 calc(33.333% - 10px); /* Three fields per row */
         min-width: 250px; /* Minimum width for responsiveness */
     }
+    @keyframes fadeZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 </style>
 
 <div class="main-content">
