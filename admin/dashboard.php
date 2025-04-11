@@ -1885,7 +1885,13 @@ input:checked + .toggle-slider:before {
         const generateReportBtn = document.getElementById('generateReportBtn');
         if (generateReportBtn) {
             generateReportBtn.onclick = function() {
-                document.getElementById('reportModal').style.display = 'block';
+                const modal = document.getElementById('reportModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    setTimeout(() => {
+                        modal.classList.add('show');
+                    }, 10);
+                }
             }
         }
         
