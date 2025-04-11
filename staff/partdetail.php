@@ -211,8 +211,6 @@ $conn->close();
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    animation: fadeZoomIn 1.5s ease forwards;
-
 }
 
 .media-location-wrapper {
@@ -437,14 +435,4 @@ $conn->close();
     font-weight: 500;
 }
 
-@keyframes fadeZoomIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 </style>
