@@ -165,7 +165,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </script>";
                 exit();
             } else {
-                // Generate OTP and send email using PHPMailer via sendMail()
                 $otp = rand(1000, 9999);
                 $_SESSION['otp'] = $otp;
                 $_SESSION['pending_user'] = $user;
@@ -185,7 +184,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     exit();
                 }
                 
-                // Ipakita ang SweetAlert2 prompt para sa pag-enter ng 4-digit code
                 echo "<script>
                 Swal.fire({
                     title: 'Enter Verification Code',
