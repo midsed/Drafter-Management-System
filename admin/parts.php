@@ -1199,30 +1199,34 @@ body {
 
 /* ---------- TABLE VIEW (List Style) ---------- */
 .parts-list-container {
-    width: 100%;
     overflow-x: auto;
-    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 .parts-list-container table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 .parts-list-container th,
 .parts-list-container td {
     padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
-    border-bottom: 1px solid #ddd;
 }
 .parts-list-container th {
-    background-color: #f8f9fa;
+    background-color: #f2f2f2;
     font-weight: 600;
+    color: #333;
     position: sticky;
     top: 0;
+    padding: 8px 10px;
+    font-size: 14px;
 }
 .parts-list-container tr:hover {
-    background-color: #f5f5f5;
+    background-color: #f9f9f9;
 }
 .parts-list-container .out-of-stock {
     color: #E10F0F;
