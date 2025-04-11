@@ -786,7 +786,6 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem('partsViewMode', 'list');
     });
 
-    // Check for saved view preference
     const savedViewMode = localStorage.getItem('partsViewMode') || 'grid';
     if (savedViewMode === 'list') {
         listViewBtn.click();
@@ -794,7 +793,6 @@ document.addEventListener("DOMContentLoaded", function() {
         gridViewBtn.click();
     }
 
-    // Make table rows clickable (except when clicking on buttons)
     document.querySelectorAll('.part-row').forEach(row => {
         row.addEventListener('click', function(e) {
             if (!e.target.closest('button') && !e.target.closest('a')) {
@@ -805,12 +803,51 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+function dragStart(e) {
+  const partId = this.dataset.partId;
+  const dragBox = document.createElement('div');
+  dragBox.className = 'drag-box';
+  const clone = this.cloneNode(true);
+  clone.style.filter = "none";
+  dragBox.appendChild(clone);
+  dragBox.style.width = this.offsetWidth + "px";
+  dragBox.style.height = this.offsetHeight + "px";
+  dragBox.style.position = "absolute";
+  dragBox.style.top = "-9999px";
+  document.body.appendChild(dragBox);
+  e.dataTransfer.setDragImage(dragBox, dragBox.offsetWidth / 2, dragBox.offsetHeight / 2);
+  e.dataTransfer.setData("text/plain", partId);
+  e.dataTransfer.effectAllowed = "move";
+  setTimeout(() => document.body.removeChild(dragBox), 0);
+}
+function dragOverRetrieveIcon(e) {
+  e.preventDefault();
+  this.classList.add("drag-over");
+  e.dataTransfer.dropEffect = "move";
+}
+function dragLeaveRetrieveIcon(e) {
+  this.classList.remove("drag-over");
+}
+function dropOnRetrieveIcon(e) {
+  e.preventDefault();
+  this.classList.remove("drag-over");
+  const partId = e.dataTransfer.getData("text/plain");
+  addToCart(partId);
+}
+document.querySelectorAll('.part-card').forEach(card => {
+  card.addEventListener('dragstart', dragStart);
+});
+const retrieveIcon = document.querySelector('.cart-icon');
+if (retrieveIcon) {
+  retrieveIcon.addEventListener('dragover', dragOverRetrieveIcon);
+  retrieveIcon.addEventListener('dragleave', dragLeaveRetrieveIcon);
+  retrieveIcon.addEventListener('drop', dropOnRetrieveIcon);
+}
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* ---------- Keyframes for container's one-time scale on load ---------- */
 @keyframes scaleUp {
     from {
         transform: scale(0.9);
@@ -822,7 +859,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 }
 
-/* If you have a special highlight for 'selected-card' */
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -1280,4 +1316,36 @@ body {
     border-radius: 0 4px 4px 0;
 }
 
+.drag-box {
+  border: 2px dashed #E10F0F;
+  background: #fff;
+  opacity: 100%;
+  filter: none;
+}
+
+.drag-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.drag-over {
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 2px dashed #E10F0F;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+.drag-over img {
+
+}
+.drag-over .out-of-stock-overlay {
+  display: none;
+}
+.drag-over .image-container {
+  position: relative;
+  overflow: hidden;
+}
+.drag-over .image-container img {
+  filter: blur(2px);
+  transition: filter 0.3s ease;
+}
 </style>
