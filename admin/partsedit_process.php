@@ -154,63 +154,63 @@ if ($quantity < ($quantity_left + $quantity_right)) {
 
     // Log detailed changes for each field if it was modified
     if ($currentPart['Name'] != $part_name) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Name", $part_id, $currentPart['Name'], $part_name, "Name");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Name - Changed Name from '" . $currentPart['Name'] . "' to '" . $part_name . "'", $part_id, $currentPart['Name'], $part_name, "Name");
     }
     
     if ($currentPart['Price'] != $part_price) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Price", $part_id, $currentPart['Price'], $part_price, "Price");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Price - Changed Price from '" . $currentPart['Price'] . "' to '" . $part_price . "'", $part_id, $currentPart['Price'], $part_price, "Price");
     }
     
     if ($currentPart['Quantity'] != $quantity) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Quantity", $part_id, $currentPart['Quantity'], $quantity, "Quantity");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Quantity - Changed Quantity from '" . $currentPart['Quantity'] . "' to '" . $quantity . "'", $part_id, $currentPart['Quantity'], $quantity, "Quantity");
     }
     
     if ($currentPart['QuantityLeft'] != $quantity_left) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Left Quantity", $part_id, $currentPart['QuantityLeft'], $quantity_left, "QuantityLeft");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Left Quantity - Changed Left Quantity from '" . $currentPart['QuantityLeft'] . "' to '" . $quantity_left . "'", $part_id, $currentPart['QuantityLeft'], $quantity_left, "QuantityLeft");
     }
     
     if ($currentPart['QuantityRight'] != $quantity_right) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Right Quantity", $part_id, $currentPart['QuantityRight'], $quantity_right, "QuantityRight");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Right Quantity - Changed Right Quantity from '" . $currentPart['QuantityRight'] . "' to '" . $quantity_right . "'", $part_id, $currentPart['QuantityRight'], $quantity_right, "QuantityRight");
     }
     
     if ($currentPart['Make'] != $make) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Make", $part_id, $currentPart['Make'], $make, "Make");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Make - Changed Make from '" . $currentPart['Make'] . "' to '" . $make . "'", $part_id, $currentPart['Make'], $make, "Make");
     }
     
     if ($currentPart['Model'] != $model) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Model", $part_id, $currentPart['Model'], $model, "Model");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Model - Changed Model from '" . $currentPart['Model'] . "' to '" . $model . "'", $part_id, $currentPart['Model'], $model, "Model");
     }
     
     if ($currentPart['YearModel'] != $year_model) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Year", $part_id, $currentPart['YearModel'], $year_model, "YearModel");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Year - Changed Year from '" . $currentPart['YearModel'] . "' to '" . $year_model . "'", $part_id, $currentPart['YearModel'], $year_model, "YearModel");
     }
     
     if ($currentPart['ChassisNumber'] != $chassis_number) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Chassis Number", $part_id, $currentPart['ChassisNumber'], $chassis_number, "ChassisNumber");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Chassis Number - Changed Chassis Number from '" . $currentPart['ChassisNumber'] . "' to '" . $chassis_number . "'", $part_id, $currentPart['ChassisNumber'], $chassis_number, "ChassisNumber");
     }
     
     if ($currentPart['Category'] != $category) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Category", $part_id, $currentPart['Category'], $category, "Category");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Category - Changed Category from '" . $currentPart['Category'] . "' to '" . $category . "'", $part_id, $currentPart['Category'], $category, "Category");
     }
     
     if ($currentPart['Authenticity'] != $authenticity) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Authenticity", $part_id, $currentPart['Authenticity'], $authenticity, "Authenticity");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Authenticity - Changed Authenticity from '" . $currentPart['Authenticity'] . "' to '" . $authenticity . "'", $part_id, $currentPart['Authenticity'], $authenticity, "Authenticity");
     }
     
     if ($currentPart['PartCondition'] != $part_condition) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Condition", $part_id, $currentPart['PartCondition'], $part_condition, "PartCondition");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Condition - Changed Condition from '" . $currentPart['PartCondition'] . "' to '" . $part_condition . "'", $part_id, $currentPart['PartCondition'], $part_condition, "PartCondition");
     }
     
     if ($currentPart['ItemStatus'] != $item_status) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Status", $part_id, $currentPart['ItemStatus'], $item_status, "ItemStatus");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Status - Changed Status from '" . $currentPart['ItemStatus'] . "' to '" . $item_status . "'", $part_id, $currentPart['ItemStatus'], $item_status, "ItemStatus");
     }
     
     if ($currentPart['Location'] != $location) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Location", $part_id, $currentPart['Location'], $location, "Location");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Location - Changed Location from '" . $currentPart['Location'] . "' to '" . $location . "'", $part_id, $currentPart['Location'], $location, "Location");
     }
     
     if ($currentPart['Description'] != $description) {
-        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Description", $part_id, $currentPart['Description'], $description, "Description");
+        logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Description - Changed Description from '" . $currentPart['Description'] . "' to '" . $description . "'", $part_id, $currentPart['Description'], $description, "Description");
     }
     
     // Also log a general update action
