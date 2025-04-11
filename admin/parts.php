@@ -139,7 +139,10 @@ include('navigation/topbar.php');
         $models = isset($_GET['model']) ? explode(',', $_GET['model']) : [];
         $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
         
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
+        $sql = "SELECT p.PartID, p.Name, p.Make, p.Model, p.Location, p.Quantity, p.Media, p.Category, p.ChassisNumber, p.PartCondition, s.CompanyName as SupplierName 
+FROM part p 
+LEFT JOIN supplier s ON p.SupplierID = s.SupplierID 
+WHERE p.archived = 0";
             $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
                 if (!empty($categories)) {
                     $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
@@ -160,7 +163,9 @@ include('navigation/topbar.php');
                     $countSql .= " AND Model IN ($modelList)";
                 }
                 if (!empty($search)) {
-                    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                    $sql .= " AND (p.Name LIKE '%$search%' OR p.Make LIKE '%$search%' OR p.Model LIKE '%$search%' 
+                           OR p.Category LIKE '%$search%' OR p.ChassisNumber LIKE '%$search%' 
+                           OR p.PartCondition LIKE '%$search%' OR s.CompanyName LIKE '%$search%')";
                     $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
                 }
 
