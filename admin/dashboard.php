@@ -416,101 +416,157 @@ body {
     box-shadow: 0 2px 4px rgba(0, 163, 0, 0.2);
 }
 
-/* Metrics Cards Styling */
-.metrics-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.8rem;
-    margin-bottom: 2.5rem;
-}
+:root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #9b59b6;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
 
-.metric-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
-    padding: 1.8rem;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.03);
-    overflow: hidden;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-.metric-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #E10F0F, #FF5757);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
 
-.metric-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+        .content {
+            max-width: 1340px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-.metric-card:hover::before {
-    transform: scaleX(1);
-}
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
 
-.metric-icon {
-    font-size: 2.5rem;
-    color: #E10F0F;
-    margin-bottom: 1.2rem;
-    background: rgba(225, 15, 15, 0.08);
-    width: 70px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-.metric-card:hover .metric-icon {
-    transform: scale(1.1);
-    background: rgba(225, 15, 15, 0.12);
-}
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
 
-.metric-value {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0.6rem 0;
-    transition: color 0.3s ease;
-}
+        .metric-card:nth-child(1) {
+            border-top: 4px solid var(--primary-color);
+        }
 
-.metric-card:hover .metric-value {
-    color: #E10F0F;
-}
+        .metric-card:nth-child(2) {
+            border-top: 4px solid var(--success-color);
+        }
 
-.metric-subtitle {
-    font-size: 0.95rem;
-    color: #6c757d;
-    margin-top: 0.6rem;
-    font-weight: 500;
-}
+        .metric-card:nth-child(3) {
+            border-top: 4px solid var(--warning-color);
+        }
 
-.metric-card h2 {
-    font-size: 1.2rem;
-    color: #343a40;
-    margin: 0;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
+        .metric-card:nth-child(4) {
+            border-top: 4px solid var(--danger-color);
+        }
 
-.metric-card:hover h2 {
-    color: #E10F0F;
-}
+        .metric-card:nth-child(5) {
+            border-top: 4px solid var(--info-color);
+        }
+
+        .metric-card:nth-child(6) {
+            border-top: 4px solid var(--secondary-color);
+        }
+
+        .metric-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .metric-card:nth-child(1) .metric-icon {
+            background-color: var(--primary-color);
+        }
+
+        .metric-card:nth-child(2) .metric-icon {
+            background-color: var(--success-color);
+        }
+
+        .metric-card:nth-child(3) .metric-icon {
+            background-color: var(--warning-color);
+        }
+
+        .metric-card:nth-child(4) .metric-icon {
+            background-color: var(--danger-color);
+        }
+
+        .metric-card:nth-child(5) .metric-icon {
+            background-color: var(--info-color);
+        }
+
+        .metric-card:nth-child(6) .metric-icon {
+            background-color: var(--secondary-color);
+        }
+
+        .metric-card:hover .metric-icon {
+            transform: scale(1.1);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #444;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #333, #777);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .metric-subtitle {
+            font-size: 0.875rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
 
 /* Chart Container Styling */
 .chart-container {
