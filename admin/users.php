@@ -160,7 +160,7 @@ $result = $conn->query($sql);
                         <h4 style="margin: 0 0 10px; font-size: 16px; font-weight: 600; color: #333;">Sort By</h4>
                         <select id="sortField" 
                                 style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; margin-bottom: 10px;">
-                            <option value="UserID"    <?= $sortField === 'UserID'    ? 'selected' : '' ?>>User ID</option>
+                            <option value="UserID"    <?= $sortField === 'UserID'    ? 'selected' : '' ?>>User  ID</option>
                             <option value="Name"      <?= $sortField === 'Name'      ? 'selected' : '' ?>>Name</option>
                             <option value="RoleType"  <?= $sortField === 'RoleType'  ? 'selected' : '' ?>>Role</option>
                             <option value="Email"     <?= $sortField === 'Email'     ? 'selected' : '' ?>>Email</option>
@@ -193,16 +193,16 @@ $result = $conn->query($sql);
 
     <!-- Table Container -->
     <div class="table-container" style="overflow-x: auto;">
-        <table class="supplier-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <table class="logs-table">
             <thead>
-                <tr style="background-color: #f2f2f2; font-weight: 600;">
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">User ID</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Name</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Role</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Email Address</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Status</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Last Login</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Actions</th>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email Address</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -210,22 +210,19 @@ $result = $conn->query($sql);
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     echo "<tr style='cursor: pointer;'>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>#{$row['UserID']}</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['Name']) . "</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['RoleType']) . "</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['Email']) . "</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . htmlspecialchars($row['Status']) . "</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>" . ($row['LastLogin'] ? htmlspecialchars($row['LastLogin']) : 'Never') . "</td>";
-                    echo "<td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>
-                            <a href='usersedit.php?UserID={$row['UserID']}' class='btn btn-edit' 
-                               style='background-color: #E10F0F; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none;'>
-                               Edit
-                            </a>
+                    echo "<td>#{$row['UserID']}</td>";
+                    echo "<td>" . htmlspecialchars($row['Name']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['RoleType']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['Email']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['Status']) . "</td>";
+                    echo "<td>" . ($row['LastLogin'] ? htmlspecialchars($row['LastLogin']) : 'Never') . "</td>";
+                    echo "<td>
+                            <a href='usersedit.php?UserID={$row['UserID']}' class='red-button'>Edit</a>
                           </td>";
                     echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='7' style='padding: 10px; border-bottom: 1px solid #ddd; text-align: center;'>No users found.</td></tr>";
+                echo "<tr><td colspan='7'>No users found.</td></tr>";
             }
             ?>
             </tbody>
@@ -400,5 +397,223 @@ window.addEventListener("click", function (event) {
 });
 </script>
 
+<style>
+body, button, select, input, a {
+    font-family: 'Poppins', sans-serif;
+}
+
+.header a {
+    color: black;
+}
+
+.search-actions {
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.search-container input[type="text"] {
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.filter-container, .sort-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.filter-icon, .sort-icon {
+    color: #E10F0F;
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.filter-icon:hover, .sort-icon:hover {
+    color: darkred;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff; 
+    min-width: 260px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center; 
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.dropdown-content h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.date-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.date-filters input[type="date"] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.dropdown-content select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.filter-actions, .sort-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.red-button {
+    background-color: #E10F0F;
+    color: white;
+    border: none;
+    padding-bottom: 10px;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.red-button:hover {
+    background-color: darkred;
+}
+
+.clear-button {
+    background-color: #CCCCCC;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.clear-button:hover {
+    background-color: #999999; 
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.logs-table th, .logs-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.logs-table th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+.logs-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination-button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid black;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.pagination-button:hover {
+    background: #f0f0f0;
+}
+
+.active-page {
+    background: black;
+    color: white;
+    font-weight: bold;
+}
+.logs-table th, .logs-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.logs-table th {
+    background-color: #f8f8f8;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+    padding: 8px 10px;
+}
+</style>
 </body>
 </html>

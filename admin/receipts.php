@@ -542,19 +542,25 @@ body {
 #receipt-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 #receipt-table th, #receipt-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
 }
 #receipt-table th {
     background-color: #f2f2f2;
     font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+    padding: 8px 10px;
+    font-size: 14px;
 }
 #receipt-table tr:hover {
-    background-color: rgb(218, 218, 218);
+    background-color: #f9f9f9;
 }
 .no-results {
     text-align: center;

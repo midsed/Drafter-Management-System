@@ -339,23 +339,33 @@ $result = $conn->query($sql);
         background: darkred;
     }
     .table-container {
-        margin-top: 20px;
+        overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
     }
     table {
         width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
     }
     th, td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
+        padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
     }
     th {
-        background-color: rgb(255, 255, 255);
+        background-color: #f2f2f2;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+    padding: 8px 10px;
+    font-size: 14px;
     }
     tr:hover {
-        background-color: rgb(218, 218, 218);
+        background-color: #f9f9f9;
     }
     .pagination {
         display: flex;
