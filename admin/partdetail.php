@@ -25,7 +25,10 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $partID = $_GET['id'];
 
-$sql = "SELECT * FROM part WHERE PartID = ?";
+$sql = "SELECT p.*, s.CompanyName, s.Email, s.PhoneNumber 
+       FROM part p 
+       LEFT JOIN supplier s ON p.SupplierID = s.SupplierID 
+       WHERE p.PartID = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $partID);
 $stmt->execute();
@@ -141,6 +144,24 @@ $conn->close();
                 <h3>Description</h3>
                 <div class="description-content">
                     <?php echo nl2br(htmlspecialchars($part["Description"])); ?>
+                </div>
+            </div>
+
+            <div class="supplier-section">
+                <h3>Supplier Information</h3>
+                <div class="supplier-details">
+                    <div class="supplier-item">
+                        <div class="supplier-label">Company Name</div>
+                        <div class="supplier-value"><?php echo htmlspecialchars($part["CompanyName"] ?? 'Not Available'); ?></div>
+                    </div>
+                    <div class="supplier-item">
+                        <div class="supplier-label">Email</div>
+                        <div class="supplier-value"><?php echo htmlspecialchars($part["Email"] ?? 'Not Available'); ?></div>
+                    </div>
+                    <div class="supplier-item">
+                        <div class="supplier-label">Phone Number</div>
+                        <div class="supplier-value"><?php echo htmlspecialchars($part["PhoneNumber"] ?? 'Not Available'); ?></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -354,6 +375,68 @@ $conn->close();
     line-height: 1.6;
     color: #495057; /* Darker gray for description text */
 }
+
+.supplier-section {
+    margin-top: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.supplier-section h3 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.supplier-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.supplier-item {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.supplier-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.supplier-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: rgba(255, 0, 0, 0.55);
+    border-radius: 8px 8px 0 0;
+}
+
+.supplier-label {
+    font-size: 14px;
+    color: #495057;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.supplier-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
 @keyframes fadeZoomIn {
   0% {
     opacity: 0;

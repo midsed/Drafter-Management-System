@@ -82,6 +82,9 @@ if ($quantity < ($quantity_left + $quantity_right)) {
 
     $imageName = $existingPart['Media'];
 
+    // Store the old image path for logging
+    $oldImagePath = $existingPart['Media'];
+
     if (!empty($_FILES["part_image"]["name"])) {
         $target_dir = "../partimages/"; // Updated to navigate out of the admin folder
         if (!is_dir($target_dir)) {
@@ -124,6 +127,9 @@ if ($quantity < ($quantity_left + $quantity_right)) {
     
         if (move_uploaded_file($_FILES["part_image"]["tmp_name"], $target_file)) {
             $imageName = "partimages/" . basename($target_file); // Store the correct relative path for display
+            
+            // Log the image change
+            logDetailedAction($conn, $userID, $username, $roleType, "Edit Part Image - Changed Image", $part_id, $oldImagePath, $imageName, "Media");
         } else {
             die("Error: Failed to move uploaded file.");
         }
