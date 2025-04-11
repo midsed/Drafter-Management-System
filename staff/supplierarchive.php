@@ -5,7 +5,7 @@ require_once "dbconnect.php"; // Include the database connection
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
-}
+}   
 
 if (!isset($_SESSION['Username'])) {
     $_SESSION['Username'];
@@ -84,6 +84,7 @@ if (!isset($_SESSION['Username'])) {
         });
     });
 
+    // Re-list supplier functionality with SweetAlert
     function relistSupplier(supplierID) {
     Swal.fire({
         title: 'Are you sure?',
@@ -179,33 +180,40 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 .table-container {
-    margin-top: 20px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
 .supplier-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .supplier-table th,
 .supplier-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
 }
 
-.search-container {
-    margin-bottom: 10px;
+.supplier-table th {
+    background-color: #f2f2f2; /* Match the background color from logs.php */
+    font-weight: 600;
+    color: #333; /* Match the text color from logs.php */
+    position: sticky;
+    top: 0;
+    padding: 8px 10px; /* Adjust padding for a smaller appearance */
+    font-size: 14px; /* Adjust font size for consistency */
 }
 
-.search-container input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.supplier-table tr:hover {
+    background-color: #f9f9f9;
 }
+
 .search-container {
         margin-top: 10px;
         margin-bottom: 20px;

@@ -5,7 +5,7 @@ include('dbconnect.php');
 if (!isset($_SESSION['UserID']) || $_SESSION['RoleType'] != 'Staff') {
     header("Location: /Drafter-Management-System/login.php");
     exit();
-}
+}   
 
 include('navigation/sidebar.php');
 include('navigation/topbar.php');
@@ -41,7 +41,7 @@ include('navigation/topbar.php');
 
         if ($result->num_rows > 0) { ?>
             <div class="table-container">
-                <table class="supplier-table">
+            <table class="archived-services-table">
                     <thead>
                         <tr>
                             <th>Service ID</th>
@@ -173,5 +173,39 @@ function relistService(serviceID) {
 
     .btn-relist:hover {
         background-color: #218838;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .archived-services-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .archived-services-table th, .archived-services-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+    }
+
+    .archived-services-table th {
+        background-color: #f2f2f2;
+        font-weight: 600;
+        color: #333;
+        position: sticky;
+        top: 0;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .archived-services-table tr:hover {
+        background-color: #f9f9f9;
     }
 </style>

@@ -138,7 +138,10 @@ include('navigation/topbar.php');
         $models = isset($_GET['model']) ? explode(',', $_GET['model']) : [];
         $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
         
-        $sql = "SELECT PartID, Name, Make, Model, Location, Quantity, Media, Category FROM part WHERE archived = 0";
+        $sql = "SELECT p.PartID, p.Name, p.Make, p.Model, p.Location, p.Quantity, p.Media, p.Category, p.ChassisNumber, p.PartCondition, s.CompanyName as SupplierName 
+FROM part p 
+LEFT JOIN supplier s ON p.SupplierID = s.SupplierID 
+WHERE p.archived = 0";
             $countSql = "SELECT COUNT(*) AS total FROM part WHERE archived = 0";
                 if (!empty($categories)) {
                     $escapedCategories = array_map([$conn, 'real_escape_string'], $categories);
@@ -159,7 +162,9 @@ include('navigation/topbar.php');
                     $countSql .= " AND Model IN ($modelList)";
                 }
                 if (!empty($search)) {
-                    $sql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
+                    $sql .= " AND (p.Name LIKE '%$search%' OR p.Make LIKE '%$search%' OR p.Model LIKE '%$search%' 
+                           OR p.Category LIKE '%$search%' OR p.ChassisNumber LIKE '%$search%' 
+                           OR p.PartCondition LIKE '%$search%' OR s.CompanyName LIKE '%$search%')";
                     $countSql .= " AND (Name LIKE '%$search%' OR Make LIKE '%$search%' OR Model LIKE '%$search%' OR Category LIKE '%$search%')";
                 }
 
@@ -199,6 +204,7 @@ include('navigation/topbar.php');
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions card-actions'>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                             <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Retrieve Part</button>
                         </div>
                     </div>
@@ -241,6 +247,7 @@ include('navigation/topbar.php');
                             <td>{$part['Location']}</td>
                             <td class='" . ($isOutOfStock ? "out-of-stock" : "") . "'>{$part['Quantity']}</td>
                             <td class='actions'>
+                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                                 <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Retrieve Part</button>
                             </td>
                         </tr>
@@ -803,7 +810,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* ---------- Keyframes ---------- */
+/* ---------- Keyframes for container's one-time scale on load ---------- */
 @keyframes scaleUp {
     from {
         transform: scale(0.9);
@@ -815,14 +822,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 }
 
-/* Keyframes for card hover pulse glow */
-@keyframes cardPulseGlow {
-    0%   { box-shadow: 0 0 6px rgba(255,77,77,0.3); }
-    50%  { box-shadow: 0 0 16px rgba(255,77,77,0.5); }
-    100% { box-shadow: 0 0 6px rgba(255,77,77,0.3); }
-}
-
-/* Pulse for selected card highlight (optional) */
+/* If you have a special highlight for 'selected-card' */
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -838,13 +838,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 }
 
-/* ---------- Base Body ---------- */
+/* ---------- Base Body / Font ---------- */
 body {
     font-family: 'Poppins', sans-serif;
 }
 
-/* ---------- Parts Container ---------- */
-/* This container zooms in once on page load and includes extra padding so it appears larger than the cards */
+/* 
+   ---------- .parts-container ----------
+   Scales in once on page load, no repeated zoom on hover
+*/
 .parts-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -856,46 +858,44 @@ body {
     border-radius: 20px;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 
-    animation: scaleUp 1s ease forwards;
+    animation: scaleUp 1s ease forwards; /* Animate once on page load */
     transition: box-shadow 0.5s ease;
     position: relative;
     overflow: hidden;
 }
 
-/* On hover, the container only updates its shadow */
+/* Optional subtle shadow shift on hover, but no new zoom. */
 .parts-container:hover {
     box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
 }
 
-/* Optional second container that is larger from the start */
+/* If you want a second container that's larger from the start */
 .parts-container2 {
     transform: scale(1.1);
     transform-origin: center center;
 }
 
-/* ---------- Part Card ---------- */
-/* Cards use a flex column layout for consistent sizing */
+/* 
+   ---------- .part-card ----------
+   Zooms in on hover with a scale transform
+*/
 .part-card {
     background: white;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    min-height: 280px;
-    transform-origin: center center;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
     position: relative;
 }
 
-/* On hover, each card scales up to 1.05 and pulses with a red glow */
+/* Card hover: scale up slightly & add a mild box-shadow. */
 .part-card:hover {
     transform: scale(1.05);
-    animation: cardPulseGlow 1.5s infinite;
+    box-shadow: 0 6px 12px rgba(255, 77, 77, 0.3);
 }
 
-/* Selected card highlight */
+/* If it's 'selected' for highlight/archiving, show a pulse */
 .selected-card {
     border: 6px solid rgba(225, 15, 15, 0.7);
     animation: pulse 0.5s ease-out;
@@ -947,11 +947,11 @@ body {
     font-size: 14px;
 }
 .part-card .card-actions {
-    margin-top: auto; /* Push actions to the bottom */
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     gap: 10px;
+    margin-top: 10px;
 }
 .part-card .edit-btn {
     background: gray;
@@ -970,7 +970,7 @@ body {
     background: darkorange;
 }
 
-/* ---------- Search, Filter, & Sort ---------- */
+/* ---------- Search, Filter, Sort, and Pagination Bars ---------- */
 .search-actions {
     display: flex;
     justify-content: space-between;
@@ -1000,8 +1000,6 @@ body {
     gap: 10px;
     position: relative;
 }
-
-/* ---------- Red Button & Cart Icon ---------- */
 .red-button {
     background: #E10F0F;
     color: white;
@@ -1039,7 +1037,7 @@ body {
     font-weight: bold;
 }
 
-/* ---------- Filter & Sort Dropdowns ---------- */
+/* Filter & Sort containers */
 .filter-container,
 .sort-container {
     display: flex;
@@ -1060,12 +1058,14 @@ body {
     transition: color 0.3s ease;
     background: none;
     border: none;
-    cursor: pointer;
+    outline: none; 
 }
 .filter-icon:hover,
 .sort-icon:hover {
     color: darkred;
 }
+
+/* Filter & Sort Dropdowns */
 .dropdown-content {
     display: none;
     position: absolute;
@@ -1073,7 +1073,7 @@ body {
     min-width: 300px;
     max-height: 300px;
     overflow-y: auto;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     padding: 15px;
     border-radius: 8px;
@@ -1143,32 +1143,38 @@ body {
     background-color: #bbb;
 }
 
-/* ---------- Sort Options ---------- */
+/* Sort Options */
 .sort-options {
     display: flex;
     gap: 10px;
     justify-content: center;
 }
-.sort-option.red-button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    margin: 5px 0;
-    background-color: white;
-    color: #E10F0F;
-    border: 1px solid #E10F0F;
+.sort-option {
+    background-color: #E10F0F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
-.sort-option.red-button:hover {
-    background-color: #f8f8f8;
+.sort-option.active-sort {
+    background-color: darkred;
+}
+.sort-option:hover {
+    background-color: darkred;
 }
 
-/* ---------- Pagination ---------- */
+/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-top: 40px;
+    position: relative;
+    width: 100%;
     padding-bottom: 40px;
 }
 .pagination-button {
@@ -1190,56 +1196,65 @@ body {
     font-weight: bold;
 }
 
-/* ---------- List View (Table) Styles ---------- */
+/* ---------- TABLE VIEW (List Style) ---------- */
 .parts-list-container {
-    width: 100%;
     overflow-x: auto;
-    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 .parts-list-container table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 .parts-list-container th,
 .parts-list-container td {
     padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
-    border-bottom: 1px solid #ddd;
 }
 .parts-list-container th {
-    background-color: #f8f9fa;
+    background-color: #f2f2f2;
     font-weight: 600;
+    color: #333;
     position: sticky;
     top: 0;
+    padding: 8px 10px;
+    font-size: 14px;
 }
 .parts-list-container tr:hover {
-    background-color: #f5f5f5;
+    background-color: #f9f9f9;
 }
 .parts-list-container .out-of-stock {
     color: #E10F0F;
     font-weight: bold;
 }
 .parts-list-container .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
     white-space: nowrap;
 }
 .parts-list-container a {
-    color: #0066cc;
+    color: #fff;
     text-decoration: none;
 }
 .parts-list-container a:hover {
     text-decoration: underline;
 }
 
-/* ---------- Additional Buttons & View Toggle ---------- */
+/* Additional Buttons */
 .cart-icon {
     color: #FFB52E;
 }
 .new-stock-btn {
-    background: #00A300;
+    background:  #00A300;
     color: white;
 }
+
+/* View Toggle (Grid/List) */
 .view-toggle {
     display: flex;
     align-items: center;

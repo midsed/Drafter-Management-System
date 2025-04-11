@@ -180,20 +180,38 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 .table-container {
-    margin-top: 20px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
 .supplier-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .supplier-table th,
 .supplier-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
+}
+
+.supplier-table th {
+    background-color: #f2f2f2; /* Match the background color from logs.php */
+    font-weight: 600;
+    color: #333; /* Match the text color from logs.php */
+    position: sticky;
+    top: 0;
+    padding: 8px 10px; /* Adjust padding for a smaller appearance */
+    font-size: 14px; /* Adjust font size for consistency */
+}
+
+.supplier-table tr:hover {
+    background-color: #f9f9f9;
 }
 
 .search-container {
