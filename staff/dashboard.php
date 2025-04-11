@@ -195,6 +195,20 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
                 <canvas id="stockLevelChart"></canvas>
             </div>
             <div class="chart-box">
+                <h2>Inventory Value by Category</h2>
+                <div class="chart-controls">
+                    <select id="valueTimePeriod" onchange="updateValueChart()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <canvas id="valueChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-box">
                 <h2>Parts Added Over Time</h2>
                 <div class="chart-controls">
                     <select id="timePeriod" onchange="updateLineChart()">
@@ -206,8 +220,6 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
                 </div>
                 <canvas id="recentUpdatesChart"></canvas>
             </div>
-        </div>
-        <div class="chart-container">
             <div class="chart-box">
                 <h2>Recent Parts Retrieved</h2>
                 <div class="chart-controls">
@@ -219,18 +231,6 @@ while ($row = mysqli_fetch_assoc($monthlySummaryResult)) {
                     </select>
                 </div>
                 <canvas id="checkoutTrendChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <h2>Inventory Value by Category</h2>
-                <div class="chart-controls">
-                    <select id="valueTimePeriod" onchange="updateValueChart()">
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Yearly</option>
-                    </select>
-                </div>
-                <canvas id="valueChart"></canvas>
             </div>
         </div>
         <div class="transaction-history">
