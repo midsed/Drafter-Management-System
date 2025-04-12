@@ -204,7 +204,6 @@ WHERE p.archived = 0";
                         <p><strong>Location:</strong> {$part['Location']}</p>
                         <p><strong>Quantity:</strong> {$part['Quantity']}</p>
                         <div class='actions card-actions'>
-                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                             <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Retrieve Part</button>
                         </div>
                     </div>
@@ -247,7 +246,6 @@ WHERE p.archived = 0";
                             <td>{$part['Location']}</td>
                             <td class='" . ($isOutOfStock ? "out-of-stock" : "") . "'>{$part['Quantity']}</td>
                             <td class='actions'>
-                            <a href='partsedit.php?id={$part['PartID']}' class='red-button edit-btn'>Edit</a>
                                 <button class='red-button add-to-cart-btn" . ($isOutOfStock ? " disabled-btn" : "") . "' " . ($isOutOfStock ? "disabled" : "") . " onclick='addToCart({$part['PartID']}, \"{$part['Name']}\", \"{$part['Make']}\", \"{$part['Model']}\")'>Retrieve Part</button>
                             </td>
                         </tr>
