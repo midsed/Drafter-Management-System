@@ -187,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "<script>
                 Swal.fire({
                     title: 'Enter Verification Code',
-                    html: '<p>Enter the 4-digit access code sent to your email.</p><input id=\"swal-input\" type=\"text\" maxlength=\"4\" class=\"swal2-input\" placeholder=\"XXXX\">',
+                    html: '<p>Enter the 4-digit access code sent to your email.</p><input id=\"swal-input\" type=\"text\" maxlength=\"4\" class=\"swal2-input\" placeholder=\"XXXX\" style=\"color: black; font-weight: bold; font-size: 18px; text-align: center;\">',
                     focusConfirm: false,
                     preConfirm: () => {
                         const otp = document.getElementById('swal-input').value;
@@ -198,7 +198,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         return otp;
                     },
                     showCancelButton: true,
-                    confirmButtonText: 'Submit'
+                    confirmButtonText: 'Submit',
+                    customClass: {
+                        popup: 'custom-popup-class',
+                        input: 'custom-input-class'
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
                         var form = document.createElement('form');
@@ -306,5 +310,31 @@ var granimInstance = new Granim({
     }
 });
 </script>
+<style>
+.custom-popup-class {
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.swal2-input {
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 22px !important;
+    text-align: center !important;
+    letter-spacing: 4px !important;
+    background-color: #f5f5f5 !important;
+    border: 2px solid #ddd !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    margin: 15px auto !important;
+    width: 160px !important;
+}
+.swal2-input::placeholder {
+    color: #aaa !important;
+}
+.swal2-input:focus {
+    border-color: #4a90e2 !important;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25) !important;
+}
+</style>
 </body>
 </html>
