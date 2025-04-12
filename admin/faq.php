@@ -33,32 +33,180 @@ include('navigation/topbar.php');
     </div>
 
     <div class="faq-section">
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
-            <div class="faq-answer">
-                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.
-                </p>
+    <div class="faq-category">
+            <h2>System Navigation</h2>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I navigate the dashboard?</h2>
+                <div class="faq-answer">
+                    <p>The dashboard provides easy access to all features:</p>
+                    <ol>
+                        <li>Use the sidebar menu (☰) on the left to access different sections</li>
+                        <li>Click the toggle button to expand/collapse the sidebar</li>
+                        <li>View quick statistics and summaries in dashboard cards</li>
+                        <li>Access your account information and notifications from the top bar</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do generate a report?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Click the "Generate Report" button on the top right corner</li>
+                        <li>You can customize the elements you want to add in the PDF report</li>
+                        <li>You can click "Update Preview" to preview the design of the report</li>
+                        <li>Export via PDF or Excel</li>
+                    </ol>
+                </div>
             </div>
         </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
-            <div class="faq-answer">
-                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.
-                </p>
+         <!-- System Administration -->
+         <div class="faq-category">
+             <h2>System Administration</h2>
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> How do I manage user accounts?</h2>
+                 <div class="faq-answer">
+                     <ol>
+                         <li>Access the Users section from the sidebar</li>
+                         <li>View all user accounts and their roles</li>
+                         <li>To add a new user:
+                             <ul>
+                                 <li>Click "Add New User"</li>
+                                 <li>Fill in user details and assign role</li>
+                                 <li>Set initial password</li>
+                                 <li>Save the new account</li>
+                             </ul>
+                         </li>
+                         <li>To modify existing users:
+                             <ul>
+                                 <li>Click the edit icon next to the user</li>
+                                 <li>Update necessary information</li>
+                                 <li>Save changes</li>
+                             </ul>
+                         </li>
+                     </ol>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Inventory Management -->
+         <div class="faq-category">
+             <h2>Inventory Management</h2>
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> How do I manage parts inventory?</h2>
+                 <div class="faq-answer">
+                     <ol>
+                         <li>Navigate to the Parts section</li>
+                         <li>Monitor inventory levels in real-time</li>
+                         <li>Add new parts:
+                             <ul>
+                                 <li>Click "Add New Part"</li>
+                                 <li>Enter part details and specifications</li>
+                                 <li>Set initial quantity and price</li>
+                                 <li>Upload images if available</li>
+                             </ul>
+                         </li>
+                         <li>Update existing parts:
+                             <ul>
+                                 <li>Click edit on the desired part</li>
+                                 <li>Modify details as needed</li>
+                                 <li>Save changes</li>
+                             </ul>
+                         </li>
+                     </ol>
+                 </div>
+             </div>
+
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
+                 <div class="faq-answer">
+                     <ol>
+                         <li>Go to Parts Management</li>
+                         <li>Enable "Select Mode"</li>
+                         <li>Choose parts to archive</li>
+                         <li>Click "Archive Selected"</li>
+                         <li>Confirm the action</li>
+                         <li>Parts will be moved to archive</li>
+                     </ol>
+                 </div>
+             </div>
+         </div>
+         <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I use the part retrieve function?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Browse the Parts section</li>
+                        <li>Click "Part Retrieve Icon" for desired items</li>
+                        <li>Access your inventory using the retrieve part icon at the top right</li>
+                        <li>Adjust quantities as needed</li>
+                        <li>Click "Proceed" to complete the retreival process</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Go to Retrieve Part (icon at top right)</li>
+                        <li>Review your items</li>
+                        <li>Click "Print Receipt"</li>
+                        <li>A printable receipt will be generated</li>
+                    </ol>
+                </div>
             </div>
         </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I reset my password?</h2>
-            <div class="faq-answer">
-                <p>To reset your password, click 'Forgot Password?'. Enter your E-mail and click 'Send OTP'. Check your E-mail and enter the OTP code and click the 'Verify Code' button. Then add your New Password.</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> Where can I find your terms and conditions?</h2>
-            <div class="faq-answer">
-                <p>Our terms and conditions can be found in the footer of our website or by clicking on the 'Terms' link.</p>
-            </div>
-        </div>
+         <!-- Service Management -->
+         <div class="faq-category">
+             <h2>Service Records</h2>
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> How do I manage service records?</h2>
+                 <div class="faq-answer">
+                     <ol>
+                         <li>Access the Services section</li>
+                         <li>View all service records</li>
+                         <li>Add new service record:
+                             <ul>
+                                 <li>Click "Add New Service"</li>
+                                 <li>Enter service details</li>
+                                 <li>Add parts used</li>
+                                 <li>Record labor costs</li>
+                             </ul>
+                         </li>
+                         <li>Generate service reports as needed</li>
+                     </ol>
+                 </div>
+             </div>
+         </div>
+
+         <!-- System Settings -->
+         <div class="faq-category">
+             <h2>System Settings</h2>
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> How do I reset my password?</h2>
+                 <div class="faq-answer">
+                     <ol>
+                         <li>Click 'Forgot Password?' on login page</li>
+                         <li>Enter your email address</li>
+                         <li>Click 'Send OTP'</li>
+                         <li>Check email for OTP code</li>
+                         <li>Enter code and verify</li>
+                         <li>Set new password</li>
+                     </ol>
+                 </div>
+             </div>
+
+             <div class="faq-item">
+                 <h2 class="faq-question"><span class="icon">></span> Where can I find system documentation?</h2>
+                 <div class="faq-answer">
+                     <p>Access system documentation through:</p>
+                     <ul>
+                         <li>Terms and Conditions in the footer</li>
+                         <li>FAQ section (current page)</li>
+                         <li>Help section in the sidebar</li>
+                     </ul>
+                 </div>
+             </div>
+         </div>
     </div>
 </div>
 
