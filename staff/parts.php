@@ -892,7 +892,6 @@ body {
     border-radius: 20px;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 
-    animation: scaleUp 1s ease forwards; /* Animate once on page load */
     transition: box-shadow 0.5s ease;
     position: relative;
     overflow: hidden;
