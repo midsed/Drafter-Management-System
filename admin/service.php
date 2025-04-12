@@ -405,6 +405,20 @@ $result = $conn->query($sql);
     .sort-option:hover {
         background-color: darkred;
     }
+    @keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#logsTableBody tr {
+    animation: slideDown 0.5s ease-out;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -613,6 +613,21 @@ body, button, select, input, a {
     position: sticky;
     top: 0;
     padding: 8px 10px;
+    
+}@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Apply the animation to each table row in the users table's body */
+#userTableBody tr {
+    animation: slideDown 0.5s ease-out;
 }
 </style>
 </body>

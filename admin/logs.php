@@ -908,3 +908,17 @@ body, button, select, input, a {
     margin-bottom: 15px;
     text-align: right;
 }
+.log-row {
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
