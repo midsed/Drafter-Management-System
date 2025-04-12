@@ -33,30 +33,114 @@ include('navigation/topbar.php');
     </div>
 
     <div class="faq-section">
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
-            <div class="faq-answer">
-                <p>Go to Parts page > Add to Cart > Cart Icon at the top right corner > Print Receipt.
-                </p>
+        <!-- System Navigation -->
+        <div class="faq-category">
+            <h2>System Navigation</h2>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I navigate the dashboard?</h2>
+                <div class="faq-answer">
+                    <p>The dashboard provides easy access to all features:</p>
+                    <ol>
+                        <li>Use the sidebar menu (☰) on the left to access different sections</li>
+                        <li>Click the toggle button to expand/collapse the sidebar</li>
+                        <li>View quick statistics and summaries in dashboard cards</li>
+                        <li>Access your account information and notifications from the top bar</li>
+                    </ol>
+                </div>
             </div>
         </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
-            <div class="faq-answer">
-                <p>Go to Parts page > Select Mode > Select All or Click individual parts > Archive Selected > Confirm > Archive.
-                </p>
+
+        <!-- Parts Management -->
+        <div class="faq-category">
+            <h2>Parts Management</h2>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I add new parts to the system?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Go to the Parts section</li>
+                        <li>Click "Add New Part"</li>
+                        <li>Fill in the required details:
+                            <ul>
+                                <li>Part name and description</li>
+                                <li>Category and specifications</li>
+                                <li>Quantity and price</li>
+                                <li>Upload images if available</li>
+                            </ul>
+                        </li>
+                        <li>Click "Save" to add the part</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I archive multiple parts?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Go to Parts page</li>
+                        <li>Click "Select Mode"</li>
+                        <li>Choose "Select All" or click individual parts</li>
+                        <li>Click "Archive Selected"</li>
+                        <li>Confirm the action</li>
+                    </ol>
+                </div>
             </div>
         </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> How do I reset my password?</h2>
-            <div class="faq-answer">
-                <p>To reset your password, click 'Forgot Password?'. Enter your E-mail and click 'Send OTP'. Check your E-mail and enter the OTP code and click the 'Verify Code' button. Then add your New Password.</p>
+
+        <!-- Cart Management -->
+        <div class="faq-category">
+            <h2>Part Retrieval</h2>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I use the part retrieve function?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Browse the Parts section</li>
+                        <li>Click "Part Retrieve Icon" for desired items</li>
+                        <li>Access your inventory using the retrieve part icon at the top right</li>
+                        <li>Adjust quantities as needed</li>
+                        <li>Click "Proceed" to complete the retreival process</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I print the part retrieval receipt?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Go to Cart (icon at top right)</li>
+                        <li>Review your items</li>
+                        <li>Click "Print Receipt"</li>
+                        <li>A printable receipt will be generated</li>
+                    </ol>
+                </div>
             </div>
         </div>
-        <div class="faq-item">
-            <h2 class="faq-question"><span class="icon">></span> Where can I find your terms and conditions?</h2>
-            <div class="faq-answer">
-                <p>Our terms and conditions can be found in the footer of our website or by clicking on the 'Terms' link.</p>
+
+        <!-- Account Management -->
+        <div class="faq-category">
+            <h2>Account Management</h2>
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> How do I reset my password?</h2>
+                <div class="faq-answer">
+                    <ol>
+                        <li>Click 'Forgot Password?' on the login page</li>
+                        <li>Enter your email address</li>
+                        <li>Click 'Send OTP'</li>
+                        <li>Check your email for the OTP code</li>
+                        <li>Enter the code and click 'Verify Code'</li>
+                        <li>Set your new password</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question"><span class="icon">></span> Where can I find your terms and conditions?</h2>
+                <div class="faq-answer">
+                    <p>Access our terms and conditions in two ways:</p>
+                    <ul>
+                        <li>Click the 'Terms and Conditions' link in the footer</li>
+                        <li>Visit the Terms page through the sidebar menu</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
