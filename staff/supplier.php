@@ -692,5 +692,19 @@ document.addEventListener("DOMContentLoaded", function() {
         color: white;
         font-weight: bold;
     }
-    
+    @keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#supplierTableBody tr {
+    animation: slideDown 0.5s ease-out;
+}
+
 </style>

@@ -920,6 +920,18 @@ body {
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
     position: relative;
+    animation: slideDown 0.5s ease-out;
+
+}
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Card hover: scale up slightly & add a mild box-shadow. */

@@ -147,6 +147,20 @@ $categories = $resultCategory->fetch_all(MYSQLI_ASSOC);
             display: flex;
             align-items: center;
         }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        /* Apply the animation to each table row once on page load */
+        #receipt-table tbody tr {
+            animation: slideDown 0.5s ease-out;
+        }
     </style>
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
