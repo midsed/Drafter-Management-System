@@ -922,6 +922,8 @@ body {
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
     position: relative;
+    animation: slideDown 0.5s ease-out;
+
 }
 
 /* Card hover: scale up slightly & add a mild box-shadow. */
@@ -977,6 +979,17 @@ body {
 }
 
 /* ---------- Card Text & Actions ---------- */
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .part-card p {
     margin: 8px 0;
     font-size: 14px;
